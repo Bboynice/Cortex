@@ -1,0 +1,29 @@
+.glow-rect {
+  fill: none;
+  stroke: var(--color);
+  stroke-width: var(--thickness);
+  stroke-linejoin: round;
+  stroke-dasharray: 185%;
+  stroke-dashoffset: 80;
+  filter: url(#glow);
+  opacity: 0;
+
+  animation: snake 2s linear infinite;
+  animation-play-state: paused;
+  transition: opacity 0.2s;
+}
+
+button:hover .glow-rect {
+  opacity: var(--opacity);
+  animation-play-state: running;
+}
+
+button:active {
+  --opacity: 0;
+}
+
+@keyframes snake {
+  to {
+    stroke-dashoffset: 370%;
+  }
+}
