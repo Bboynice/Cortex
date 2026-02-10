@@ -4,6 +4,7 @@ import { generateCodingChallenge } from './actions';
 import { useState } from 'react';
 import MyButton from '@/src/components/ui/GlowButton/GlowButton';
 import DropdownMenu from '@/src/components/ui/dropdown';
+import { Badge } from '@/src/components/ui/badge';
 
 export default function AppHome() {
   const [challenge, setChallenge] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export default function AppHome() {
           {loading ? "Generating..." : "Generate"}
         </MyButton>
         <DropdownMenu />
+        <Badge variant="success">Success</Badge>
         </div>
 
         {challenge && (

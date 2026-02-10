@@ -37,7 +37,7 @@ export default function DropdownMenu() {
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className="flex w-full items-center justify-between rounded-lg p-2 bg-orange-500 text-white flex justify-center  min-h-10
-        min-w-[10rem]"
+        min-w-[10rem] transition-all duration-300 ease-in-out transform hover:scale-105"
       >
         {selected.name}
       </button>
@@ -45,13 +45,13 @@ export default function DropdownMenu() {
       {isOpen && (
         <ul
           role="listbox"
-          className="absolute z-10 mt-1 w-full rounded-lg border bg-white shadow-lg overflow-hidden"
+          className="absolute z-10 mt-1 w-full rounded-lg bg-gradient-to-br from-white to-gray-100 backdrop-blur-lg shadow-lg overflow-hidden"
         >
           {languages.map((lang) => (
                 <motion.li
                 key={lang.id}
                 onClick={() => handleSelect(lang)}
-                className="cursor-pointer p-2 flex items-center hover:bg-gray-100 overflow-hidden"
+                className="cursor-pointer p-2 flex items-center transition-all duration-300 ease-in-out"
                 initial="initial"
                 whileHover="hovered" // This triggers children with the same variant name
                 >
@@ -61,7 +61,7 @@ export default function DropdownMenu() {
                       hovered: { x: "10%" } // Move to the right
                     }}
                     transition={{ type: "tween", duration: 0.4, ease: "easeInOut" }}
-                    className="w-full text-left"
+                    className="w-full text-left dropdown-item"
                 >
                     {lang.name}
                 </motion.div>

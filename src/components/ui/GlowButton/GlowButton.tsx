@@ -28,8 +28,8 @@ export default function MyButton({
         font-medium
         text-base
         sm:text-2xl
-        backdrop-blur-[100px]
-        bg-orange-500/100
+        bg-primary
+        text-primary-foreground
         hover:brightness-110
         active:bg-white/10
         transition
