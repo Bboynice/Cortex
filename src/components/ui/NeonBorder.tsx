@@ -1,26 +1,47 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { useId } from "react"; 
 
 interface NeonBeamProps {
   colorClass?: string;
   duration?: number;
   type?: "bottom" | "border";
-  rounded?: number;
+  rounded?: RoundedPreset | number;
   rainbow?: boolean;
 }
+
+type RoundedPreset =
+  | "rounded-none"
+  | "rounded-xs"
+  | "rounded-sm"
+  | "rounded-md"
+  | "rounded-lg"
+  | "rounded-xl"
+  | "rounded-2xl"
+  | "rounded-3xl"
+  | "rounded-4xl";
+
+const ROUNDED_TO_PX: Record<RoundedPreset, number> = {
+  "rounded-none": 0,
+  "rounded-xs": 2,
+  "rounded-sm": 4,
+  "rounded-md": 6,
+  "rounded-lg": 8,
+  "rounded-xl": 12,
+  "rounded-2xl": 16,
+  "rounded-3xl": 24,
+  "rounded-4xl": 32,
+};
 
 export default function NeonBeam({ 
   colorClass = "via-cyan-400", 
   duration = 3,
   type = "bottom",
-  rounded = 0,
+  rounded = "rounded-none",
   rainbow = true,
 }: NeonBeamProps) {
-  
-  // 2. Generate a unique ID for this specific beam's gradient
-  const gradientId = useId(); 
+  const borderColorClass = colorClass.replace("via-", "text-");
+  const roundedPx = typeof rounded === "number" ? rounded : ROUNDED_TO_PX[rounded];
 
   // 3. Use Array Syntax for the filter to guarantee the loop works
   const borderVariants: Variants = {
@@ -87,7 +108,7 @@ export default function NeonBeam({
         <rect
           width="100%"
           height="100%"
-          rx={rounded}
+          rx={roundedPx}
           fill="none"
           stroke="currentColor"
           strokeWidth="1"
@@ -97,23 +118,33 @@ export default function NeonBeam({
         <motion.rect
           width="100%"
           height="100%"
-          rx={rounded}
+          rx={roundedPx}
           fill="none"
-          stroke={`url(#${gradientId})`} 
-          strokeWidth="3"
+          stroke="currentColor"
+          strokeWidth="2"
           strokeLinecap="round"
+          strokeLinejoin="round"
+          className={borderColorClass}
           variants={borderVariants}
           initial="initial"
           animate="animate"
         />
 
-        <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="50%" stopColor="#06b6d4" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
+        <motion.rect
+          width="100%"
+          height="100%"
+          rx={roundedPx}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`${borderColorClass} blur-[2px]`}
+          variants={borderVariants}
+          initial="initial"
+          animate="animate"
+        />
+
       </svg>
     </div>
   );

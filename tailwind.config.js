@@ -10,13 +10,19 @@ module.exports = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        surface: "hsl(var(--foreground))",
+        content: "hsl(var(--text))",
         card: "hsl(var(--card))",
         border: "hsl(var(--border))",
+          accent: "hsl(var(--accent))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         muted: "hsl(var(--muted))",
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        info: 'hsl(var(--info))',
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',

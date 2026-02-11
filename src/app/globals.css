@@ -4,35 +4,59 @@
   /* Mapping your CSS variables to Tailwind utility names */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
+  --color-content: hsl(var(--text));
+  --color-surface: hsl(var(--foreground));
   --color-card: hsl(var(--card));
   --color-border: hsl(var(--border));
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-muted: hsl(var(--muted));
+  --color-accent: hsl(var(--accent));
 
   /* Adding your custom animation back in */
   --animate-spin-slow: spin 3s linear infinite;
 }
 
 @layer base {
-  :root {
-    --background: 60 9.8% 97.8%;
-    --foreground: 24 9.8% 10%;
-    --card: 0 0% 100%;
-    --border: 20 5.9% 90%;
-    --primary: 24.6 95% 53.1%;
-    --primary-foreground: 0 0% 100%;
-    --muted: 24 4.8% 95.9%;
+:root {
+    /* LIGHT THEME (Stone/Warm) */
+    --background: 0 0% 100%;             /* FFFFFF */
+    --foreground: 24 10% 10%;            /* 1C1917 (Text) */
+    --text: 24 10% 10%;                  /* 1C1917 (Text) */
+    --card: 0 0% 100%;                   /* FFFFFF */
+    --border: 30 5% 91%;                 /* E7E5E4 (stone-200) */
+    
+    --primary: 24.6 95% 53.1%;           /* F97316 (Orange-500) */
+    --primary-foreground: 0 0% 100%;     /* FFFFFF */
+    
+    --muted: 24 5% 40%;                  /* 78716C (Hint text) */
+    --muted-foreground: 24 6% 83%;       /* A8A29E (Second hint) */
+    
+    --accent: 270 67% 65%;               /* A855F7 (Purple Icon) */
+    --success: 142 71% 45%;              /* 22C55E (Green Indicator) */
+    --warning: 45 93% 47%;               /* EAB308 (Yellow) */
+    --info: 217 91% 60%;                 /* 3B82F6 (Blue Line) */
+    
+    --icon: 25 5% 35%;                   /* 57534E (Icons) */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 5.9%;
-    --border: 240 5.9% 15.7%;
-    --primary: 24.6 95% 53.1%;
+    /* DARK THEME (Slate/Cool) */
+    --background: 222.2 84% 4.9%;         /* 020617 */
+    --foreground: 222.2 47.4% 11.2%;     /* 0F172A */
+    --text: 210 40% 98%;                 /* F8FAFC (Text) */
+    --card: 222.2 47.4% 11.2%;           /* 0F172A */
+    --border: 217 33% 17%;               /* 1E293B/slate-800 */
+    
+    --primary: 24.6 95% 53.1%;           /* F97316 (Orange-500) */
     --primary-foreground: 0 0% 100%;
-    --muted: 240 3.7% 15.9%;
+    
+    --muted: 215 25% 62%;                /* 94A3B8 (Hint text) */
+    --muted-foreground: 214 32% 91%;     /* CBD5E1 (Task text) */
+    
+    --accent: 221 15% 35%;               /* 475569 (Icons) */
+    --success: 142 71% 45%;              /* 22C55E (Green) */
+    --info: 217 91% 60%;                 /* 3B82F6 (Blue lines) */
   }
 }
 
@@ -41,13 +65,11 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-content;
   }
 }
-
-
-*{
-  margin: 0;
-  padding: 0;
+/* Tailwind preflight already resets margin/padding.
+   Keep only box-sizing without breaking utility spacing. */
+*, ::before, ::after {
   box-sizing: border-box;
 }

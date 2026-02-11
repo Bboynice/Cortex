@@ -22,14 +22,13 @@ export default function MyButton({
         justify-center
         min-h-10
         min-w-[10rem]
-        rounded-2xl
         text-white
+        rounded-2xl
         uppercase
         font-medium
         text-base
         sm:text-2xl
         bg-primary
-        text-primary-foreground
         hover:brightness-110
         active:bg-white/10
         transition

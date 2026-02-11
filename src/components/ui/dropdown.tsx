@@ -1,17 +1,30 @@
 'use client'
 
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
-const languages = [
-  { id: "js", name: "JavaScript" },
-  { id: "py", name: "Python" },
-  { id: "rs", name: "Rust" },
-];
+export type DropdownChoice<T extends string = string> = {
+  value: T;
+  label: string;
+};
 
-export default function DropdownMenu() {
+interface DropdownMenuProps<T extends string = string> {
+  choices: DropdownChoice<T>[];
+  value?: T; // controlled
+  defaultValue?: T; // uncontrolled
+  onChange?: (value: T) => void;
+  placeholder?: string;
+}
+
+export default function DropdownMenu<T extends string = string>({
+  choices,
+  value,
+  defaultValue,
+  onChange,
+  placeholder = "Select…",
+}: DropdownMenuProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState(languages[0]);
+  const [internalValue, setInternalValue] = useState<T | undefined>(defaultValue);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close when clicking outside
@@ -23,52 +36,67 @@ export default function DropdownMenu() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleSelect = (lang: typeof languages[0]) => {
-    setSelected(lang); 
+  const selectedValue = value ?? internalValue;
+  const selectedChoice = choices.find((c) => c.value === selectedValue);
+
+  const handleSelect = (choice: DropdownChoice<T>) => {
+    setInternalValue(choice.value);
+    onChange?.(choice.value);
     setIsOpen(false);
   };
 
   return (
-    <div ref={dropdownRef} className="relative w-48"
+    <div
+      ref={dropdownRef}
+      className="relative w-auto"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
     >
       <button
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between rounded-lg p-2 bg-orange-500 text-white flex justify-center  min-h-10
-        min-w-[10rem] transition-all duration-300 ease-in-out transform hover:scale-105"
+        className={[
+          "flex w-full min-h-10 min-w-[10rem] items-center justify-center p-2 transition-all duration-300 ease-in-out transform",
+          "border border-background dark:border-muted border-[0.5px] dark:bg-foreground dark:text-muted-foreground",
+          isOpen ? "rounded-t-lg rounded-b-none" : "rounded-lg",
+        ].join(" ")}
       >
-        {selected.name}
+        {selectedChoice?.label ?? placeholder}
       </button>
 
-      {isOpen && (
-        <ul
-          role="listbox"
-          className="absolute z-10 mt-1 w-full rounded-lg bg-gradient-to-br from-white to-gray-100 backdrop-blur-lg shadow-lg overflow-hidden"
-        >
-          {languages.map((lang) => (
-                <motion.li
-                key={lang.id}
-                onClick={() => handleSelect(lang)}
-                className="cursor-pointer p-2 flex items-center transition-all duration-300 ease-in-out"
+      <AnimatePresence>
+        {isOpen && (
+          <motion.ul
+            role="listbox"
+            initial={{ opacity: 0, scaleY: 0.98, y: -2 }}
+            animate={{ opacity: 1, scaleY: 1, y: 0 }}
+            exit={{ opacity: 0, scaleY: 0.98, y: -2 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute left-0 top-full z-10 w-full origin-top overflow-hidden rounded-b-lg border border-background border-t-0 border-[0.5px] dark:border-muted dark:bg-foreground backdrop-blur-lg shadow-lg"
+          >
+            {choices.map((choice) => (
+              <motion.li
+                key={choice.value}
+                onClick={() => handleSelect(choice)}
+                className="flex cursor-pointer items-center p-2 transition-all duration-300 ease-in-out"
                 initial="initial"
                 whileHover="hovered" // This triggers children with the same variant name
-                >
+              >
                 <motion.div
-                    variants={{
-                      initial: { x: 0 }, // Start at the initial position
-                      hovered: { x: "10%" } // Move to the right
-                    }}
-                    transition={{ type: "tween", duration: 0.4, ease: "easeInOut" }}
-                    className="w-full text-left dropdown-item"
+                  variants={{
+                    initial: { x: 0 }, // Start at the initial position
+                    hovered: { x: "10%" }, // Move to the right
+                  }}
+                  transition={{ type: "tween", duration: 0.4, ease: "easeInOut" }}
+                  className="dropdown-item w-full text-left"
                 >
-                    {lang.name}
+                  {choice.label}
                 </motion.div>
-                </motion.li>
-          ))}
-        </ul>
-      )}
+              </motion.li>
+            ))}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
