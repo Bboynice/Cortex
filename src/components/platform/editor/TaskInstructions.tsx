@@ -1,23 +1,37 @@
+import Pill from "@/src/components/ui/Pill";
+
 interface TaskInstructionsProps {
   challenge?: string;
   requirements?: string[];
   hints?: { title: string; description: string }[];
   estimatedTime?: number;
+  languageLabel?: string;
+  difficultyLabel?: string;
 }
 
 export default function TaskInstructions({ 
-  challenge = "No challenge found",
-  requirements = [],
-  hints = [],
+  challenge = "Generate a new task",
+  requirements = ["Follow the instructions", "Here will be the requirements"],
+  hints = [{ title: "Here might be some hints", description: "" }],
   estimatedTime = 0,
+  languageLabel,
+  difficultyLabel,
 }: TaskInstructionsProps) {
 
   return (
-    <div className="dark:bg-foreground dark:text-content w-1/3 h-auto flex flex-col items-center gap-4 dark:border-r-1 dark:border-accent">
-        <div className="w-full flex border-b-1 dark:border-accent justify-center items-center">
-          <div className="dark:text-muted-foreground w-[90%] h-auto py-2 ">AI Task Generator</div>
+    <div className="dark:bg-foreground dark:text-content flex h-full w-1/3 shrink-0 flex-col items-center gap-4 overflow-hidden dark:border-r-1 dark:border-accent">
+        <div className="w-full h-auto flex justify-center items-center border-b-1 dark:border-accent">
+        <div className="w-[90%] flex min-w-0 justify-between items-center gap-2">
+          <div className="dark:text-muted-foreground h-auto py-2 shrink-0">AI Task Generator</div>
+          <div className="w-auto h-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+            {languageLabel && <Pill text={languageLabel} variant="content" />}
+            {difficultyLabel && <Pill text={difficultyLabel} variant="primary" />}
+          </div>
         </div>
-        <div className=" p-4 rounded-md border-1 dark:border-accent dark:bg-background text-content w-[90%] h-auto">
+        </div>
+       
+        <div className="w-full flex-1 min-h-0 overflow-auto">
+        <div className="p-4 rounded-md border-1 dark:border-accent dark:bg-background text-content w-[90%] h-auto mx-auto mt-4">
           <p className="text-lg font-semi-bold dark:text-primary">Challenge:</p>
           <p className="dark:text-muted-foreground">{challenge}</p>
           <p className="text-lg font-semi-bold dark:text-primary">Requirements:</p>
@@ -29,10 +43,10 @@ export default function TaskInstructions({
             </ul>
         </div>
       </div>
-      <div className="w-full justify-center items-center flex flex-col w-full h-auto">
+      <div className="w-full justify-center items-center flex flex-col w-full h-auto mt-4">
         <div className="h-auto w-[90%] flex justify-center items-center flex-col gap-4 dark:border-b-1 dark:border-border pb-4">
           {hints.map((hint, idx) => (
-            <div className="w-full flex justify-center items-center flex-row gap-4">
+            <div key={`${idx}-${hint.title}`} className="w-full flex justify-center items-center flex-row gap-4">
                   <svg
                     width="32"
                     height="32"
@@ -47,7 +61,7 @@ export default function TaskInstructions({
                     <circle cx="12" cy="12" r="10" fill="currentColor" fillOpacity="0.18" stroke="none" />
                     <path d="M8.2 12.2l2.3 2.3L15.8 9.7" />
                   </svg>
-                <div key={`${idx}-${hint.title}`} className="w-full flex justify-center flex-col">
+                <div className="w-full flex justify-center flex-col">
                   <h1 className="text-lg font-semi-bold dark:text-muted-foreground">{hint.title}</h1>
                   <p className="text-sm text-muted">{hint.description}</p>
                 </div>  
@@ -76,6 +90,7 @@ export default function TaskInstructions({
           <p className="text-sm dark:text-muted">Estimated:</p>
           <p className="text-sm dark:text-muted">{estimatedTime} minutes</p>
         </div>
+      </div>
       </div>
     </div>
   );
