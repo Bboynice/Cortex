@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import CodeEditor from '@/src/components/platform/editor/CodeEditor';
 import { ErrorIndicator } from '@/src/components/ui/errorIndicator';
+import TerminalOutput from '@/src/components/platform/editor/TerminalOutput';
 
 type SupportedLanguage = 'javascript' | 'python' | 'rust';
 
@@ -11,6 +12,8 @@ interface CodeWindowProps {
   language: SupportedLanguage;
   code: string;
   onChange: (code: string) => void;
+  onRun?: (code: string) => void;
+  logs: string[];
 }
 
 const languageToExtension = {
@@ -19,9 +22,10 @@ const languageToExtension = {
   rust: 'rs',
 };
 
-const CodeWindow = ({ language, code, onChange }: CodeWindowProps) => {
+const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) => {
   const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
   const [issueCounts, setIssueCounts] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
+  
 
   const footerStatus =
     issueCounts.errors > 0
@@ -45,8 +49,9 @@ const CodeWindow = ({ language, code, onChange }: CodeWindowProps) => {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => {}}
-              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-accent px-4 text-sm font-semibold text-content hover:brightness-110 active:brightness-95"
+              onClick={() => onRun?.(code)}
+              disabled={!onRun}
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-accent px-4 text-sm font-semibold text-content hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
@@ -92,6 +97,8 @@ const CodeWindow = ({ language, code, onChange }: CodeWindowProps) => {
            }}
          />
       </div>
+
+      <TerminalOutput logs={logs} />
 
       {/* Window Footer */}
       <div className="flex w-full shrink-0 items-center justify-between border-t-1 dark:border-accent px-4 py-2 font-mono text-xs">

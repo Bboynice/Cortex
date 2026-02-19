@@ -10,6 +10,7 @@ export async function generateCodingChallenge({
     difficulty?: "easy" | "medium" | "hard";
 } = {}) {
     try {
+        const seed = crypto.randomUUID();
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
             response_format: { type: "json_object" },
@@ -22,6 +23,7 @@ export async function generateCodingChallenge({
                 {
                     role: "user",
                     content: [
+                        `Seed: ${seed} (use this to pick a different task each time you generate a challenge)`,
                         `Create a random programming task in ${language}. Difficulty: ${difficulty}. Use only standard language features (no frameworks/libs).`,
                         "",
                         'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number }',

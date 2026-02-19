@@ -1,4 +1,7 @@
 import Pill from "@/src/components/ui/Pill";
+import { Loader2 } from "lucide-react";
+import NeonBorder from "@/src/components/ui/NeonBorder";
+import CortexLoader from "@/src/components/ui/CortexLoader";
 
 interface TaskInstructionsProps {
   challenge?: string;
@@ -7,6 +10,7 @@ interface TaskInstructionsProps {
   estimatedTime?: number;
   languageLabel?: string;
   difficultyLabel?: string;
+  isGenerating?: boolean;
 }
 
 export default function TaskInstructions({ 
@@ -16,11 +20,11 @@ export default function TaskInstructions({
   estimatedTime = 0,
   languageLabel,
   difficultyLabel,
+  isGenerating = false,
 }: TaskInstructionsProps) {
-
   return (
-    <div className="dark:bg-foreground dark:text-content flex h-full w-1/3 shrink-0 flex-col items-center gap-4 overflow-hidden dark:border-r-1 dark:border-accent">
-        <div className="w-full h-auto flex justify-center items-center border-b-1 dark:border-accent">
+    <div className={`dark:bg-foreground dark:text-content flex h-full w-1/3 shrink-0 flex-col items-center gap-4 overflow-hidden dark:border-r-1 dark:border-accent `}>
+        <div className={`w-full h-auto flex justify-center items-center border-b-1 dark:border-accent `}>
         <div className="w-[90%] flex min-w-0 justify-between items-center gap-2">
           <div className="dark:text-muted-foreground h-auto py-2 shrink-0">AI Task Generator</div>
           <div className="w-auto h-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
@@ -30,17 +34,19 @@ export default function TaskInstructions({
         </div>
         </div>
        
-        <div className="w-full flex-1 min-h-0 overflow-auto">
+        <div className="w-full flex-1 min-h-0 overflow-auto ">
         <div className="p-4 rounded-md border-1 dark:border-accent dark:bg-background text-content w-[90%] h-auto mx-auto mt-4">
           <p className="text-lg font-semi-bold dark:text-primary">Challenge:</p>
-          <p className="dark:text-muted-foreground">{challenge}</p>
+         {isGenerating ?  <CortexLoader size={3} /> : <p className="dark:text-muted-foreground">{challenge}</p>}
           <p className="text-lg font-semi-bold dark:text-primary">Requirements:</p>
           <div className="flex flex-col gap-2">
+            {isGenerating ? <CortexLoader size={3} /> : 
             <ul className="list-disc list-inside space-y-1 dark:text-muted">
               {(requirements.length ? requirements : ["No requirements found"]).map((requirement, idx) => (
                 <li key={`${idx}-${requirement}`}>{requirement}</li>
               ))}
             </ul>
+            }
         </div>
       </div>
       <div className="w-full justify-center items-center flex flex-col w-full h-auto mt-4">
@@ -61,10 +67,18 @@ export default function TaskInstructions({
                     <circle cx="12" cy="12" r="10" fill="currentColor" fillOpacity="0.18" stroke="none" />
                     <path d="M8.2 12.2l2.3 2.3L15.8 9.7" />
                   </svg>
-                <div className="w-full flex justify-center flex-col">
-                  <h1 className="text-lg font-semi-bold dark:text-muted-foreground">{hint.title}</h1>
-                  <p className="text-sm text-muted">{hint.description}</p>
-                </div>  
+                  <div className="w-full flex justify-start flex-col">
+                    {isGenerating ? (
+                      <div className="py-1">
+                        <CortexLoader size={3} />
+                      </div>
+                    ) : (
+                      <>
+                        <h1 className="text-lg font-semi-bold dark:text-muted-foreground">{hint.title}</h1>
+                        <p className="text-sm text-muted">{hint.description}</p>
+                      </>
+                    )}
+                  </div>
             </div>
           ))}
         </div>
@@ -88,7 +102,7 @@ export default function TaskInstructions({
             <circle cx="12" cy="12" r="1" fill="currentColor" fillOpacity="0.85" />
           </svg>
           <p className="text-sm dark:text-muted">Estimated:</p>
-          <p className="text-sm dark:text-muted">{estimatedTime} minutes</p>
+          {isGenerating ? <CortexLoader size={3} /> : <p className="text-sm dark:text-muted">{estimatedTime} minutes</p>}
         </div>
       </div>
       </div>
