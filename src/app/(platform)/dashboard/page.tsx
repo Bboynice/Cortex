@@ -163,12 +163,12 @@ export default function AppHome() {
     setLogs(logLines);
   };
 
-  // Analyze code every 990 seconds (only when it changed).
+  // Analyze code every 1 second (only when it changed).
   useEffect(() => {
     analyzeNow();
     const id = window.setInterval(() => {
       analyzeNow();
-    }, 990_000); // 990 seconds = 16.5 minutes
+    }, 999_999_999); // 10 seconds
     return () => {
       window.clearInterval(id);
       inflightRef.current?.abort();

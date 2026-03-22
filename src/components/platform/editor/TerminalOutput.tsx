@@ -1,23 +1,29 @@
-interface TerminalOutputProps {
-    logs: string[];
-}
+import { useTypewriter } from "@/src/hooks/useTypewriter";
+import { motion } from "framer-motion";
 
-export default function TerminalOutput({ logs }: TerminalOutputProps) {
+export default function TerminalOutput({
+  logs,
+  speedMs,
+}: {
+  logs: string[];
+  speedMs?: number;
+}) {
+  const fullText = logs.map(log => `> ${log}`).join("\n");
+  const typed = useTypewriter(fullText, speedMs);
   return (
     <div className="w-full h-auto bg-slate-950 font-mono text-sm p-4 overflow-y-auto border-t border-border">
-      <div className="flex items-center gap-2 mb-2 text-muted">
-        <span className="text-xs uppercase font-bold tracking-wider">Terminal</span>
+      <div className="mb-2 flex items-center gap-2 text-muted">
+        <span className="text-xs font-bold uppercase tracking-wider">Terminal</span>
       </div>
-      
+
       {logs.length === 0 ? (
-        <p className="text-slate-600 italic">No output yet. Click "Run" to execute your code.</p>
+        <p className="text-slate-600 italic">
+          No output yet. Click &quot;Run&quot; to execute your code.
+        </p>
       ) : (
-        logs.map((log, index) => (
-          <div key={index} className="flex gap-2 mb-1">
-            <span className="text-primary select-none opacity-50">&gt;</span>
-            <span className="text-slate-200 break-all">{log}</span>
-          </div>
-        ))
+        <motion.pre className="whitespace-pre-wrap break-words text-slate-200 m-0">
+          {typed}
+        </motion.pre>
       )}
     </div>
   );

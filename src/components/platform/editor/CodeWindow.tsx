@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import CodeEditor from '@/src/components/platform/editor/CodeEditor';
 import { ErrorIndicator } from '@/src/components/ui/errorIndicator';
 import TerminalOutput from '@/src/components/platform/editor/TerminalOutput';
+import { useModalStore } from '@/src/hooks/use-modal-store';
 
 type SupportedLanguage = 'javascript' | 'python' | 'rust';
 
@@ -25,6 +26,7 @@ const languageToExtension = {
 const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) => {
   const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
   const [issueCounts, setIssueCounts] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
+  const [modal, setModal] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
   
 
   const footerStatus =
@@ -33,6 +35,8 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
       : issueCounts.warnings > 0
         ? { color: 'yellow-500' as const, label: `${issueCounts.warnings} warning${issueCounts.warnings === 1 ? '' : 's'}` }
         : { color: 'green-500' as const, label: 'No issues' };
+
+  const {onOpen} = useModalStore();
 
   return (
     <div className="flex h-full min-h-0 flex-1 min-w-0 flex-col overflow-hidden dark:bg-foreground text-content">
@@ -60,7 +64,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
             </button>
             <button
               type="button"
-              onClick={() => {}}
+              onClick={() => onOpen("save-code", { currentCode: code })}
               className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95"
             >
               <svg

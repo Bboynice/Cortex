@@ -4,6 +4,7 @@
 import { useEffect, useRef } from 'react';
 import Editor, { OnChange, OnMount } from '@monaco-editor/react';
 import type { editor as MonacoEditor } from 'monaco-editor';
+import CortexLoader from '@/src/components/ui/CortexLoader';
 
 interface CodeEditorProps {
   code: string;
@@ -62,6 +63,11 @@ const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionC
         onChange={handleEditorChange}
         onMount={handleMount}
         onValidate={onMarkersChange}
+        loading={
+          <>
+            <CortexLoader size={6} />
+          </>
+      }
         options={{
           minimap: { enabled: false }, // Hide the minimap like in your design
           fontSize: 14,
