@@ -23,10 +23,11 @@ const languageToExtension = {
   rust: 'rs',
 };
 
+
+
 const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) => {
   const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
   const [issueCounts, setIssueCounts] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
-  const [modal, setModal] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
   
 
   const footerStatus =
@@ -37,6 +38,17 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
         : { color: 'green-500' as const, label: 'No issues' };
 
   const {onOpen} = useModalStore();
+
+  const handleSubmit = () => {
+    onOpen("save-code", {
+      title: "Submit Solution?",
+      description: "Your code will be run against test cases.",
+      submitText: "Submit",
+      cancelText: "Cancel",
+      currentCode: code,
+      action: () => onRun?.(code),
+    });
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-1 min-w-0 flex-col overflow-hidden dark:bg-foreground text-content">
@@ -54,7 +66,6 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
             <button
               type="button"
               onClick={() => onRun?.(code)}
-              disabled={!onRun}
               className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-accent px-4 text-sm font-semibold text-content hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
@@ -64,7 +75,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
             </button>
             <button
               type="button"
-              onClick={() => onOpen("save-code", { currentCode: code })}
+              onClick={handleSubmit}
               className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95"
             >
               <svg

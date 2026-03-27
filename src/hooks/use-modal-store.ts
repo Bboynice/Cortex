@@ -15,5 +15,5 @@ export const useModalStore = create<ModalStore>((set) => ({
   isOpen: false,
   data: {},
   onOpen: (type, data = {}) => set({ isOpen: true, type, data }),
-  onClose: () => set({ isOpen: false, type: null }),
+  onClose: () => set({ isOpen: false, type: null, data: {} }),
 }));

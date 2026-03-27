@@ -4,7 +4,7 @@ import { generateCodingChallenge } from './actions';
 import { useEffect, useRef, useState } from 'react';
 import MyButton from '@/src/components/ui/GlowButton/GlowButton';
 import DropdownMenu from '@/src/components/ui/dropdown';
-import { Badge } from '@/src/components/ui/badge';
+import { Badge } from '@/src/components/ui/Badge';
 import TaskInstructions from '@/src/components/platform/editor/TaskInstructions';
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
@@ -168,7 +168,7 @@ export default function AppHome() {
     analyzeNow();
     const id = window.setInterval(() => {
       analyzeNow();
-    }, 999_999_999); // 10 seconds
+    }, 999_999_999); // 10 minutes (999999999ms)
     return () => {
       window.clearInterval(id);
       inflightRef.current?.abort();
