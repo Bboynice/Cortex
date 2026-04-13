@@ -10,8 +10,10 @@ const Header = () => {
           <Link href="/dashboard">Cortex</Link>
           <Link href="/dashboard">Playground</Link>
           <Link href="/contact">Contact</Link>
+
         </nav>
         <div className="flex items-center gap-4">
+          <Link href="/login">Log In</Link>
           <Link href="/settings">Account</Link>
         </div>
       </div>

@@ -1,6 +1,5 @@
-import Link from "next/link";
-import Marketing from "@/src/app/(marketing)/page";
+import MarketingHomePage from "@/src/components/marketing/MarketingHomePage";
 
 export default function MarketingHome() {
-  return <Marketing />;
+  return <MarketingHomePage />;
 }
