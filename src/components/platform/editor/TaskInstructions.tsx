@@ -23,8 +23,8 @@ export default function TaskInstructions({
   isGenerating = false,
 }: TaskInstructionsProps) {
   return (
-    <div className={`dark:bg-foreground dark:text-content flex h-full w-1/3 shrink-0 flex-col items-center gap-4 overflow-hidden dark:border-r-1 dark:border-accent `}>
-        <div className={`w-full h-auto flex justify-center items-center border-b-1 dark:border-accent `}>
+    <div className={`dark:bg-foreground dark:text-content flex h-full w-1/3 shrink-0 flex-col items-center gap-4 overflow-hidden dark:border-r-1 dark:border-border `}>
+        <div className={`w-full h-12 flex justify-center items-center border-b-1 dark:border-border `}>
         <div className="w-[90%] flex min-w-0 justify-between items-center gap-2">
           <div className="dark:text-muted-foreground h-auto py-2 shrink-0">AI Task Generator</div>
           <div className="w-auto h-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
@@ -35,13 +35,13 @@ export default function TaskInstructions({
         </div>
        
         <div className="w-full flex-1 min-h-0 overflow-auto ">
-        <div className="p-4 rounded-md border-1 dark:border-accent dark:bg-background text-content w-[90%] h-auto mx-auto mt-4">
-          <p className="text-lg font-semi-bold dark:text-primary">Challenge:</p>
-         {isGenerating ?  <CortexLoader size={3} /> : <p className="dark:text-muted-foreground">{challenge}</p>}
-          <p className="text-lg font-semi-bold dark:text-primary">Requirements:</p>
+        <div className="mx-auto mt-4 w-[90%] h-auto p-4 rounded-md border border-border bg-cortex-heat text-content">
+          <p className="text-lg font-semibold dark:text-white">Challenge:</p>
+         {isGenerating ?  <CortexLoader size={3} /> : <p className="dark:text-white/70">{challenge}</p>}
+          <p className="text-lg font-semibold dark:text-white mt-3">Requirements:</p>
           <div className="flex flex-col gap-2">
             {isGenerating ? <CortexLoader size={3} /> : 
-            <ul className="list-disc list-inside space-y-1 dark:text-muted">
+            <ul className="list-disc list-inside space-y-1 dark:text-white/50">
               {(requirements.length ? requirements : ["No requirements found"]).map((requirement, idx) => (
                 <li key={`${idx}-${requirement}`}>{requirement}</li>
               ))}
@@ -102,10 +102,10 @@ export default function TaskInstructions({
             <circle cx="12" cy="12" r="1" fill="currentColor" fillOpacity="0.85" />
           </svg>
           <p className="text-sm dark:text-muted">Estimated:</p>
-          {isGenerating ? <CortexLoader size={3} /> : <p className="text-sm dark:text-muted">{estimatedTime} minutes</p>}
+          {isGenerating ? <CortexLoader size={3} /> : <p className="text-sm dark:text-content/50">{estimatedTime} minutes</p>}
         </div>
       </div>
       </div>
     </div>
   );
-}
+} 

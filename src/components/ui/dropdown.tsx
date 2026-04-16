@@ -57,7 +57,7 @@ export default function DropdownMenu<T extends string = string>({
         aria-expanded={isOpen}
         className={[
           "flex w-full min-h-10 min-w-[10rem] items-center justify-center p-2 transition-all duration-300 ease-in-out transform",
-          "border border-background dark:border-muted border-[0.5px] dark:bg-foreground dark:text-muted-foreground",
+          "border border-background dark:border-border border-[0.5px] dark:bg-card/80 backdrop-blur-lg dark:text-text",
           isOpen ? "rounded-t-lg rounded-b-none" : "rounded-lg",
         ].join(" ")}
       >
@@ -72,7 +72,7 @@ export default function DropdownMenu<T extends string = string>({
             animate={{ opacity: 1, scaleY: 1, y: 0 }}
             exit={{ opacity: 0, scaleY: 0.98, y: -2 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 top-full z-10 w-full origin-top overflow-hidden rounded-b-lg border border-background border-t-0 border-[0.5px] dark:border-muted dark:bg-foreground backdrop-blur-lg shadow-lg"
+            className="absolute left-0 top-full z-10 w-full origin-top overflow-hidden rounded-b-lg border border-t-0 border-[0.5px] dark:border-border dark:bg-foreground/10 backdrop-blur-lg shadow-lg"
           >
             {choices.map((choice) => (
               <motion.li

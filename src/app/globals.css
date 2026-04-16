@@ -1,62 +1,132 @@
 @import "tailwindcss";
 
-@theme {
-  /* Mapping your CSS variables to Tailwind utility names */
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-content: hsl(var(--text));
-  --color-surface: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-border: hsl(var(--border));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-accent: hsl(var(--accent));
 
-  /* Adding your custom animation back in */
+@theme {
+  /* Main UI Mapping */
+  --color-background: hsl(var(--background));     /* Full screen background */
+  --color-foreground: hsl(var(--foreground));     /* Header/Footer/Overlays */
+  --color-content: hsl(var(--text));              /* Primary code and title text */
+  --color-surface: hsl(var(--card));              /* Sidebar, Terminal, and Editor panes */
+  --color-border: hsl(var(--border));             /* Panel dividers and input outlines */
+  
+  /* The "Action" Colors */
+  --color-primary: hsl(var(--primary));           /* Generate and Submit buttons */
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  /* AI Logic & Heatmap Colors */
+  --color-ai-glow: hsl(var(--ai-glow));           /* Low scores/Error pulses */
+  --color-ai-core: hsl(var(--ai-core));           /* AI thinking/processing states */
+  
+  /* Secondary UI */
+  --color-muted: hsl(var(--muted));               /* Line numbers, terminal prompts (>) */
+  --color-muted-foreground: hsl(var(--muted-foreground)); /* Secondary labels and hints */
+  --color-accent: hsl(var(--accent));             /* Icons and active tab indicators */
+
   --animate-spin-slow: spin 3s linear infinite;
+
+}
+
+@keyframes cortex-drift {
+  0%, 100% {
+    transform: translateX(0%) translateY(0%) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateX(8%) translateY(-12%) rotate(20deg) scale(1.12);
+  }
+  50% {
+    transform: translateX(-6%) translateY(8%) rotate(-15deg) scale(0.95);
+  }
+  75% {
+    transform: translateX(10%) translateY(5%) rotate(10deg) scale(1.08);
+  }
+}
+
+.bg-cortex-heat {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #000;
+}
+
+.bg-cortex-heat::before {
+  content: "";
+  position: absolute;
+  inset: -80%;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 40% 35% at 35% 30%, hsl(32 39% 76% / 0.6) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 45% at 65% 50%, hsl(4 99% 38%) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 40% at 30% 70%, hsl(24 99% 47%) 0%, transparent 70%),
+    radial-gradient(ellipse 35% 50% at 80% 25%, hsl(24 99% 47% / 0.7) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 30% at 55% 45%, hsl(4 99% 38% / 0.5) 0%, transparent 60%);
+  filter: blur(40px);
+  opacity: 0.85;
+  animation: cortex-drift 25s ease-in-out infinite;
+}
+
+.bg-cortex-heat::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  background-repeat: repeat;
 }
 
 @layer base {
-:root {
-    /* LIGHT THEME (Stone/Warm) */
-    --background: 0 0% 100%;             /* FFFFFF */
-    --foreground: 24 10% 10%;            /* 1C1917 (Text) */
-    --text: 24 10% 10%;                  /* 1C1917 (Text) */
-    --card: 0 0% 100%;                   /* FFFFFF */
-    --border: 30 5% 91%;                 /* E7E5E4 (stone-200) */
+  :root {
+    /* LIGHT THEME (Minimalist/Print look) */
+    --background: 0 0% 98%;             /* Soft White Page */
+    --foreground: 0 0% 0%;              /* Deep Black Headers */
+    --text: 0 0% 13%;                   /* High-legibility text */
+    --card: 0 0% 100%;                  /* Clean White Panels */
+    --border: 0 0% 85%;                 /* Light Gray Dividers */
     
-    --primary: 24.6 95% 53.1%;           /* F97316 (Orange-500) */
-    --primary-foreground: 0 0% 100%;     /* FFFFFF */
+    --primary: 17 84% 49%;              /* Branding Orange */
+    --primary-foreground: 0 0% 98%;
     
-    --muted: 24 5% 40%;                  /* 78716C (Hint text) */
-    --muted-foreground: 24 6% 83%;       /* A8A29E (Second hint) */
+    --muted: 0 0% 65%;                  /* Secondary UI text */
+    --muted-foreground: 0 0% 39%;       
     
-    --accent: 270 67% 65%;               /* A855F7 (Purple Icon) */
-    --success: 142 71% 45%;              /* 22C55E (Green Indicator) */
-    --warning: 45 93% 47%;               /* EAB308 (Yellow) */
-    --info: 217 91% 60%;                 /* 3B82F6 (Blue Line) */
+    --accent: 17 84% 49%;
     
-    --icon: 25 5% 35%;                   /* 57534E (Icons) */
+    --ai-core: 4 99% 38%;               /* "Deep Heat" Red */
+    --ai-glow: 32 39% 76%;              /* Soft Cream Highlight */
   }
 
   .dark {
-    /* DARK THEME (Slate/Cool) */
-    --background: 222.2 84% 4.9%;         /* 020617 */
-    --foreground: 222.2 47.4% 11.2%;     /* 0F172A */
-    --text: 210 40% 98%;                 /* F8FAFC (Text) */
-    --card: 222.2 47.4% 11.2%;           /* 0F172A */
-    --border: 217 33% 17%;               /* 1E293B/slate-800 */
+    /* DARK THEME (The "Cortex Industrial" Platform) */
     
-    --primary: 24.6 95% 53.1%;           /* F97316 (Orange-500) */
-    --primary-foreground: 0 0% 100%;
+    /* BACKGROUND: Use on the main <html> or <body> to make everything float */
+    --background: 0 0% 0%;               /* #000000 (Pure Pitch Black) */
     
-    --muted: 215 25% 62%;                /* 94A3B8 (Hint text) */
-    --muted-foreground: 214 32% 91%;     /* CBD5E1 (Task text) */
+    /* TEXT: Use for Code Editor text and H1 titles */
+    --text: 0 0% 98%;                    /* #F9F9F9 (Stark White) */
     
-    --accent: 221 15% 35%;               /* 475569 (Icons) */
-    --success: 142 71% 45%;              /* 22C55E (Green) */
-    --info: 217 91% 60%;                 /* 3B82F6 (Blue lines) */
+    /* CARD/SURFACE: Use for Sidebar, Terminal Background, and Editor Background */
+    --card: 0 0% 7%;                     /* #121212 (Lifted Black) */
+    
+    /* BORDER: Use for the lines between Sidebar, Editor, and Terminal */
+    --border: 0 0% 20%;                  /* #333333 (Mechanical Gray) */
+    
+    /* PRIMARY: Use for the "GENERATE", "RUN", and "SUBMIT" buttons */
+    --primary: 17 84% 49%;               /* #E85002 (Vibrant Branding Orange) */
+    --primary-foreground: 0 0% 98%;
+    
+    /* MUTED: Use for Editor Line Numbers and the Terminal ">" prompt */
+    --muted: 0 0% 39%;                   /* #646464 (Dimmed Gray) */
+    
+    /* MUTED FOREGROUND: Use for "Estimated time" and Requirement descriptions */
+    --muted-foreground: 0 0% 65%;        /* #A7A7A7 (Silver Gray) */
+    
+    --accent: 17 84% 49%;                /* Standard Orange Accents */
+    
+    /* AI CORE: Use for the "Real-time Feedback" Score text (Performance/Quality) */
+    --ai-core: 24 99% 47%;               /* #F16001 (Bright Heat Orange) */
+    
+    /* AI GLOW: Use for Danger Zone borders and "Connection Error" text */
+    --ai-glow: 4 99% 38%;                /* #C10801 (Deep Warning Red) */
   }
 }
 
@@ -65,11 +135,6 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-content;
+    @apply bg-background text-content selection:bg-primary/30;
   }
-}
-/* Tailwind preflight already resets margin/padding.
-   Keep only box-sizing without breaking utility spacing. */
-*, ::before, ::after {
-  box-sizing: border-box;
 }

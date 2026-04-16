@@ -15,7 +15,7 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-fit px-4">
+    <header className="fixed top-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-fit px-4">
       <div className="pointer-events-auto relative group">
         
         {/* 1. THE AURORA GLOW (Behind the glass) */}

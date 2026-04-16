@@ -52,8 +52,8 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
 
   return (
     <div className="flex h-full min-h-0 flex-1 min-w-0 flex-col overflow-hidden dark:bg-foreground text-content">
-      <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-accent">
-        <div className="flex w-full min-w-0 items-center justify-between gap-2 py-2 px-8">
+      <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border  h-12">
+        <div className="flex w-full min-w-0 items-center justify-between gap-2 h-12 px-8 ">
           <div className="flex items-center gap-2 ">
             <div className="flex gap-1.5">
               <ErrorIndicator color="red-500" size={3} />
@@ -99,7 +99,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
       </div>
 
       {/* Main Editor Area */}
-      <div className="relative flex-1 min-h-0 overflow-hidden">
+      <div className="relative flex-1 min-h-0 overflow-hidden ">
          <CodeEditor
            code={code}
            onChange={onChange}
@@ -116,7 +116,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
       <TerminalOutput logs={logs} />
 
       {/* Window Footer */}
-      <div className="flex w-full shrink-0 items-center justify-between border-t-1 dark:border-accent px-4 py-2 font-mono text-xs">
+      <div className="flex w-full shrink-0 items-center justify-between border-t-1 dark:border-border px-4 py-2 font-mono text-xs">
         <div className="flex items-center gap-2">
           <ErrorIndicator color={footerStatus.color} size={2} />
           <span>{footerStatus.label}</span>
