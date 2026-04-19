@@ -51,16 +51,16 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-1 min-w-0 flex-col overflow-hidden dark:bg-foreground text-content">
-      <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border  h-12">
-        <div className="flex w-full min-w-0 items-center justify-between gap-2 h-12 px-8 ">
+    <div className="mt-4 mr-4 mb-4 flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 border-border bg-foreground text-content">
+      <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border h-12">
+        <div className="flex w-full min-w-0 items-center justify-between h-12 px-4">
           <div className="flex items-center gap-2 ">
             <div className="flex gap-1.5">
               <ErrorIndicator color="red-500" size={3} />
               <ErrorIndicator color="yellow-500" size={3} />
               <ErrorIndicator color="green-500" size={3} />
             </div>
-            <span className="ml-2 font-mono text-sm font-semibold text-white">solution.{languageToExtension[language]}</span>
+            <span className="ml-2 font-mono text-sm font-semibold text-white dark:text-content dark:bg-content/15 p-2 border-1 border-border rounded-md">solution.{languageToExtension[language]}</span>
           </div>
           <div className="flex items-center gap-2">
             <button

@@ -1,5 +1,5 @@
 // src/components/ui/AnalyticsCard.tsx
-import { Info, Loader2 } from "lucide-react";
+import { Info } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface AnalyticsCardProps {
@@ -34,9 +34,16 @@ export default function AnalyticsCard({
     <div className={`flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm ${loading ? "blur-sm opacity-50 shadow-white" : ""}`}>
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-medium text-content">{title}</h3>
-          <span title={infoTooltip} className="inline-flex">
-            <Info size={16} className="text-muted-foreground cursor-help" aria-hidden="true" />
-          </span>
+        {infoTooltip ? (
+          <button
+            type="button"
+            title={infoTooltip}
+            aria-label={infoTooltip}
+            className="inline-flex items-center rounded-sm text-muted-foreground cursor-help"
+          >
+            <Info size={16} aria-hidden="true" />
+          </button>
+        ) : null}
       </div>
 
       <div className="flex items-baseline gap-1 mb-3">

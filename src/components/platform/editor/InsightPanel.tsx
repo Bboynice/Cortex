@@ -50,6 +50,12 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage }
   const codeQuality = analysis?.scores?.codeQuality ?? 0;
   const performance = analysis?.scores?.performance ?? 0;
   const bestPractices = analysis?.scores?.bestPractices ?? 0;
+  const codeQualityTooltip =
+    "Based on readability, structure, and how clearly the solution solves the task.";
+  const performanceTooltip =
+    "Based on efficiency, unnecessary work, and how heavy the code looks to run.";
+  const bestPracticesTooltip =
+    "Based on clean conventions, maintainability, and safer coding patterns.";
 
   const codeQualitySummary = analysis?.summaries?.codeQuality ?? "Waiting for analysis…";
   const performanceSummary = analysis?.summaries?.performance ?? "Waiting for analysis…";
@@ -61,16 +67,8 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage }
     "Start typing your solution — I’ll analyze it periodically and surface improvements here.";
 
   return (
-    <section className="w-full flex flex-col border-t-1 dark:border-accent bg-background p-6 space-y-6">
-      {/* 1. Header Section */}
+    <section className="w-full flex flex-col bg-background space-y-4 px-4 pb-4">
       <div className="flex items-center gap-2 px-2">
-        <span className="text-orange-500">
-          <Lightbulb size={50} />
-        </span>
-        <h2 className="text-lg font-semibold text-content tracking-tight">
-          Real-time Feedback
-        </h2>
-       
         <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
           {status === "loading" && (
             <>
@@ -94,6 +92,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage }
                           score={codeQuality} 
                           description={codeQualitySummary} 
                           color="green" 
+                          infoTooltip={codeQualityTooltip}
                           loading={status === "loading" ? true : false}
                         />
                         <AnalyticsCard 
@@ -101,6 +100,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage }
                           score={performance} 
                           description={performanceSummary} 
                           color="orange" 
+                          infoTooltip={performanceTooltip}
                           loading={status === "loading" ? true : false}
                         />
                         <AnalyticsCard 
@@ -108,6 +108,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage }
                           score={bestPractices} 
                           description={bestPracticesSummary} 
                           color="blue" 
+                          infoTooltip={bestPracticesTooltip}
                           loading={status === "loading" ? true : false}
                         />
           

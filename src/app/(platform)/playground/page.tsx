@@ -177,9 +177,9 @@ export default function AppHome() {
   }, []);
 
   return (
-   <main className="flex h-full min-h-0 w-full flex-col overflow-y-auto">
-      <section className="flex w-full flex-col">
-        <div className="flex h-18 w-full shrink-0 items-center justify-start border-b-1 dark:border-border dark:bg-background dark:text-content">
+   <div className="h-full min-h-0 w-full overflow-y-auto pt-16">
+      <section className="w-full">
+        <div className="flex h-auto w-full items-center justify-start dark:text-content">
           <div className="flex h-auto w-1/3 flex-row items-center justify-center gap-2">
             <div className="flex h-auto w-[90%] flex-row items-center justify-between gap-2">
               <MyButton effect="glow" onClick={handleGenerate}>
@@ -201,8 +201,7 @@ export default function AppHome() {
           </div>
         </div>
 
-        {/* Fixed-height split view so it doesn't grow with generated content */}
-        <div className="flex h-[70vh] min-h-[28rem] w-full items-stretch overflow-hidden">
+        <div className="flex min-h-0 flex-1 w-full items-stretch overflow-hidden">
           <TaskInstructions
             challenge={challenge}
             requirements={requirements}
@@ -216,9 +215,8 @@ export default function AppHome() {
         </div>
       </section>
 
-      {/* Scroll down to see insights */}
       <InsightPanel analysis={analysis} status={analysisStatus} errorMessage={analysisError} />
-   </main>
+   </div>
    
   );
 }
