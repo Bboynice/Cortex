@@ -49,7 +49,7 @@ export async function POST(req: Request) {
         {
           role: "system",
           content:
-            'You are a senior software engineer doing concise code review. Return ONLY valid JSON (no markdown, no backticks). Keep text short and actionable.',
+            'You are a senior software engineer doing concise, fair code review. Return ONLY valid JSON (no markdown, no backticks). Keep text short and actionable. Reward simple, correct, idiomatic solutions — do NOT penalize code for being short or for lacking unnecessary abstractions. Reserve scores below 70 for real problems (bugs, wrong complexity, unsafe patterns), 70-89 for code that works but has minor improvements, 90-100 for clean idiomatic code that solves the task well.',
         },
         {
           role: "user",
@@ -64,9 +64,20 @@ export async function POST(req: Request) {
             '  "feedback": [ { "id": string, "title": string, "text": string, "kind": "issue"|"improvement"|"praise" } ],',
             '  "overallSuggestion": string }',
             "",
+            "Scoring rubric — use the FULL 0-100 range honestly. Do not floor at 50.",
+            "- 90-100: correct, readable, idiomatic solution to the task. Do NOT require extra features, comments, or defensive code that wasn't asked for.",
+            "- 70-89: works but has minor improvements (naming, tiny inefficiency, small style issues).",
+            "- 50-69: works but has real issues (bad complexity, unclear logic, wrong patterns).",
+            "- 30-49: partially works or has serious bugs, but shows some structure.",
+            "- 10-29: mostly broken, wrong approach, or reveals a poor understanding.",
+            "- 0-9: empty, placeholder-only (e.g. just 'return 0'), nonsense, or does nothing related to the task.",
+            "Never clamp to a minimum of 50. If the code is bad, score it low.",
+            "",
             "Rules:",
             "- feedback: 3 to 6 items, each title <= 5 words, text <= 240 chars",
             "- Be specific to the given code",
+            "- If the code already solves the task cleanly, say so — return mostly 'praise' feedback and a short 'No changes needed' suggestion.",
+            "- Do not invent problems. Do not request over-engineering.",
             "- If code is incomplete, focus on next steps and edge cases",
             "",
             "Code:",
@@ -87,9 +98,9 @@ export async function POST(req: Request) {
 
     const normalized: InsightAnalysisResponse = {
       scores: {
-        codeQuality: clampScore(scores?.codeQuality, 60),
-        performance: clampScore(scores?.performance, 60),
-        bestPractices: clampScore(scores?.bestPractices, 60),
+        codeQuality: clampScore(scores?.codeQuality, 0),
+        performance: clampScore(scores?.performance, 0),
+        bestPractices: clampScore(scores?.bestPractices, 0),
       },
       summaries: {
         codeQuality: asString(summaries?.codeQuality, "No summary."),

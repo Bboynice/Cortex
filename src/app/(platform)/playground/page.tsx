@@ -27,6 +27,8 @@ export default function AppHome() {
   const [analysis, setAnalysis] = useState<InsightAnalysis | null>(null);
   const [analysisStatus, setAnalysisStatus] = useState<"idle" | "loading" | "error">("idle");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [isApplyingFix, setIsApplyingFix] = useState(false);
+  const [applyFixError, setApplyFixError] = useState<string | null>(null);
 
   const languageChoices = [
     { value: "javascript" as const, label: "JavaScript" },
@@ -66,6 +68,7 @@ export default function AppHome() {
 
   const lastSuccessfulHashRef = useRef<string | null>(null);
   const inflightRef = useRef<AbortController | null>(null);
+  const applyFixInflightRef = useRef<AbortController | null>(null);
 
   async function sha256Base64(input: string) {
     const data = new TextEncoder().encode(input);
@@ -80,6 +83,8 @@ export default function AppHome() {
     if (analysisStatus === "loading") return;
 
     const ctx = latestContextRef.current;
+    // Don't analyze until a challenge has been generated.
+    if (!ctx.challenge) return;
     // Avoid hammering when code hasn't changed.
     const hash = await sha256Base64(`${ctx.language}\n${ctx.code}`);
     if (hash === lastSuccessfulHashRef.current) return;
@@ -148,11 +153,70 @@ export default function AppHome() {
 
       setGeneratedLanguageLabel(languageChoices.find((c) => c.value === language)?.label ?? undefined);
       setGeneratedDifficultyLabel(difficultyChoices.find((c) => c.value === difficulty)?.label ?? undefined);
+
+      // Reset last-analyzed hash so the freshly generated challenge is analyzed immediately.
+      lastSuccessfulHashRef.current = null;
+      latestContextRef.current = {
+        code: startCode[language],
+        language,
+        challenge: result.challenge ?? undefined,
+        requirements: result.requirements ?? [],
+      };
+      analyzeNow();
     } else {
       alert("Error generating challenge");
     }
     
     setLoading(false);
+  }
+
+  async function handleApplyFix() {
+    const ctx = latestContextRef.current;
+    const suggestion = analysis?.overallSuggestion?.trim();
+    if (!suggestion || !ctx.code?.trim() || isApplyingFix) return;
+
+    applyFixInflightRef.current?.abort();
+    const controller = new AbortController();
+    applyFixInflightRef.current = controller;
+
+    setIsApplyingFix(true);
+    setApplyFixError(null);
+
+    try {
+      const res = await fetch("/api/apply-fix", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          code: ctx.code,
+          language: ctx.language,
+          suggestion,
+          challenge: ctx.challenge,
+          requirements: ctx.requirements,
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.message || errJson?.error || `HTTP ${res.status}`);
+      }
+
+      const data = (await res.json()) as { code?: string };
+      const nextCode = (data?.code ?? "").trim();
+      if (!nextCode) throw new Error("Empty fix returned");
+
+      setCode(nextCode);
+      // Force re-analysis of the new code so the panel updates.
+      lastSuccessfulHashRef.current = null;
+      latestContextRef.current = { ...ctx, code: nextCode };
+      analyzeNow();
+    } catch (e: any) {
+      if (e?.name === "AbortError") return;
+      setApplyFixError(e?.message || "Failed to apply fix");
+    } finally {
+      if (applyFixInflightRef.current === controller) applyFixInflightRef.current = null;
+      setIsApplyingFix(false);
+    }
   }
 
   const handleRun = async (codeToRun: string) => {
@@ -163,18 +227,19 @@ export default function AppHome() {
     setLogs(logLines);
   };
 
-  // Analyze code every 1 second (only when it changed).
+  // Analyze code on an interval, but only once a challenge has been generated.
   useEffect(() => {
+    if (!challenge) return;
     analyzeNow();
     const id = window.setInterval(() => {
       analyzeNow();
-    }, 999_999_999); // 10 minutes (999999999ms)
+    }, 999_999_999);
     return () => {
       window.clearInterval(id);
       inflightRef.current?.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [challenge]);
 
   return (
    <div className="h-full min-h-0 w-full overflow-y-auto pt-16">
@@ -215,7 +280,15 @@ export default function AppHome() {
         </div>
       </section>
 
-      <InsightPanel analysis={analysis} status={analysisStatus} errorMessage={analysisError} />
+      <InsightPanel
+        analysis={analysis}
+        status={analysisStatus}
+        errorMessage={analysisError}
+        hasChallenge={Boolean(challenge)}
+        onApplyFix={handleApplyFix}
+        isApplyingFix={isApplyingFix}
+        applyFixError={applyFixError}
+      />
    </div>
    
   );

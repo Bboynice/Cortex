@@ -11,20 +11,22 @@ export default function TerminalOutput({
   const fullText = logs.map(log => `> ${log}`).join("\n");
   const typed = useTypewriter(fullText, speedMs);
   return (
-    <div className="w-full h-auto bg-slate-950 font-mono text-sm p-4 overflow-y-auto border-t border-border">
-      <div className="mb-2 flex items-center gap-2 text-muted">
-        <span className="text-xs font-bold uppercase tracking-wider">Terminal</span>
+    <div className="flex h-28 w-full shrink-0 flex-col border-t border-border bg-background font-mono text-sm">
+      <div className="flex shrink-0 items-center gap-2 px-4 pt-2 text-muted">
+        <span className="text-[10px] font-bold uppercase tracking-wider">Terminal</span>
       </div>
 
-      {logs.length === 0 ? (
-        <p className="text-slate-600 italic">
-          No output yet. Click &quot;Run&quot; to execute your code.
-        </p>
-      ) : (
-        <motion.pre className="whitespace-pre-wrap break-words text-slate-200 m-0">
-          {typed}
-        </motion.pre>
-      )}
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-2">
+        {logs.length === 0 ? (
+          <p className="m-0 text-slate-600 italic">
+            No output yet. Click &quot;Run&quot; to execute your code.
+          </p>
+        ) : (
+          <motion.pre className="m-0 whitespace-pre-wrap break-words leading-5 text-slate-200">
+            {typed}
+          </motion.pre>
+        )}
+      </div>
     </div>
   );
 }

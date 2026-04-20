@@ -55,7 +55,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
           aria-modal="true"
           aria-label={modalTitle}
         >
-          <span className="relative flex w-full flex-col gap-3 overflow-hidden rounded-2xl border border-accent bg-foreground p-5 shadow-2xl">
+          <span className="relative flex w-full flex-col gap-3 overflow-hidden rounded-lg border border-border bg-foreground p-5 shadow-2xl">
             <button
               type="button"
               onClick={onClose}
@@ -66,21 +66,21 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
             </button>
 
             <div className="pr-10">
-              <h1 className="text-lg font-semibold text-white">{modalTitle}</h1>
-              <p className="mt-1 text-sm text-content/80">{modalDescription}</p>
+              <h1 className="text-lg font-semibold text-content">{modalTitle}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{modalDescription}</p>
             </div>
 
             <div className="mt-2 flex w-full flex-row justify-end gap-2">
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-center rounded-[10px] bg-accent px-4 text-sm font-semibold text-content hover:brightness-110 active:brightness-95"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-surface px-4 text-sm font-semibold text-content hover:brightness-110 active:brightness-95"
                 onClick={onClose}
               >
                 {modalCancelText}
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 items-center justify-center rounded-[10px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95"
                 onClick={handleSubmit}
               >
                 {modalSubmitText}

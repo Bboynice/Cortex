@@ -60,7 +60,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
               <ErrorIndicator color="yellow-500" size={3} />
               <ErrorIndicator color="green-500" size={3} />
             </div>
-            <span className="ml-2 font-mono text-sm font-semibold text-white dark:text-content dark:bg-content/15 p-2 border-1 border-border rounded-md">solution.{languageToExtension[language]}</span>
+            <span className="ml-2 font-mono text-sm font-semibold text-white dark:text-content dark:bg-content/10 p-2 border-1 border-border rounded-md">solution.{languageToExtension[language]}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
