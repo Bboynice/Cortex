@@ -1,6 +1,8 @@
 <div align="center">
 
-<img src="./.github/assets/banner.svg" alt="Cortex — deliberate AI practice for developers" width="100%" />
+# Cortex
+
+**Deliberate AI practice for developers — missions, a live editor, and honest feedback in one loop.**
 
 <br />
 
@@ -16,7 +18,7 @@
 <br />
 <br />
 
-<p><strong>Cortex</strong> turns vague learning goals into focused coding missions, instant feedback, and visible progress you can actually feel week&nbsp;after&nbsp;week.</p>
+<p>Cortex turns vague learning goals into focused coding missions, instant feedback, and visible progress you can actually feel week&nbsp;after&nbsp;week.</p>
 
 <p>
   <a href="#the-loop">The loop</a>
@@ -37,7 +39,7 @@
 ## The loop
 
 <div align="center">
-  <img src="./.github/assets/preview.svg" alt="Cortex playground — editor, AI insights, apply-fix" width="100%" />
+  <img src="./.github/assets/playground.png" alt="Cortex playground — editor, AI insights, apply-fix" width="100%" />
 </div>
 
 <br />
@@ -85,24 +87,13 @@ One-click **Apply Fix** rewrites your code using the model's overall suggestion,
 
 ---
 
-## Component showcase
+## Getting in
 
 <div align="center">
-  <img src="./.github/assets/components.svg" alt="Cortex design system — GlowButton, AnalyticsCard, feedback blocks, CortexLoader, palette" width="100%" />
+  <img src="./.github/assets/login.png" alt="Cortex login screen — Google, GitHub, and email sign-in" width="100%" />
 </div>
 
-<br />
-
-<details>
-<summary><strong>What's rendered above</strong></summary>
-
-- **`<GlowButton />`** — a configurable button with `color`, `roundness`, `height`, `width`, and an optional SVG glow filter. Used for *Generate* / *Run* / *Apply Fix* actions.
-- **`<AnalyticsCard />`** — the score tile used in the Insights panel. Takes a `score` (0–100), a `description`, a themed color, and an optional info tooltip.
-- **Feedback block** — the `InsightFeedbackBlock` primitive, rendered with one of three kinds: `praise` (green), `improvement` (orange), `issue` (red).
-- **`<CortexLoader />`** — three concentric, independently-animated rings used as the brand motif throughout the app.
-- **Palette swatches** — the four most-used surface & accent tokens from the dark "Cortex Industrial" theme.
-
-</details>
+Auth lives in its own route group (`(auth)`) with a dedicated layout and server actions. Users can continue with **Google**, **GitHub**, or classic **email + password** — whichever path they pick, they land straight in the platform shell with the floating glass nav ready to go.
 
 ---
 
@@ -158,7 +149,7 @@ flowchart LR
 
 ```
 cortex/
-├─ .github/assets/            ← banner, preview and design-system SVGs
+├─ .github/assets/            ← README screenshots
 ├─ public/                    ← static assets
 └─ src/
    ├─ app/
