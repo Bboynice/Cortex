@@ -1,0 +1,279 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 860" role="img" aria-label="Cortex playground preview">
+  <defs>
+    <radialGradient id="pageGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F16001" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#C10801" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="pageGlow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E3C9A6" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="scoreOk" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="scoreWarm" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F16001"/>
+      <stop offset="100%" stop-color="#C10801"/>
+    </linearGradient>
+    <linearGradient id="scoreBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="primaryBtn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F16001"/>
+      <stop offset="100%" stop-color="#C10801"/>
+    </linearGradient>
+    <linearGradient id="ruleAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F16001"/>
+      <stop offset="100%" stop-color="#F16001" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1400" height="860" fill="#000000"/>
+  <circle cx="260" cy="700" r="400" fill="url(#pageGlow)"/>
+  <circle cx="1200" cy="160" r="380" fill="url(#pageGlow2)"/>
+  <circle cx="1280" cy="720" r="300" fill="url(#pageGlow)" opacity="0.6"/>
+
+  <!-- Outer app frame -->
+  <rect x="16" y="16" width="1368" height="828" rx="22" fill="#060606" stroke="#222222"/>
+  <rect x="17" y="17" width="1366" height="56" rx="21" fill="#0b0b0b"/>
+
+  <!-- Floating nav pill (from Header.tsx) -->
+  <g transform="translate(560, 28)">
+    <rect x="-4" y="-4" width="288" height="40" rx="20" fill="#F16001" opacity="0.12"/>
+    <rect width="280" height="32" rx="16" fill="#0a0a0a" stroke="#333333"/>
+    <rect x="8" y="6" width="74" height="20" rx="10" fill="#1a0d05"/>
+    <text x="45" y="20" text-anchor="middle" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif" font-size="11" font-weight="600">Cortex</text>
+    <text x="120" y="20" text-anchor="middle" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Playground</text>
+    <text x="200" y="20" text-anchor="middle" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Contact</text>
+    <circle cx="260" cy="16" r="8" fill="#121212" stroke="#333333"/>
+  </g>
+
+  <!-- Window controls -->
+  <g transform="translate(40, 32)">
+    <circle cx="0" cy="10" r="6" fill="#C10801"/>
+    <circle cx="20" cy="10" r="6" fill="#F16001"/>
+    <circle cx="40" cy="10" r="6" fill="#E3C9A6"/>
+  </g>
+
+  <!-- Right-side mini user pill -->
+  <g transform="translate(1240, 28)">
+    <rect width="120" height="32" rx="16" fill="#0a0a0a" stroke="#333333"/>
+    <circle cx="16" cy="16" r="8" fill="url(#primaryBtn)"/>
+    <text x="32" y="20" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">illia@cortex</text>
+  </g>
+
+  <!-- ============================= LEFT COLUMN ============================= -->
+
+  <!-- Task / challenge card -->
+  <g transform="translate(40, 96)">
+    <rect width="820" height="100" rx="16" fill="#0a0a0a" stroke="#333333"/>
+    <g transform="translate(20, 18)">
+      <rect width="68" height="20" rx="10" fill="#1a0d05" stroke="#F16001" stroke-opacity="0.35"/>
+      <text x="34" y="14" text-anchor="middle" fill="#F16001" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" letter-spacing="1.4">MISSION</text>
+
+      <text y="46" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="18" font-weight="600">Sum the even numbers in an array without built-in helpers</text>
+    </g>
+    <!-- requirement pills -->
+    <g transform="translate(20, 72)" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">
+      <g>
+        <rect width="122" height="20" rx="10" fill="#121212" stroke="#333333"/>
+        <text x="10" y="14" fill="#A7A7A7">Language: JavaScript</text>
+      </g>
+      <g transform="translate(132, 0)">
+        <rect width="122" height="20" rx="10" fill="#121212" stroke="#333333"/>
+        <text x="10" y="14" fill="#A7A7A7">Difficulty: Easy</text>
+      </g>
+      <g transform="translate(264, 0)">
+        <rect width="148" height="20" rx="10" fill="#121212" stroke="#333333"/>
+        <text x="10" y="14" fill="#A7A7A7">Estimated time: 15 min</text>
+      </g>
+    </g>
+    <!-- top-right generate button -->
+    <g transform="translate(670, 24)">
+      <rect width="130" height="52" rx="14" fill="url(#primaryBtn)"/>
+      <text x="65" y="31" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="2">GENERATE</text>
+      <circle cx="20" cy="26" r="5" fill="#FFFFFF" opacity="0.8"/>
+    </g>
+  </g>
+
+  <!-- Editor window -->
+  <g transform="translate(40, 212)">
+    <rect width="820" height="448" rx="18" fill="#0a0a0a" stroke="#333333"/>
+    <!-- tab bar -->
+    <rect x="1" y="1" width="818" height="42" rx="17" fill="#121212"/>
+    <rect x="1" y="28" width="818" height="14" fill="#121212"/>
+
+    <g transform="translate(18, 12)">
+      <rect width="140" height="24" rx="8" fill="#0a0a0a" stroke="#333333"/>
+      <circle cx="14" cy="12" r="4" fill="#F16001"/>
+      <text x="26" y="16" fill="#F9F9F9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">challenge.js</text>
+    </g>
+    <g transform="translate(720, 12)">
+      <rect width="84" height="24" rx="12" fill="url(#primaryBtn)"/>
+      <text x="42" y="16" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">¶  RUN</text>
+    </g>
+
+    <!-- gutter -->
+    <rect x="1" y="43" width="48" height="404" fill="#060606"/>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#646464" text-anchor="end">
+      <text x="38" y="74">1</text>
+      <text x="38" y="98">2</text>
+      <text x="38" y="122">3</text>
+      <text x="38" y="146">4</text>
+      <text x="38" y="170">5</text>
+      <text x="38" y="194">6</text>
+      <text x="38" y="218">7</text>
+      <text x="38" y="242">8</text>
+      <text x="38" y="266">9</text>
+      <text x="38" y="290">10</text>
+      <text x="38" y="314">11</text>
+      <text x="38" y="338">12</text>
+    </g>
+
+    <!-- code -->
+    <g transform="translate(64, 72)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">
+      <text y="0" fill="#A7A7A7"><tspan fill="#E3C9A6">function </tspan><tspan fill="#F9F9F9">sumEvenNumbers</tspan>(arr) {</text>
+      <text y="24" fill="#A7A7A7">  <tspan fill="#E3C9A6">if</tspan> (!<tspan fill="#38bdf8">Array</tspan>.isArray(arr)) <tspan fill="#E3C9A6">return</tspan> 0;</text>
+      <text y="48" fill="#A7A7A7">  </text>
+      <text y="72" fill="#A7A7A7">  <tspan fill="#E3C9A6">let</tspan> <tspan fill="#F9F9F9">total</tspan> = 0;</text>
+      <text y="96" fill="#A7A7A7">  <tspan fill="#E3C9A6">for</tspan> (<tspan fill="#E3C9A6">const</tspan> n <tspan fill="#E3C9A6">of</tspan> arr) {</text>
+      <text y="120" fill="#A7A7A7">    <tspan fill="#E3C9A6">if</tspan> (<tspan fill="#E3C9A6">typeof</tspan> n !== <tspan fill="#22c55e">"number"</tspan>) <tspan fill="#E3C9A6">continue</tspan>;</text>
+      <text y="144" fill="#A7A7A7">    <tspan fill="#E3C9A6">if</tspan> (n % 2 === 0) total += n;</text>
+      <text y="168" fill="#A7A7A7">  }</text>
+      <text y="192" fill="#A7A7A7">  </text>
+      <text y="216" fill="#A7A7A7">  <tspan fill="#E3C9A6">return</tspan> total;</text>
+      <text y="240" fill="#A7A7A7">}</text>
+      <text y="288" fill="#A7A7A7"><tspan fill="#646464">// Runs in-browser via new Function; Python/Rust via Piston</tspan></text>
+    </g>
+
+    <!-- terminal -->
+    <rect x="1" y="348" width="818" height="99" rx="0" fill="#060606"/>
+    <rect x="1" y="348" width="818" height="26" fill="#0a0a0a"/>
+    <g transform="translate(16, 356)">
+      <rect width="86" height="14" rx="7" fill="#121212" stroke="#333333"/>
+      <text x="43" y="10" text-anchor="middle" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9" letter-spacing="1.4">TERMINAL</text>
+    </g>
+    <g transform="translate(20, 390)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12">
+      <text y="0"><tspan fill="#F16001">&gt;</tspan> <tspan fill="#A7A7A7">node challenge.js</tspan></text>
+      <text y="22" fill="#F9F9F9">30</text>
+      <text y="44" fill="#646464">Executed successfully (no output).</text>
+    </g>
+  </g>
+
+  <!-- ============================= RIGHT COLUMN ============================= -->
+
+  <!-- Insights panel header -->
+  <g transform="translate(880, 96)">
+    <text y="18" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif" font-size="16" font-weight="600">AI Insights</text>
+    <g transform="translate(112, 0)">
+      <circle cx="6" cy="12" r="4" fill="#F16001">
+      </circle>
+      <text x="18" y="16" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" letter-spacing="1.5">LIVE · ANALYSED 2s AGO</text>
+    </g>
+    <rect y="38" width="480" height="1" fill="#222222"/>
+    <rect y="38" width="120" height="1" fill="url(#ruleAccent)"/>
+  </g>
+
+  <!-- Score cards row -->
+  <g transform="translate(880, 148)">
+    <!-- Code Quality -->
+    <g>
+      <rect width="152" height="108" rx="14" fill="#0a0a0a" stroke="#333333"/>
+      <text x="16" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">Code quality</text>
+      <text x="16" y="62" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28" font-weight="700">94</text>
+      <text x="62" y="62" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">/ 100</text>
+      <rect x="16" y="74" width="120" height="6" rx="3" fill="#1a1a1a"/>
+      <rect x="16" y="74" width="113" height="6" rx="3" fill="url(#scoreOk)"/>
+      <text x="16" y="96" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Clear, readable, idiomatic.</text>
+    </g>
+    <!-- Performance -->
+    <g transform="translate(164, 0)">
+      <rect width="152" height="108" rx="14" fill="#0a0a0a" stroke="#333333"/>
+      <text x="16" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">Performance</text>
+      <text x="16" y="62" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28" font-weight="700">88</text>
+      <text x="62" y="62" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">/ 100</text>
+      <rect x="16" y="74" width="120" height="6" rx="3" fill="#1a1a1a"/>
+      <rect x="16" y="74" width="106" height="6" rx="3" fill="url(#scoreWarm)"/>
+      <text x="16" y="96" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Linear pass, no waste.</text>
+    </g>
+    <!-- Best practices -->
+    <g transform="translate(328, 0)">
+      <rect width="152" height="108" rx="14" fill="#0a0a0a" stroke="#333333"/>
+      <text x="16" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">Best practices</text>
+      <text x="16" y="62" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="28" font-weight="700">91</text>
+      <text x="62" y="62" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">/ 100</text>
+      <rect x="16" y="74" width="120" height="6" rx="3" fill="#1a1a1a"/>
+      <rect x="16" y="74" width="110" height="6" rx="3" fill="url(#scoreBlue)"/>
+      <text x="16" y="96" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Guarded input, safe types.</text>
+    </g>
+  </g>
+
+  <!-- Feedback list -->
+  <g transform="translate(880, 280)">
+    <text y="14" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" letter-spacing="1.6">FEEDBACK</text>
+
+    <!-- praise -->
+    <g transform="translate(0, 24)">
+      <rect width="480" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
+      <rect width="4" height="72" rx="2" fill="#22c55e"/>
+      <g transform="translate(20, 18)">
+        <text fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Guards the input</text>
+        <text y="22" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Early return on non-array keeps the function safe on edge cases.</text>
+      </g>
+      <g transform="translate(420, 12)">
+        <rect width="50" height="20" rx="10" fill="#0b1a10" stroke="#22c55e" stroke-opacity="0.4"/>
+        <text x="25" y="14" text-anchor="middle" fill="#22c55e" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1">PRAISE</text>
+      </g>
+    </g>
+
+    <!-- improvement -->
+    <g transform="translate(0, 108)">
+      <rect width="480" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
+      <rect width="4" height="72" rx="2" fill="#F16001"/>
+      <g transform="translate(20, 18)">
+        <text fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Consider a reduce</text>
+        <text y="22" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Reduce would express intent a little more declaratively here.</text>
+      </g>
+      <g transform="translate(392, 12)">
+        <rect width="78" height="20" rx="10" fill="#1a0d05" stroke="#F16001" stroke-opacity="0.4"/>
+        <text x="39" y="14" text-anchor="middle" fill="#F16001" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1">IMPROVE</text>
+      </g>
+    </g>
+
+    <!-- issue -->
+    <g transform="translate(0, 192)">
+      <rect width="480" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
+      <rect width="4" height="72" rx="2" fill="#C10801"/>
+      <g transform="translate(20, 18)">
+        <text fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Mixed types slip through</text>
+        <text y="22" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">typeof check skips non-numbers but floats still qualify as even.</text>
+      </g>
+      <g transform="translate(420, 12)">
+        <rect width="50" height="20" rx="10" fill="#160303" stroke="#C10801" stroke-opacity="0.5"/>
+        <text x="25" y="14" text-anchor="middle" fill="#C10801" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1">ISSUE</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Overall suggestion + Apply fix -->
+  <g transform="translate(880, 572)">
+    <rect width="480" height="80" rx="14" fill="#0a0a0a" stroke="#333333"/>
+    <text x="18" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" letter-spacing="1.6">OVERALL SUGGESTION</text>
+    <text x="18" y="50" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12">Tighten the integer check, then you're done </text>
+    <text x="18" y="68" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12">no structural changes needed.</text>
+  </g>
+
+  <g transform="translate(880, 668)">
+    <rect x="-2" y="-2" width="484" height="52" rx="16" fill="#F16001" opacity="0.16"/>
+    <rect width="480" height="48" rx="14" fill="url(#primaryBtn)"/>
+    <text x="240" y="30" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" letter-spacing="2.4">APPLY FIX  ·  AI REWRITE</text>
+    <circle cx="44" cy="24" r="5" fill="#FFFFFF" opacity="0.85"/>
+  </g>
+
+  <g transform="translate(880, 736)">
+    <text fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Every keystroke is debounced and hashed  the model only reanalyses when your code genuinely changes.</text>
+  </g>
+</svg>

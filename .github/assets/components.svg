@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 460" role="img" aria-label="Cortex UI components">
+  <defs>
+    <radialGradient id="sGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F16001" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="btnPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F16001"/>
+      <stop offset="100%" stop-color="#C10801"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%" gradientTransform="rotate(45)">
+      <stop offset="0%" stop-color="#E3C9A6"/>
+      <stop offset="50%" stop-color="#F16001"/>
+      <stop offset="100%" stop-color="#C10801"/>
+    </linearGradient>
+    <linearGradient id="scoreWarm" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F16001"/>
+      <stop offset="100%" stop-color="#C10801"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect width="1400" height="460" fill="#000000"/>
+  <circle cx="300" cy="230" r="280" fill="url(#sGlow)"/>
+  <circle cx="1100" cy="230" r="280" fill="url(#sGlow)"/>
+
+  <!-- Section title -->
+  <text x="56" y="52" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif" font-size="18" font-weight="600">Design system</text>
+  <text x="56" y="76" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12">Industrial dark · orange heat · cream highlights</text>
+  <rect x="56" y="96" width="1288" height="1" fill="#222222"/>
+  <rect x="56" y="96" width="140" height="1" fill="#F16001"/>
+
+  <!-- ============== Tile 1: GlowButton ============== -->
+  <g transform="translate(56, 132)">
+    <rect width="300" height="280" rx="20" fill="#060606" stroke="#222222"/>
+    <text x="20" y="34" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">GLOW BUTTON</text>
+
+    <g transform="translate(60, 66)">
+      <!-- outer halo -->
+      <rect x="-12" y="-12" width="204" height="84" rx="24" fill="#F16001" opacity="0.22" filter="url(#soft)"/>
+      <rect width="180" height="60" rx="16" fill="url(#btnPrimary)"/>
+      <text x="90" y="38" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14" font-weight="700" letter-spacing="2.8">GENERATE</text>
+      <!-- stroke highlight -->
+      <rect width="180" height="60" rx="16" fill="none" stroke="#FFDACC" stroke-opacity="0.55"/>
+    </g>
+
+    <g transform="translate(60, 170)">
+      <rect width="180" height="60" rx="16" fill="#121212" stroke="#333333"/>
+      <text x="90" y="38" text-anchor="middle" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14" font-weight="600" letter-spacing="2.4">CARD</text>
+    </g>
+
+    <text x="20" y="258" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Variants: primary · card · accent · background</text>
+  </g>
+
+  <!-- ============== Tile 2: Score card (AnalyticsCard) ============== -->
+  <g transform="translate(388, 132)">
+    <rect width="300" height="280" rx="20" fill="#060606" stroke="#222222"/>
+    <text x="20" y="34" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">ANALYTICS CARD</text>
+
+    <g transform="translate(30, 66)">
+      <rect width="240" height="180" rx="14" fill="#0a0a0a" stroke="#333333"/>
+      <text x="20" y="32" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="13" font-weight="500">Code quality</text>
+      <circle cx="220" cy="26" r="6" fill="none" stroke="#646464"/>
+      <text x="220" y="30" text-anchor="middle" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9">i</text>
+
+      <text x="20" y="92" fill="#F16001" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="42" font-weight="700">94</text>
+      <text x="78" y="92" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14">/ 100</text>
+
+      <rect x="20" y="118" width="200" height="8" rx="4" fill="#1a1a1a"/>
+      <rect x="20" y="118" width="188" height="8" rx="4" fill="url(#scoreWarm)"/>
+
+      <text x="20" y="152" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Clear, readable, idiomatic solution.</text>
+    </g>
+
+    <text x="20" y="258" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Used in the AI Insights panel · 3 per analysis</text>
+  </g>
+
+  <!-- ============== Tile 3: Feedback block ============== -->
+  <g transform="translate(720, 132)">
+    <rect width="300" height="280" rx="20" fill="#060606" stroke="#222222"/>
+    <text x="20" y="34" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">FEEDBACK BLOCK</text>
+
+    <g transform="translate(30, 66)">
+      <rect width="240" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
+      <rect width="4" height="72" rx="2" fill="#22c55e"/>
+      <text x="20" y="26" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Guards the input</text>
+      <text x="20" y="48" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Early return keeps it safe on edge</text>
+      <text x="20" y="62" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">cases. Nice.</text>
+      <rect x="178" y="10" width="52" height="18" rx="9" fill="#0b1a10" stroke="#22c55e" stroke-opacity="0.4"/>
+      <text x="204" y="22" text-anchor="middle" fill="#22c55e" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1">PRAISE</text>
+    </g>
+
+    <g transform="translate(30, 152)">
+      <rect width="240" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
+      <rect width="4" height="72" rx="2" fill="#C10801"/>
+      <text x="20" y="26" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="600">Floats count as even</text>
+      <text x="20" y="48" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">2.0 slips through your modulo</text>
+      <text x="20" y="62" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">check  tighten the guard.</text>
+      <rect x="184" y="10" width="46" height="18" rx="9" fill="#160303" stroke="#C10801" stroke-opacity="0.5"/>
+      <text x="207" y="22" text-anchor="middle" fill="#C10801" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" letter-spacing="1">ISSUE</text>
+    </g>
+
+    <text x="20" y="258" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Kinds: praise · improvement · issue</text>
+  </g>
+
+  <!-- ============== Tile 4: CortexLoader + palette ============== -->
+  <g transform="translate(1052, 132)">
+    <rect width="292" height="280" rx="20" fill="#060606" stroke="#222222"/>
+    <text x="20" y="34" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8">CORTEX LOADER</text>
+
+    <g transform="translate(146, 130)">
+      <g transform="rotate(-45)">
+        <circle r="48" fill="none" stroke="url(#ringGrad)" stroke-width="1.6" stroke-dasharray="270 30" stroke-linecap="round"/>
+      </g>
+      <g transform="rotate(30)">
+        <circle r="36" fill="none" stroke="url(#ringGrad)" stroke-width="1.8" stroke-dasharray="200 25" stroke-linecap="round"/>
+      </g>
+      <g transform="rotate(-10)">
+        <circle r="24" fill="none" stroke="url(#ringGrad)" stroke-width="1.8" stroke-dasharray="132 18" stroke-linecap="round"/>
+      </g>
+      <circle r="4" fill="#F16001"/>
+    </g>
+
+    <g transform="translate(20, 232)">
+      <g>
+        <rect width="32" height="32" rx="8" fill="#F16001"/>
+        <text x="16" y="52" text-anchor="middle" fill="#646464" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9">#E85002</text>
+      </g>
+      <g transform="translate(66, 0)">
+        <rect width="32" height="32" rx="8" fill="#C10801"/>
+        <text x="16" y="52" text-anchor="middle" fill="#646464" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9">#C10801</text>
+      </g>
+      <g transform="translate(132, 0)">
+        <rect width="32" height="32" rx="8" fill="#E3C9A6"/>
+        <text x="16" y="52" text-anchor="middle" fill="#646464" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9">#E3C9A6</text>
+      </g>
+      <g transform="translate(198, 0)">
+        <rect width="32" height="32" rx="8" fill="#121212" stroke="#333333"/>
+        <text x="16" y="52" text-anchor="middle" fill="#646464" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="9">#121212</text>
+      </g>
+    </g>
+  </g>
+</svg>
