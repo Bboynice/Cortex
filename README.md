@@ -110,40 +110,40 @@ One-click **Apply Fix** rewrites your code using the model's overall suggestion,
 
 ```mermaid
 flowchart LR
-    subgraph Client [Browser]
-        U[You]
-        E[Monaco editor]
-        T[Terminal output]
-        I[AI Insights panel]
+    subgraph Client["Browser"]
+        U["You"]
+        E["Monaco editor"]
+        T["Terminal output"]
+        I["AI Insights panel"]
     end
 
-    subgraph Server [Next.js 16 server]
-        A1[[server action<br/>generateCodingChallenge]]
-        A2[/api/insights]
-        A3[/api/apply-fix]
+    subgraph Server["Next.js 16 server"]
+        A1[["server action<br/>generateCodingChallenge"]]
+        A2["POST /api/insights"]
+        A3["POST /api/apply-fix"]
     end
 
-    subgraph External [External]
-        O[OpenAI API]
-        P[Piston API]
+    subgraph External["External"]
+        O["OpenAI API"]
+        P["Piston API"]
     end
 
-    U -- language + difficulty --> A1
+    U -- "language + difficulty" --> A1
     A1 <--> O
-    A1 -- task + hints + requirements --> E
+    A1 -- "task + hints + requirements" --> E
 
-    U -- writes code --> E
-    E -- run JS --> T
-    E -- run Python / Rust --> P
+    U -- "writes code" --> E
+    E -- "run JS" --> T
+    E -- "run Python / Rust" --> P
     P --> T
 
-    E -- debounced + SHA-256 hash --> A2
+    E -- "debounced + SHA-256 hash" --> A2
     A2 <--> O
-    A2 -- scores + typed feedback --> I
+    A2 -- "scores + typed feedback" --> I
 
-    I -- apply fix --> A3
+    I -- "apply fix" --> A3
     A3 <--> O
-    A3 -- rewritten code --> E
+    A3 -- "rewritten code" --> E
 ```
 
 **Key design decisions**
