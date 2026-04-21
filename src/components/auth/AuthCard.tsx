@@ -19,7 +19,7 @@ export default function AuthCard({
   footerLabel,
 }: AuthCardProps) {
   return (
-    <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/10 p-6 shadow-xl backdrop-blur">
+    <div className="w-full max-w-md rounded-2xl border border-white/10 bg-black/10 p-6 shadow-xl backdrop-blur-lg backdrop-brightness-125 shadow-inner">
       <div className="mb-6 text-center">
         <h1 className="text-2xl font-semibold text-white">{title}</h1>
         <p className="mt-2 text-sm text-white/70">{description}</p>

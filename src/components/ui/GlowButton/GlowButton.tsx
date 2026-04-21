@@ -36,6 +36,7 @@ export default function MyButton({
       foreground: "bg-foreground text-content",
       background: "bg-background text-content border border-border",
       accent: "bg-accent text-accent-foreground border border-border",
+      white: "bg-white text-black", 
     }[color] ?? "bg-primary text-primary-foreground";
 
   // Don't use dynamic Tailwind classes like `rounded-[${roundness}px]`:

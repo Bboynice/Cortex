@@ -74,6 +74,215 @@
   background-repeat: repeat;
 }
 
+@keyframes cortex-slow-drift {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.08);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) scale(1);
+  }
+}
+
+@keyframes cortex-ember-breath {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1.05);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(-180deg) scale(0.95);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(-360deg) scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+.bg-cortex-aura {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #000000;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.55) 85%, rgba(0, 0, 0, 0.9) 100%),
+    linear-gradient(180deg, #040103 0%, #000000 55%, #020101 100%);
+  background-attachment: fixed;
+}
+
+.bg-cortex-aura::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180%;
+  aspect-ratio: 1 / 1;
+  z-index: 0;
+  background-image: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    hsl(4 99% 38% / 0.22) 35deg,
+    hsl(24 99% 47% / 0.20) 80deg,
+    transparent 130deg,
+    transparent 170deg,
+    hsl(32 39% 76% / 0.10) 210deg,
+    hsl(4 99% 38% / 0.18) 255deg,
+    transparent 300deg,
+    hsl(24 99% 47% / 0.14) 335deg,
+    transparent 360deg
+  );
+  filter: blur(80px);
+  animation: cortex-slow-drift 90s linear infinite;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: transform;
+  border-radius: 50%;
+}
+
+.bg-cortex-aura::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160%;
+  aspect-ratio: 1 / 1;
+  z-index: 1;
+  pointer-events: none;
+  background-image: conic-gradient(
+    from 90deg at 50% 50%,
+    transparent 0deg,
+    hsl(24 99% 47% / 0.12) 60deg,
+    transparent 120deg,
+    hsl(4 99% 38% / 0.15) 190deg,
+    transparent 250deg,
+    hsl(32 39% 76% / 0.07) 310deg,
+    transparent 360deg
+  );
+  filter: blur(110px);
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: transform;
+  border-radius: 50%;
+  animation: cortex-ember-breath 65s linear infinite;
+}
+
+.bg-cortex-aura > * {
+  position: relative;
+  z-index: 2;
+}
+
+.bg-cortex-aura::before,
+.bg-cortex-aura::after {
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, black 0%, black 55%, transparent 95%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 50%, black 0%, black 55%, transparent 95%);
+}
+
+.bg-cortex-aura {
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 70% 50% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.55) 85%, rgba(0, 0, 0, 0.9) 100%),
+    linear-gradient(180deg, #040103 0%, #000000 55%, #020101 100%);
+  background-size: 200px 200px, auto, auto;
+  background-repeat: repeat, no-repeat, no-repeat;
+}
+
+@keyframes cortex-abyss-drift {
+  0%, 100% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) rotate(180deg) scale(1.05);
+  }
+}
+
+@keyframes cortex-abyss-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+.bg-cortex-abyss {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: #000000;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 55% 40% at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.75) 70%, rgba(0, 0, 0, 0.98) 100%),
+    radial-gradient(ellipse 120% 80% at 50% 120%, hsl(4 99% 12% / 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 50% -20%, hsl(17 60% 10% / 0.45) 0%, transparent 65%),
+    linear-gradient(180deg, #050203 0%, #000000 50%, #020101 100%);
+  background-size: 180px 180px, auto, auto, auto, auto;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-attachment: fixed;
+}
+
+.bg-cortex-abyss::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  aspect-ratio: 1 / 1;
+  z-index: 0;
+  background-image: conic-gradient(
+    from 45deg at 50% 50%,
+    transparent 0deg,
+    hsl(4 99% 38% / 0.10) 45deg,
+    hsl(24 99% 35% / 0.08) 100deg,
+    transparent 150deg,
+    transparent 210deg,
+    hsl(17 84% 25% / 0.09) 255deg,
+    hsl(4 99% 30% / 0.11) 300deg,
+    transparent 360deg
+  );
+  filter: blur(90px);
+  animation: cortex-abyss-drift 120s linear infinite;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: transform;
+  border-radius: 50%;
+  mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, black 0%, black 45%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, black 0%, black 45%, transparent 90%);
+}
+
+.bg-cortex-abyss::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  aspect-ratio: 1 / 1;
+  z-index: 1;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    hsl(24 99% 47% / 0.09) 0%,
+    hsl(4 99% 38% / 0.07) 35%,
+    transparent 70%
+  );
+  filter: blur(70px);
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: transform, opacity;
+  border-radius: 50%;
+  animation: cortex-abyss-pulse 12s ease-in-out infinite;
+}
+
+.bg-cortex-abyss > * {
+  position: relative;
+  z-index: 2;
+}
+
 @layer base {
   :root {
     /* LIGHT THEME (Minimalist/Print look) */

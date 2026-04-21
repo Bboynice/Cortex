@@ -1,5 +1,5 @@
 import AuthCard from "@/src/components/auth/AuthCard";
-import LoginFrom from "@/src/components/auth/LoginFrom";
+import LoginForm from "@/src/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (
@@ -10,7 +10,7 @@ export default function LoginPage() {
       footerHref="/register"
       footerLabel="Create one"
     >
-      <LoginFrom />
+      <LoginForm />
     </AuthCard>
   );
 }

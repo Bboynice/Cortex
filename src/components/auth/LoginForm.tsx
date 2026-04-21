@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { loginAction } from "@/src/app/(auth)/actions";
 import SocialAuth from "@/src/components/auth/SocialAuth";
+import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
 
 export default function LoginFrom() {
   return (
@@ -30,7 +31,7 @@ export default function LoginFrom() {
         />
         <button
           type="submit"
-          className="w-full rounded-xl bg-white px-4 py-3 text-sm font-medium text-black transition hover:opacity-90"
+          className="w-full rounded-xl bg-white text-black px-4 py-3 text-sm font-medium transition hover:opacity-90"
         >
           Log In
         </button>
