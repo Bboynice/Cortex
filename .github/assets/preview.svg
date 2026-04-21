@@ -36,38 +36,31 @@
   <circle cx="1200" cy="160" r="380" fill="url(#pageGlow2)"/>
   <circle cx="1280" cy="720" r="300" fill="url(#pageGlow)" opacity="0.6"/>
 
-  <!-- Outer app frame -->
   <rect x="16" y="16" width="1368" height="828" rx="22" fill="#060606" stroke="#222222"/>
   <rect x="17" y="17" width="1366" height="56" rx="21" fill="#0b0b0b"/>
 
-  <!-- Floating nav pill (from Header.tsx) -->
   <g transform="translate(560, 28)">
     <rect x="-4" y="-4" width="288" height="40" rx="20" fill="#F16001" opacity="0.12"/>
     <rect width="280" height="32" rx="16" fill="#0a0a0a" stroke="#333333"/>
     <rect x="8" y="6" width="74" height="20" rx="10" fill="#1a0d05"/>
-    <text x="45" y="20" text-anchor="middle" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif" font-size="11" font-weight="600">Cortex</text>
+    <text x="45" y="20" text-anchor="middle" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, Inter, sans-serif" font-size="11" font-weight="600">Cortex</text>
     <text x="120" y="20" text-anchor="middle" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Playground</text>
     <text x="200" y="20" text-anchor="middle" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Contact</text>
     <circle cx="260" cy="16" r="8" fill="#121212" stroke="#333333"/>
   </g>
 
-  <!-- Window controls -->
   <g transform="translate(40, 32)">
     <circle cx="0" cy="10" r="6" fill="#C10801"/>
     <circle cx="20" cy="10" r="6" fill="#F16001"/>
     <circle cx="40" cy="10" r="6" fill="#E3C9A6"/>
   </g>
 
-  <!-- Right-side mini user pill -->
   <g transform="translate(1240, 28)">
     <rect width="120" height="32" rx="16" fill="#0a0a0a" stroke="#333333"/>
     <circle cx="16" cy="16" r="8" fill="url(#primaryBtn)"/>
     <text x="32" y="20" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">illia@cortex</text>
   </g>
 
-  <!-- ============================= LEFT COLUMN ============================= -->
-
-  <!-- Task / challenge card -->
   <g transform="translate(40, 96)">
     <rect width="820" height="100" rx="16" fill="#0a0a0a" stroke="#333333"/>
     <g transform="translate(20, 18)">
@@ -76,7 +69,6 @@
 
       <text y="46" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="18" font-weight="600">Sum the even numbers in an array without built-in helpers</text>
     </g>
-    <!-- requirement pills -->
     <g transform="translate(20, 72)" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">
       <g>
         <rect width="122" height="20" rx="10" fill="#121212" stroke="#333333"/>
@@ -91,7 +83,6 @@
         <text x="10" y="14" fill="#A7A7A7">Estimated time: 15 min</text>
       </g>
     </g>
-    <!-- top-right generate button -->
     <g transform="translate(670, 24)">
       <rect width="130" height="52" rx="14" fill="url(#primaryBtn)"/>
       <text x="65" y="31" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" letter-spacing="2">GENERATE</text>
@@ -99,10 +90,8 @@
     </g>
   </g>
 
-  <!-- Editor window -->
   <g transform="translate(40, 212)">
     <rect width="820" height="448" rx="18" fill="#0a0a0a" stroke="#333333"/>
-    <!-- tab bar -->
     <rect x="1" y="1" width="818" height="42" rx="17" fill="#121212"/>
     <rect x="1" y="28" width="818" height="14" fill="#121212"/>
 
@@ -113,10 +102,10 @@
     </g>
     <g transform="translate(720, 12)">
       <rect width="84" height="24" rx="12" fill="url(#primaryBtn)"/>
-      <text x="42" y="16" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">¶  RUN</text>
+      <text x="42" y="16" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" letter-spacing="1.5">RUN</text>
+      <polygon points="16,10 16,22 26,16" fill="#FFFFFF"/>
     </g>
 
-    <!-- gutter -->
     <rect x="1" y="43" width="48" height="404" fill="#060606"/>
     <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#646464" text-anchor="end">
       <text x="38" y="74">1</text>
@@ -133,7 +122,6 @@
       <text x="38" y="338">12</text>
     </g>
 
-    <!-- code -->
     <g transform="translate(64, 72)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13">
       <text y="0" fill="#A7A7A7"><tspan fill="#E3C9A6">function </tspan><tspan fill="#F9F9F9">sumEvenNumbers</tspan>(arr) {</text>
       <text y="24" fill="#A7A7A7">  <tspan fill="#E3C9A6">if</tspan> (!<tspan fill="#38bdf8">Array</tspan>.isArray(arr)) <tspan fill="#E3C9A6">return</tspan> 0;</text>
@@ -149,7 +137,6 @@
       <text y="288" fill="#A7A7A7"><tspan fill="#646464">// Runs in-browser via new Function; Python/Rust via Piston</tspan></text>
     </g>
 
-    <!-- terminal -->
     <rect x="1" y="348" width="818" height="99" rx="0" fill="#060606"/>
     <rect x="1" y="348" width="818" height="26" fill="#0a0a0a"/>
     <g transform="translate(16, 356)">
@@ -163,23 +150,17 @@
     </g>
   </g>
 
-  <!-- ============================= RIGHT COLUMN ============================= -->
-
-  <!-- Insights panel header -->
   <g transform="translate(880, 96)">
-    <text y="18" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Inter, sans-serif" font-size="16" font-weight="600">AI Insights</text>
+    <text y="18" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, Inter, sans-serif" font-size="16" font-weight="600">AI Insights</text>
     <g transform="translate(112, 0)">
-      <circle cx="6" cy="12" r="4" fill="#F16001">
-      </circle>
-      <text x="18" y="16" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" letter-spacing="1.5">LIVE · ANALYSED 2s AGO</text>
+      <circle cx="6" cy="12" r="4" fill="#F16001"/>
+      <text x="18" y="16" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" letter-spacing="1.5">LIVE &#183; ANALYSED 2s AGO</text>
     </g>
     <rect y="38" width="480" height="1" fill="#222222"/>
     <rect y="38" width="120" height="1" fill="url(#ruleAccent)"/>
   </g>
 
-  <!-- Score cards row -->
   <g transform="translate(880, 148)">
-    <!-- Code Quality -->
     <g>
       <rect width="152" height="108" rx="14" fill="#0a0a0a" stroke="#333333"/>
       <text x="16" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">Code quality</text>
@@ -189,7 +170,6 @@
       <rect x="16" y="74" width="113" height="6" rx="3" fill="url(#scoreOk)"/>
       <text x="16" y="96" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Clear, readable, idiomatic.</text>
     </g>
-    <!-- Performance -->
     <g transform="translate(164, 0)">
       <rect width="152" height="108" rx="14" fill="#0a0a0a" stroke="#333333"/>
       <text x="16" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">Performance</text>
@@ -199,7 +179,6 @@
       <rect x="16" y="74" width="106" height="6" rx="3" fill="url(#scoreWarm)"/>
       <text x="16" y="96" fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10">Linear pass, no waste.</text>
     </g>
-    <!-- Best practices -->
     <g transform="translate(328, 0)">
       <rect width="152" height="108" rx="14" fill="#0a0a0a" stroke="#333333"/>
       <text x="16" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11" font-weight="500">Best practices</text>
@@ -211,11 +190,9 @@
     </g>
   </g>
 
-  <!-- Feedback list -->
   <g transform="translate(880, 280)">
     <text y="14" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" letter-spacing="1.6">FEEDBACK</text>
 
-    <!-- praise -->
     <g transform="translate(0, 24)">
       <rect width="480" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
       <rect width="4" height="72" rx="2" fill="#22c55e"/>
@@ -229,7 +206,6 @@
       </g>
     </g>
 
-    <!-- improvement -->
     <g transform="translate(0, 108)">
       <rect width="480" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
       <rect width="4" height="72" rx="2" fill="#F16001"/>
@@ -243,7 +219,6 @@
       </g>
     </g>
 
-    <!-- issue -->
     <g transform="translate(0, 192)">
       <rect width="480" height="72" rx="12" fill="#0a0a0a" stroke="#333333"/>
       <rect width="4" height="72" rx="2" fill="#C10801"/>
@@ -258,22 +233,21 @@
     </g>
   </g>
 
-  <!-- Overall suggestion + Apply fix -->
   <g transform="translate(880, 572)">
     <rect width="480" height="80" rx="14" fill="#0a0a0a" stroke="#333333"/>
     <text x="18" y="26" fill="#A7A7A7" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="10" font-weight="600" letter-spacing="1.6">OVERALL SUGGESTION</text>
-    <text x="18" y="50" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12">Tighten the integer check, then you're done </text>
+    <text x="18" y="50" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12">Tighten the integer check, then you&apos;re done &#8212;</text>
     <text x="18" y="68" fill="#F9F9F9" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="12">no structural changes needed.</text>
   </g>
 
   <g transform="translate(880, 668)">
     <rect x="-2" y="-2" width="484" height="52" rx="16" fill="#F16001" opacity="0.16"/>
     <rect width="480" height="48" rx="14" fill="url(#primaryBtn)"/>
-    <text x="240" y="30" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" letter-spacing="2.4">APPLY FIX  ·  AI REWRITE</text>
+    <text x="240" y="30" text-anchor="middle" fill="#FFFFFF" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="13" font-weight="700" letter-spacing="2.4">APPLY FIX &#183; AI REWRITE</text>
     <circle cx="44" cy="24" r="5" fill="#FFFFFF" opacity="0.85"/>
   </g>
 
   <g transform="translate(880, 736)">
-    <text fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Every keystroke is debounced and hashed  the model only reanalyses when your code genuinely changes.</text>
+    <text fill="#646464" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="11">Every keystroke is debounced and hashed &#8212; the model only reanalyses when your code genuinely changes.</text>
   </g>
 </svg>
