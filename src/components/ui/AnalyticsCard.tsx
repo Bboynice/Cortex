@@ -1,34 +1,45 @@
 // src/components/ui/AnalyticsCard.tsx
+"use client";
+
 import { Info } from "lucide-react";
 import { motion } from "framer-motion";
+import ProgressBar from "./ProgressBar";
 
 interface AnalyticsCardProps {
   title: string;
   score: number;
   maxScore?: number;
   description: string;
-  color?: "green" | "orange" | "blue"; // Limit to your theme colors
+  /** Optional override. If omitted, color is derived from the score (green / yellow / red, matching Badge). */
+  color?: string;
   infoTooltip?: string;
   loading?: boolean;
 }
 
-const colorMap = {
-  green: { text: "text-green-500", bg: "bg-green-500" },
-  orange: { text: "text-orange-500", bg: "bg-orange-500" },
-  blue: { text: "text-blue-500", bg: "bg-blue-500" },
-};
+// Matches Badge variants — same green / yellow / red tokens (tailwind *-700).
+const SCORE_COLORS = {
+  success: "#15803d", // green-700
+  warning: "#a16207", // yellow-700
+  error: "#b91c1c",   // red-700
+} as const;
+
+function colorForScore(score: number, max: number): string {
+  const pct = (score / max) * 100;
+  if (pct >= 80) return SCORE_COLORS.success;
+  if (pct >= 50) return SCORE_COLORS.warning;
+  return SCORE_COLORS.error;
+}
 
 export default function AnalyticsCard({
   title,
   score,
   maxScore = 100,
   description,
-  color = "green",
+  color,
   infoTooltip,
   loading = false,
 }: AnalyticsCardProps) {
-  const percentage = Math.min(100, Math.max(0, (score / maxScore) * 100));
-  const theme = colorMap[color];
+  const resolvedColor = color ?? colorForScore(score, maxScore);
 
   return (
     <div className={`flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm ${loading ? "blur-sm opacity-50 shadow-white" : ""}`}>
@@ -47,21 +58,11 @@ export default function AnalyticsCard({
       </div>
 
       <div className="flex items-baseline gap-1 mb-3">
-        <motion.span className={`text-3xl font-bold ${loading ? "backdrop-blur-lg" : ""} ${theme.text}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }}> {score}</motion.span>
+        <motion.span className={`text-3xl font-bold ${loading ? "backdrop-blur-lg" : ""}`} style={{ color: resolvedColor }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }}> {score}</motion.span>
         <span className="text-muted-foreground">/{maxScore}</span>
       </div>
 
-      {/* Simple Progress Bar */}
-      <div className="h-2 w-full rounded-full bg-muted mb-2 overflow-hidden">
-        <motion.div
-          className={`h-full rounded-full transition-all duration-500 ${theme.bg}`}
-          style={{ width: `${percentage}%` }}
-          initial={{ width: 0 }}
-          animate={{ width: `${percentage}%` }}
-          transition={{ duration: 1.5, ease: "easeInOut" }}
-        >
-        </motion.div>
-      </div>
+      <ProgressBar value={score} max={maxScore} fill={resolvedColor} className="mb-2" />
 
       <motion.p className="text-sm text-muted-foreground" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }}>{description}</motion.p>
     </div>

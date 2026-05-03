@@ -55,7 +55,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
           aria-modal="true"
           aria-label={modalTitle}
         >
-          <span className="relative flex w-full flex-col gap-3 overflow-hidden rounded-lg border border-border bg-foreground p-5 shadow-2xl">
+          <span className="relative flex w-full flex-col gap-3 overflow-hidden rounded-lg border border-border/80 bg-foreground p-5 shadow-2xl">
             <button
               type="button"
               onClick={onClose}

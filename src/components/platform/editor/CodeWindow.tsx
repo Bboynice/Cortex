@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import CodeEditor from '@/src/components/platform/editor/CodeEditor';
-import { ErrorIndicator } from '@/src/components/ui/errorIndicator';
+import { ErrorIndicator } from '@/src/components/ui/ErrorIndicator';
 import TerminalOutput from '@/src/components/platform/editor/TerminalOutput';
 import { useModalStore } from '@/src/hooks/use-modal-store';
 

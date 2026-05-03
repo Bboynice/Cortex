@@ -99,24 +99,24 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           title="Code Quality" 
                           score={codeQuality} 
                           description={codeQualitySummary} 
-                          color="green" 
                           infoTooltip={codeQualityTooltip}
+                          color="green"
                           loading={status === "loading" ? true : false}
                         />
                         <AnalyticsCard 
                           title="Performance" 
                           score={performance} 
                           description={performanceSummary} 
-                          color="orange" 
                           infoTooltip={performanceTooltip}
+                          color="yellow"
                           loading={status === "loading" ? true : false}
                         />
                         <AnalyticsCard 
                           title="Best Practices" 
                           score={bestPractices} 
                           description={bestPracticesSummary} 
-                          color="blue" 
                           infoTooltip={bestPracticesTooltip}
+                          color="blue"
                           loading={status === "loading" ? true : false}
                         />
           

@@ -1,6 +1,6 @@
 // src/app/app/layout.tsx
 import Header from "@/src/components/platform/navigation/Header/Header"; 
-import SavePopUp from "@/src/components/ui/savePopup";
+import SavePopUp from "@/src/components/ui/SavePopup";
 import ToastContainer from "@/src/components/ui/ToastContainer";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

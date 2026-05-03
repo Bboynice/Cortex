@@ -3,7 +3,7 @@
 import { generateCodingChallenge } from '../playground/actions';
 import { useEffect, useRef, useState } from 'react';
 import MyButton from '@/src/components/ui/GlowButton/GlowButton';
-import DropdownMenu from '@/src/components/ui/dropdown';
+import DropdownMenu from '@/src/components/ui/Dropdown';
 import { Badge } from '@/src/components/ui/Badge';
 import TaskInstructions from '@/src/components/platform/editor/TaskInstructions';
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
