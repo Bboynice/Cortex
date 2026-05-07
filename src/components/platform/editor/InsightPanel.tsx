@@ -42,13 +42,13 @@ interface InsightPanelProps {
 export default function InsightPanel({ analysis, status = "idle", errorMessage, hasChallenge = true, onApplyFix, isApplyingFix = false, applyFixError }: InsightPanelProps) {
   if (!hasChallenge) {
     return (
-      <section className="w-full flex flex-col bg-background px-4 pb-4">
-        <div className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border border-1 border-border bg-card/40 px-6 py-10 text-center">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+      <section className="w-full flex flex-col dark:bg-background px-4 pb-4">
+        <div className="flex w-full flex-col items-center justify-center gap-3 rounded-xl border border-1 dark:border-border dark:bg-card/40 px-6 py-10 text-center">
+          <h3 className="text-sm font-semibold uppercase tracking-wider dark:text-muted-foreground">
             No challenge yet
           </h3>
-          <p className="max-w-md text-sm text-muted-foreground">
-            Click <span className="font-semibold text-content">Generate</span> to create a challenge. Your code will be analyzed automatically once it&apos;s ready.
+          <p className="max-w-md text-sm dark:text-muted-foreground">
+            Click <span className="font-semibold dark:text-content">Generate</span> to create a challenge. Your code will be analyzed automatically once it&apos;s ready.
           </p>
         </div>
       </section>
@@ -75,16 +75,16 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
     "Start typing your solution — I’ll analyze it periodically and surface improvements here.";
 
   return (
-    <section className="w-full flex flex-col bg-background space-y-4 px-4 pb-4">
+    <section className="w-full flex flex-col dark:bg-background space-y-4 px-4 pb-4">
       <div className="flex items-center gap-2 px-2">
-        <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="ml-auto flex items-center gap-2 text-xs dark:text-muted-foreground">
           {status === "loading" && (
             <>
               <CortexLoader size={5} color="" />
               <span>Analyzing…</span>
             </>
           )}
-          {status === "error" && <span className="text-red-400">{errorMessage || "Analysis failed"}</span>}
+          {status === "error" && <span className="dark:text-red-400">{errorMessage || "Analysis failed"}</span>}
           {status !== "loading" && status !== "error" && analysis?.analyzedAt && (
             <span>
               Updated {new Date(analysis.analyzedAt).toLocaleTimeString()}
@@ -122,11 +122,11 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
           
       </div>
 
-      <div className={`w-full rounded-xl border border-border bg-card/50 transition-all ${status === "loading" ? "blur-sm opacity-50 shadow-white" : ""}`}>
+      <div className={`w-full rounded-xl border dark:border-border dark:bg-card/50 transition-all ${status === "loading" ? "blur-sm opacity-50 dark:shadow-white" : ""}`}>
         <div className="flex items-start justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-2">
-            <Lightbulb className="text-yellow-400" size={18} aria-hidden="true" />
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider opacity-80">
+            <Lightbulb className="dark:text-yellow-400" size={18} aria-hidden="true" />
+            <h3 className="text-sm font-semibold dark:text-muted-foreground uppercase tracking-wider opacity-80">
               AI Suggestion
             </h3>
           </div>
@@ -135,7 +135,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
             type="button"
             onClick={onApplyFix}
             disabled={!onApplyFix || isApplyingFix || !analysis?.overallSuggestion || status === "loading"}
-            className="inline-flex shrink-0 items-center gap-2 rounded-md px-2 py-1 text-xs font-semibold text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent"
+            className="inline-flex shrink-0 items-center gap-2 rounded-md px-2 py-1 text-xs font-semibold dark:text-orange-400 dark:hover:bg-orange-500/10 dark:hover:text-orange-300 disabled:cursor-not-allowed disabled:opacity-50 dark:disabled:hover:bg-transparent"
             aria-label="Apply fix"
           >
             {isApplyingFix ? (
@@ -153,11 +153,11 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
         </div>
 
         <div className="px-4 pb-4">
-          <p className="text-sm text-muted-foreground dark:text-muted leading-relaxed whitespace-pre-wrap break-words">
+          <p className="text-sm dark:text-muted leading-relaxed whitespace-pre-wrap break-words">
             {suggestion}
           </p>
           {applyFixError && (
-            <p className="mt-2 text-xs text-red-400">{applyFixError}</p>
+            <p className="mt-2 text-xs dark:text-red-400">{applyFixError}</p>
           )}
         </div>
       </div>

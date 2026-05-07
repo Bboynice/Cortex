@@ -23,7 +23,7 @@ export default function TaskInstructions({
   isGenerating = false,
 }: TaskInstructionsProps) {
   return (
-    <div className="m-4 flex w-1/3 shrink-0 self-stretch flex-col items-center overflow-hidden rounded-lg border-1 border-border bg-surface text-content">
+    <div className="m-4 flex w-1/3 shrink-0 self-stretch flex-col items-center overflow-hidden rounded-lg border-1 dark:border-border dark:bg-surface dark:text-content">
         <div className={`w-full h-12 flex justify-center items-center pl-4 pr-4`}>
         <div className="w-full flex min-w-0 justify-between items-center gap-2">
           <div className="dark:text-muted-foreground h-auto py-2 shrink-0">AI Task Generator</div>
@@ -35,7 +35,7 @@ export default function TaskInstructions({
         </div>
        
         <div className="w-full flex-1 min-h-0 overflow-auto p-4">
-        <div className="w-full h-auto p-4 rounded-md border border-border bg-cortex-heat text-content">
+        <div className="w-full h-auto p-4 rounded-md border dark:border-border dark:bg-cortex-heat dark:text-content">
           <p className="text-lg font-semibold dark:text-white">Challenge:</p>
          {isGenerating ?  <CortexLoader size={3} /> : <p className="dark:text-white/70">{challenge}</p>}
           <p className="text-lg font-semibold dark:text-white mt-3">Requirements:</p>
@@ -50,14 +50,14 @@ export default function TaskInstructions({
         </div>
       </div>
       <div className="w-full justify-start items-center flex flex-col w-full h-auto p-4">
-        <div className="h-auto w-full flex justify-center items-center flex-col gap-4 dark:border-border border-b border-border pb-4">
+        <div className="h-auto w-full flex justify-center items-center flex-col gap-4 border-b dark:border-border pb-4">
           {hints.map((hint, idx) => (
             <div key={`${idx}-${hint.title}`} className="w-full flex h-auto justify-center items-center flex-row gap-4">
                   <svg
                     width="32"
                     height="32"
                     viewBox="0 0 24 24"
-                    className="shrink-0 text-primary"
+                    className="shrink-0 dark:text-primary"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -75,7 +75,7 @@ export default function TaskInstructions({
                     ) : (
                       <>
                         <h1 className="text-lg font-semi-bold dark:text-muted-foreground">{hint.title}</h1>
-                        <p className="text-sm text-muted">{hint.description}</p>
+                        <p className="text-sm dark:text-muted">{hint.description}</p>
                       </>
                     )}
                   </div>
@@ -84,7 +84,7 @@ export default function TaskInstructions({
         </div>
         <div className="flex w-full justify-start items-center h-auto items-center flex-row gap-1 py-2">
           <svg
-            className="h-[1.15em] w-[1.15em] text-content/70"
+            className="h-[1.15em] w-[1.15em] dark:text-content/70"
             viewBox="0 0 24 24"
             aria-hidden="true"
             fill="none"

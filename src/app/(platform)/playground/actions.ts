@@ -5,12 +5,26 @@ import { openai } from '@/src/lib/ai-client';
 export async function generateCodingChallenge({
     language = "javascript",
     difficulty = "easy",
+    topic,
 }: {
     language?: "javascript" | "python" | "rust";
     difficulty?: "easy" | "medium" | "hard";
+    topic?: string;
 } = {}) {
     try {
         const seed = crypto.randomUUID();
+
+        // Treat empty / whitespace / sentinel values as "no topic chosen".
+        const normalizedTopic = topic?.trim();
+        const hasTopic =
+            !!normalizedTopic &&
+            normalizedTopic.toLowerCase() !== "any" &&
+            normalizedTopic.toLowerCase() !== "random";
+
+        const taskLine = hasTopic
+            ? `Create a programming task in ${language} on the topic "${normalizedTopic}". Difficulty: ${difficulty}.`
+            : `Create a self-contained programming task in ${language}. Difficulty: ${difficulty}. Pick a classic exercise category (algorithms, data manipulation, parsing, math, strings, arrays, recursion).`;
+
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
             response_format: { type: "json_object" },
@@ -23,13 +37,15 @@ export async function generateCodingChallenge({
                 {
                     role: "user",
                     content: [
-                        `Seed: ${seed} (use this to pick a different task each time you generate a challenge)`,
-                        `Create a random programming task in ${language}. Difficulty: ${difficulty}. Use only standard language features (no frameworks/libs).`,
+                        `Seed: ${seed} (use this to vary the specific task each call; do NOT use it to pick exotic topics)`,
+                        taskLine,
                         "",
                         'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number }',
                         "",
                         "Constraints:",
-                        "- No UI/web/framework tasks",
+                        "- Use ONLY standard language features. No third-party libraries, no frameworks, no package imports of any kind.",
+                        "- No UI, web, networking, file-I/O, or framework tasks.",
+                        "- The task must be solvable with a single pure function the user writes in the editor.",
                         '- requirements: 2-4 items, each "Label: value", no bullets/numbering',
                         "- hints: EXACTLY 3 items; each has title + description; keep both short; no bullets/numbering",
                         "- difficulty guide: easy(simple loops/if), medium(edge cases/parsing), hard(efficient algorithm)",

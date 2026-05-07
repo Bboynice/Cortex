@@ -51,7 +51,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
   };
 
   return (
-    <div className="mt-4 mr-4 mb-4 flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 border-border bg-foreground text-content">
+    <div className="mt-4 mr-4 mb-4 flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content">
       <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border h-12">
         <div className="flex w-full min-w-0 items-center justify-between h-12 px-4">
           <div className="flex items-center gap-2 ">
@@ -60,13 +60,13 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
               <ErrorIndicator color="yellow-500" size={3} />
               <ErrorIndicator color="green-500" size={3} />
             </div>
-            <span className="ml-2 font-mono text-sm font-semibold text-white dark:text-content dark:bg-content/10 p-2 border-1 border-border rounded-md">solution.{languageToExtension[language]}</span>
+            <span className="ml-2 font-mono text-sm font-semibold dark:text-content dark:bg-content/10 p-2 border-1 dark:border-border rounded-md">solution.{languageToExtension[language]}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => onRun?.(code)}
-              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-accent px-4 text-sm font-semibold text-content hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] dark:bg-accent px-4 text-sm font-semibold dark:text-content hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
@@ -76,7 +76,7 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
             <button
               type="button"
               onClick={handleSubmit}
-              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] dark:bg-primary px-4 text-sm font-semibold dark:text-primary-foreground hover:brightness-110 active:brightness-95"
             >
               <svg
                 width="16"

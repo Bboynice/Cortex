@@ -4,13 +4,15 @@ import { generateCodingChallenge } from '../playground/actions';
 import { useEffect, useRef, useState } from 'react';
 import MyButton from '@/src/components/ui/GlowButton/GlowButton';
 import DropdownMenu from '@/src/components/ui/Dropdown';
-import { Badge } from '@/src/components/ui/Badge';
 import TaskInstructions from '@/src/components/platform/editor/TaskInstructions';
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
 import InsightPanel, { type InsightAnalysis } from '@/src/components/platform/editor/InsightPanel';
+import { useSearchParams } from 'next/navigation';
 
-export default function AppHome() {
+export default function PlaygroundPage() {
+  const searchParams = useSearchParams();
+
   type Language = "javascript" | "python" | "rust";
 
   const [challenge, setChallenge] = useState<string | undefined>(undefined);
@@ -135,30 +137,47 @@ export default function AppHome() {
     setEditorLanguage(next);
   }
 
-  async function handleGenerate() {
-    // Reset editor only when Generate is clicked (not when dropdown changes)
-    setEditorLanguage(language);
-    setCode(startCode[language]);
+  type GenerateOverrides = {
+    language?: Language;
+    difficulty?: "easy" | "medium" | "hard";
+    topic?: string;
+  };
+
+  async function handleGenerate(overrides: GenerateOverrides = {}) {
+    const nextLanguage = overrides.language ?? language;
+    const nextDifficulty = overrides.difficulty ?? difficulty;
+
+    // Sync UI state so dropdowns + editor reflect what we're generating for.
+    if (overrides.language && overrides.language !== language) {
+      setLanguage(overrides.language);
+    }
+    if (overrides.difficulty && overrides.difficulty !== difficulty) {
+      setDifficulty(overrides.difficulty);
+    }
+    setEditorLanguage(nextLanguage);
+    setCode(startCode[nextLanguage]);
 
     setLoading(true);
-    
-    // Call the server action directly
-    const result = await generateCodingChallenge({ language, difficulty });
-    
+
+    const result = await generateCodingChallenge({
+      language: nextLanguage,
+      difficulty: nextDifficulty,
+      topic: overrides.topic,
+    });
+
     if (result.success) {
       setChallenge(result.challenge ?? "No challenge found");
       setRequirements(result.requirements ?? []);
       setHints(result.hints ?? []);
       setEstimatedTime(result.estimatedTime ?? 0);
 
-      setGeneratedLanguageLabel(languageChoices.find((c) => c.value === language)?.label ?? undefined);
-      setGeneratedDifficultyLabel(difficultyChoices.find((c) => c.value === difficulty)?.label ?? undefined);
+      setGeneratedLanguageLabel(languageChoices.find((c) => c.value === nextLanguage)?.label ?? undefined);
+      setGeneratedDifficultyLabel(difficultyChoices.find((c) => c.value === nextDifficulty)?.label ?? undefined);
 
-      // Reset last-analyzed hash so the freshly generated challenge is analyzed immediately.
       lastSuccessfulHashRef.current = null;
       latestContextRef.current = {
-        code: startCode[language],
-        language,
+        code: startCode[nextLanguage],
+        language: nextLanguage,
         challenge: result.challenge ?? undefined,
         requirements: result.requirements ?? [],
       };
@@ -166,8 +185,24 @@ export default function AppHome() {
     } else {
       alert("Error generating challenge");
     }
-    
+
     setLoading(false);
+  }
+
+  function parseLangParam(raw: string | null): Language | undefined {
+    if (!raw) return undefined;
+    const v = raw.toLowerCase();
+    if (v === "js" || v === "javascript") return "javascript";
+    if (v === "py" || v === "python") return "python";
+    if (v === "rs" || v === "rust") return "rust";
+    return undefined;
+  }
+
+  function parseDiffParam(raw: string | null): "easy" | "medium" | "hard" | undefined {
+    if (!raw) return undefined;
+    const v = raw.toLowerCase();
+    if (v === "easy" || v === "medium" || v === "hard") return v;
+    return undefined;
   }
 
   async function handleApplyFix() {
@@ -227,6 +262,21 @@ export default function AppHome() {
     setLogs(logLines);
   };
 
+  // Trigger generation when the dashboard navigates here with ?autoGenerate=...
+  useEffect(() => {
+    if (!searchParams.get('autoGenerate')) return;
+
+    const overrides: GenerateOverrides = {
+      language: parseLangParam(searchParams.get('lang')),
+      difficulty: parseDiffParam(searchParams.get('diff')),
+      topic: searchParams.get('title') || undefined,
+    };
+
+    handleGenerate(overrides);
+    window.history.replaceState({}, '', '/playground');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   // Analyze code on an interval, but only once a challenge has been generated.
   useEffect(() => {
     if (!challenge) return;
@@ -247,7 +297,7 @@ export default function AppHome() {
         <div className="flex h-auto w-full items-center justify-start dark:text-content">
           <div className="flex h-auto w-1/3 flex-row items-center justify-center gap-2">
             <div className="flex h-auto w-[90%] flex-row items-center justify-between gap-2">
-              <MyButton effect="glow" onClick={handleGenerate}>
+              <MyButton effect="glow" onClick={() => handleGenerate()}>
                 {loading ? "Generating..." : "Generate"}
               </MyButton>
               <DropdownMenu
