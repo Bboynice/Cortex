@@ -31,6 +31,8 @@ export default function PlaygroundPage() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isApplyingFix, setIsApplyingFix] = useState(false);
   const [applyFixError, setApplyFixError] = useState<string | null>(null);
+  const [testCases, setTestCases] = useState<{ input: string; output: string }[] | undefined>(undefined);
+
 
   const languageChoices = [
     { value: "javascript" as const, label: "JavaScript" },
@@ -170,7 +172,7 @@ export default function PlaygroundPage() {
       setRequirements(result.requirements ?? []);
       setHints(result.hints ?? []);
       setEstimatedTime(result.estimatedTime ?? 0);
-
+      setTestCases(result.testCases ?? [{ input: "Error generating test cases", output: "Error generating test cases" }]);
       setGeneratedLanguageLabel(languageChoices.find((c) => c.value === nextLanguage)?.label ?? undefined);
       setGeneratedDifficultyLabel(difficultyChoices.find((c) => c.value === nextDifficulty)?.label ?? undefined);
 
@@ -325,6 +327,8 @@ export default function PlaygroundPage() {
             languageLabel={generatedLanguageLabel}
             difficultyLabel={generatedDifficultyLabel}
             isGenerating={loading}
+            isGenerated={Boolean(challenge)}
+            testCases={testCases}
           />
           <CodeWindow language={editorLanguage} code={code} onChange={setCode} onRun={handleRun} logs={logs} />
         </div>
@@ -334,7 +338,7 @@ export default function PlaygroundPage() {
         analysis={analysis}
         status={analysisStatus}
         errorMessage={analysisError}
-        hasChallenge={Boolean(challenge)}
+        hasChallenge={Boolean(challenge)}   
         onApplyFix={handleApplyFix}
         isApplyingFix={isApplyingFix}
         applyFixError={applyFixError}

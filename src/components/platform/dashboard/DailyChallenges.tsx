@@ -61,7 +61,7 @@ export default function DailyChallenges() {
                     />
                 ))}
             </div>
-            <div className="shrink-0 pt-3 w-full">
+            <div className="shrink-0 pt-6 w-full">
                 <GlowButton
                     color="primary"
                     roundness={12}

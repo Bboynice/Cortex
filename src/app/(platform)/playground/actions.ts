@@ -40,7 +40,7 @@ export async function generateCodingChallenge({
                         `Seed: ${seed} (use this to vary the specific task each call; do NOT use it to pick exotic topics)`,
                         taskLine,
                         "",
-                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number }',
+                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "testCases": { "input": string, "output": string }[] }',
                         "",
                         "Constraints:",
                         "- Use ONLY standard language features. No third-party libraries, no frameworks, no package imports of any kind.",
@@ -67,6 +67,14 @@ export async function generateCodingChallenge({
             : [];
         const hintsRaw = Array.isArray((parsed as any)?.hints) ? (parsed as any).hints : [];
         const estimatedTimeRaw = (parsed as any)?.estimatedTime;
+        const testCasesRaw = (parsed as any)?.testCases;
+        const testCases = testCasesRaw
+            .map((t: any) => ({
+                input: typeof t?.input === "string" ? t.input : String(t?.input ?? ""),
+                output: typeof t?.output === "string" ? t.output : String(t?.output ?? ""),
+            }))
+            .filter((t: { input: string; output: string }) => t.input || t.output)
+            .slice(0, 5);
 
         const requirements = requirementsRaw
             .map((r: unknown) => (typeof r === "string" ? r.trim() : ""))
@@ -120,6 +128,7 @@ export async function generateCodingChallenge({
             requirements: normalizedRequirements,
             hints: normalizedHints,
             estimatedTime,
+            testCases,
         };
     } catch (error) {
         console.error('Error generating coding challenge:', error);

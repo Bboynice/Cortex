@@ -47,6 +47,7 @@ export default function MyButton({
     <button
       onClick={onClick}
       className={`
+        cursor-pointer
         relative
         flex
         items-center

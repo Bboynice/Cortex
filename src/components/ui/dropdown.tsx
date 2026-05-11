@@ -48,7 +48,7 @@ export default function DropdownMenu<T extends string = string>({
   return (
     <div
       ref={dropdownRef}
-      className="relative w-auto"
+      className="relative w-auto select-none"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
     >

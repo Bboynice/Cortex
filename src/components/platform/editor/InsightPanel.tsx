@@ -100,7 +100,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           score={codeQuality} 
                           description={codeQualitySummary} 
                           infoTooltip={codeQualityTooltip}
-                          color="green"
+                          color="#ef4444"
                           loading={status === "loading" ? true : false}
                         />
                         <AnalyticsCard 
@@ -108,7 +108,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           score={performance} 
                           description={performanceSummary} 
                           infoTooltip={performanceTooltip}
-                          color="yellow"
+                          color="#eab308"
                           loading={status === "loading" ? true : false}
                         />
                         <AnalyticsCard 
@@ -116,7 +116,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           score={bestPractices} 
                           description={bestPracticesSummary} 
                           infoTooltip={bestPracticesTooltip}
-                          color="blue"
+                          color="#22c55e"
                           loading={status === "loading" ? true : false}
                         />
           
