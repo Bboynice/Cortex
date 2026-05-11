@@ -14,6 +14,8 @@ interface CodeWindowProps {
   code: string;
   onChange: (code: string) => void;
   onRun?: (code: string) => void;
+  // Should resolve with { passed, total } so the submit modal can display the result.
+  onSubmit?: (code: string) => Promise<{ passed: number; total: number } | undefined | void>;
   logs: string[];
 }
 
@@ -25,7 +27,7 @@ const languageToExtension = {
 
 
 
-const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) => {
+const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWindowProps) => {
   const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
   const [issueCounts, setIssueCounts] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
   
@@ -42,11 +44,13 @@ const CodeWindow = ({ language, code, onChange, onRun, logs}: CodeWindowProps) =
   const handleSubmit = () => {
     onOpen("save-code", {
       title: "Submit Solution?",
-      description: "Your code will be run against test cases.",
+      description: "Your code will be run against the test cases.",
       submitText: "Submit",
       cancelText: "Cancel",
       currentCode: code,
-      action: () => onRun?.(code),
+      // The modal awaits this and, if it resolves with { passed, total }, switches
+      // to a results view that shows how many cases were done out of total.
+      action: () => onSubmit?.(code),
     });
   };
 

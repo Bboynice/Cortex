@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'copy';
 
 interface Toast {
   id: string;
@@ -25,7 +25,7 @@ export const useToast = create<ToastStore>((set) => ({
         : Math.random().toString(36).slice(2);
 
     const defaultDuration =
-      type === "success" ? 2500 : type === "info" ? 3200 : type === "warning" ? 4000 : 5000;
+      type === "success" ? 2500 : type === "info" ? 3200 : type === "warning" ? 4000 : type === "copy" ? 2000 : 5000;
 
     const finalDurationMs = durationMs ?? defaultDuration;
 

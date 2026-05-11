@@ -28,6 +28,8 @@ export default function ToastContainer() {
                   ? "border-red-500/35"
                   : toast.type === "warning"
                     ? "border-yellow-500/35"
+                    : toast.type === "copy"
+                      ? "border-primary"
                     : "border-blue-500/35",
             ].join(" ")}
             role="status"

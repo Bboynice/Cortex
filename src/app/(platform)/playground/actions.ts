@@ -40,7 +40,7 @@ export async function generateCodingChallenge({
                         `Seed: ${seed} (use this to vary the specific task each call; do NOT use it to pick exotic topics)`,
                         taskLine,
                         "",
-                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "testCases": { "input": string, "output": string }[] }',
+                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "testCases": { "input": string, "output": string }[], "entryFunction": string, "starterCode": string }',
                         "",
                         "Constraints:",
                         "- Use ONLY standard language features. No third-party libraries, no frameworks, no package imports of any kind.",
@@ -50,6 +50,17 @@ export async function generateCodingChallenge({
                         "- hints: EXACTLY 3 items; each has title + description; keep both short; no bullets/numbering",
                         "- difficulty guide: easy(simple loops/if), medium(edge cases/parsing), hard(efficient algorithm)",
                         "- estimatedTime: integer minutes; easy 10-20, medium 20-40, hard 40-60",
+                        "",
+                        "Grading fields (CRITICAL — these are used by an automated grader):",
+                        `- entryFunction: the exact identifier name of the function the user must implement (e.g. "sumEvenNumbers"). camelCase for JavaScript/Rust, snake_case for Python.`,
+                        `- starterCode: a ${language} snippet that defines ONLY the function signature using entryFunction as the name, with a placeholder body. Examples:`,
+                        `    javascript: "function sumEvenNumbers(arr) {\\n  // Your code here\\n  return 0;\\n}"`,
+                        `    python:     "def sum_even_numbers(arr):\\n    # Your code here\\n    return 0"`,
+                        `    rust:       "fn sum_even_numbers(arr: &[i32]) -> i32 {\\n    // Your code here\\n    return 0;\\n}"`,
+                        "- testCases: 3-5 items. BOTH input and output MUST be JSON-encoded strings the grader can JSON.parse:",
+                        '    * "input"  must be a JSON array of positional arguments to entryFunction. e.g. "[[1,2,3,4]]" means call entryFunction([1,2,3,4]). For multi-arg: "[\\"hello\\", 3]" means entryFunction("hello", 3).',
+                        '    * "output" must be the JSON-encoded expected return value. e.g. "6", "\\"banana\\"", "[1,2,3]", "true".',
+                        "    * Do NOT include the function call syntax in input. Do NOT wrap output in extra quotes for numbers/booleans/arrays.",
                     ].join("\n"),
                 },
             ],
@@ -67,7 +78,7 @@ export async function generateCodingChallenge({
             : [];
         const hintsRaw = Array.isArray((parsed as any)?.hints) ? (parsed as any).hints : [];
         const estimatedTimeRaw = (parsed as any)?.estimatedTime;
-        const testCasesRaw = (parsed as any)?.testCases;
+        const testCasesRaw = Array.isArray((parsed as any)?.testCases) ? (parsed as any).testCases : [];
         const testCases = testCasesRaw
             .map((t: any) => ({
                 input: typeof t?.input === "string" ? t.input : String(t?.input ?? ""),
@@ -75,6 +86,18 @@ export async function generateCodingChallenge({
             }))
             .filter((t: { input: string; output: string }) => t.input || t.output)
             .slice(0, 5);
+
+        const entryFunctionRaw = (parsed as any)?.entryFunction;
+        const entryFunction =
+            typeof entryFunctionRaw === "string" && /^[A-Za-z_][\w]*$/.test(entryFunctionRaw.trim())
+                ? entryFunctionRaw.trim()
+                : undefined;
+
+        const starterCodeRaw = (parsed as any)?.starterCode;
+        const starterCode =
+            typeof starterCodeRaw === "string" && starterCodeRaw.trim().length > 0
+                ? starterCodeRaw
+                : undefined;
 
         const requirements = requirementsRaw
             .map((r: unknown) => (typeof r === "string" ? r.trim() : ""))
@@ -129,6 +152,8 @@ export async function generateCodingChallenge({
             hints: normalizedHints,
             estimatedTime,
             testCases,
+            entryFunction,
+            starterCode,
         };
     } catch (error) {
         console.error('Error generating coding challenge:', error);

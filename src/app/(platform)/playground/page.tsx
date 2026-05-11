@@ -7,8 +7,10 @@ import DropdownMenu from '@/src/components/ui/Dropdown';
 import TaskInstructions from '@/src/components/platform/editor/TaskInstructions';
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
+import { runTestCases, resolveEntry, summarizeResults, type TestResult } from '@/src/lib/test-runner';
 import InsightPanel, { type InsightAnalysis } from '@/src/components/platform/editor/InsightPanel';
 import { useSearchParams } from 'next/navigation';
+import { useToast } from '@/src/hooks/use-toast';
 
 export default function PlaygroundPage() {
   const searchParams = useSearchParams();
@@ -32,7 +34,10 @@ export default function PlaygroundPage() {
   const [isApplyingFix, setIsApplyingFix] = useState(false);
   const [applyFixError, setApplyFixError] = useState<string | null>(null);
   const [testCases, setTestCases] = useState<{ input: string; output: string }[] | undefined>(undefined);
-
+  const [entryFunction, setEntryFunction] = useState<string | undefined>(undefined);
+  const [testResults, setTestResults] = useState<TestResult[] | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addToast } = useToast();
 
   const languageChoices = [
     { value: "javascript" as const, label: "JavaScript" },
@@ -158,6 +163,8 @@ export default function PlaygroundPage() {
     }
     setEditorLanguage(nextLanguage);
     setCode(startCode[nextLanguage]);
+    setTestResults(undefined);
+    setEntryFunction(undefined);
 
     setLoading(true);
 
@@ -175,10 +182,16 @@ export default function PlaygroundPage() {
       setTestCases(result.testCases ?? [{ input: "Error generating test cases", output: "Error generating test cases" }]);
       setGeneratedLanguageLabel(languageChoices.find((c) => c.value === nextLanguage)?.label ?? undefined);
       setGeneratedDifficultyLabel(difficultyChoices.find((c) => c.value === nextDifficulty)?.label ?? undefined);
+      setEntryFunction(result.entryFunction);
+
+      // Prefer the AI-supplied starter (its signature matches entryFunction)
+      // and fall back to the hardcoded snippet if missing.
+      const nextStarter = result.starterCode?.trim() ? result.starterCode : startCode[nextLanguage];
+      setCode(nextStarter);
 
       lastSuccessfulHashRef.current = null;
       latestContextRef.current = {
-        code: startCode[nextLanguage],
+        code: nextStarter,
         language: nextLanguage,
         challenge: result.challenge ?? undefined,
         requirements: result.requirements ?? [],
@@ -259,10 +272,64 @@ export default function PlaygroundPage() {
   const handleRun = async (codeToRun: string) => {
     setLogs(["Running..."]);
     const result = await executeCode(codeToRun, editorLanguage);
+
+    if (result.trim() === "Executed successfully (no output).") {
+      addToast(
+        "No output detected. Try to print/call your function.",
+        "info"
+      );
+    }
     // Split results into lines for the terminal component
     const logLines = result.split("\n").filter((line: string) => line.trim().length > 0);
     setLogs(logLines);
   };
+
+  // Returns the pass/total summary so SavePopUp can show a post-submit results view.
+  const handleSubmit = async (
+    codeToSubmit: string,
+  ): Promise<{ passed: number; total: number } | undefined> => {
+    if (!testCases || testCases.length === 0) {
+      addToast("Generate a task first so there are test cases to check against.", "warning");
+      return undefined;
+    }
+
+    setIsSubmitting(true);
+    setTestResults(undefined);
+
+    try {
+      // Prefer the AI's name if the user's code actually defines it; otherwise
+      // fall back to whatever function is present. This survives "Apply Fix"
+      // rewrites and user renames.
+      const entry = resolveEntry(codeToSubmit, editorLanguage, entryFunction);
+      const results = await runTestCases(codeToSubmit, editorLanguage, entry, testCases);
+      setTestResults(results);
+
+      const { passed, total, errored, skipped } = summarizeResults(results);
+
+      if (skipped === total && total > 0) {
+        addToast("Grading for this language is not supported yet.", "warning");
+      } else if (passed === total) {
+        addToast(`All ${total} test cases passed!`, "success");
+      } else if (errored > 0) {
+        addToast(`${passed} / ${total} passed (${errored} errored)`, "warning");
+      } else {
+        addToast(`${passed} / ${total} test cases passed`, "error");
+      }
+
+      return { passed, total };
+    } catch (e: any) {
+      addToast(e?.message || "Failed to run test cases.", "error");
+      return undefined;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Clear stale results whenever the user edits the code after submitting.
+  useEffect(() => {
+    if (testResults) setTestResults(undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
 
   // Trigger generation when the dashboard navigates here with ?autoGenerate=...
   useEffect(() => {
@@ -294,9 +361,9 @@ export default function PlaygroundPage() {
   }, [challenge]);
 
   return (
-   <div className="h-full min-h-0 w-full overflow-y-auto pt-16">
-      <section className="w-full">
-        <div className="flex h-auto w-full items-center justify-start dark:text-content">
+   <div className="h-full min-h-0 w-full overflow-y-auto pt-16 flex flex-col">
+      <section className="w-full flex flex-col flex-1 min-h-0">
+        <div className="flex h-auto w-full items-center justify-start dark:text-content shrink-0">
           <div className="flex h-auto w-1/3 flex-row items-center justify-center gap-2">
             <div className="flex h-auto w-[90%] flex-row items-center justify-between gap-2">
               <MyButton effect="glow" onClick={() => handleGenerate()}>
@@ -329,8 +396,17 @@ export default function PlaygroundPage() {
             isGenerating={loading}
             isGenerated={Boolean(challenge)}
             testCases={testCases}
+            testResults={testResults}
+            isSubmitting={isSubmitting}
           />
-          <CodeWindow language={editorLanguage} code={code} onChange={setCode} onRun={handleRun} logs={logs} />
+          <CodeWindow
+            language={editorLanguage}
+            code={code}
+            onChange={setCode}
+            onRun={handleRun}
+            onSubmit={handleSubmit}
+            logs={logs}
+          />
         </div>
       </section>
 
