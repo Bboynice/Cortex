@@ -24,6 +24,10 @@
 
   --animate-spin-slow: spin 3s linear infinite;
 
+  /* Bind the CSS variable injected by next/font/local in layout.tsx so the
+     Tailwind `font-sans` utility (and the body default) renders Chakra Petch
+     across the whole app. Falls back gracefully if the font fails to load. */
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 @keyframes cortex-drift {

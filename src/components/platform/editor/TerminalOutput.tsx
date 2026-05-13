@@ -4,14 +4,16 @@ import { motion } from "framer-motion";
 export default function TerminalOutput({
   logs,
   speedMs,
+  height = 112,
 }: {
   logs: string[];
   speedMs?: number;
+  height?: number;
 }) {
   const fullText = logs.map(log => `> ${log}`).join("\n");
   const typed = useTypewriter(fullText, speedMs);
   return (
-    <div className="flex h-28 w-full shrink-0 flex-col border-t dark:border-border dark:bg-background font-mono text-sm">
+    <div  style={{ height}} className={`flex  w-full shrink-0 flex-col border-t dark:border-border dark:bg-background font-mono text-sm`}>
       <div className="flex shrink-0 items-center gap-2 px-4 pt-2 dark:text-muted">
         <span className="text-[10px] font-bold uppercase tracking-wider">Terminal</span>
       </div>

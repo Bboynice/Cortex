@@ -19,11 +19,11 @@ const DIFF_MAP: Record<"Easy" | "Medium" | "Hard", "easy" | "medium" | "hard"> =
 };
 
 const missions = [
-    { title: "Array Sorting Algorithm", description: "Implement a custom sorting function", duration: "20 min", points: 75, difficulty: "Medium", lang: "JS" },
-    { title: "Data Structure Challenge", description: "Build a binary search tree", duration: "35 min", points: 120, difficulty: "Hard", lang: "Py" },
-    { title: "Memory Management", description: "Optimize resource allocation", duration: "15 min", points: 50, difficulty: "Easy", lang: "Rs" },
-    { title: "Memory Management", description: "Optimize resource allocation", duration: "15 min", points: 50, difficulty: "Easy", lang: "Rs" },
-    { title: "Memory Management", description: "Optimize resource allocation", duration: "15 min", points: 50, difficulty: "Easy", lang: "Rs" },
+    { title: "FizzBuzz", description: "Return Fizz, Buzz, or FizzBuzz for multiples up to N", duration: "15 min", points: 50, difficulty: "Easy", lang: "JS" },
+    { title: "Palindrome Checker", description: "Detect whether a string reads the same backwards", duration: "15 min", points: 50, difficulty: "Easy", lang: "JS" },
+    { title: "Flatten Nested Array", description: "Recursively flatten arrays of arbitrary depth", duration: "20 min", points: 75, difficulty: "Medium", lang: "JS" },
+    { title: "Anagram Detector", description: "Check if two strings are anagrams of each other", duration: "25 min", points: 90, difficulty: "Medium", lang: "JS" },
+    { title: "Two Sum", description: "Find two indices whose values add up to a target", duration: "35 min", points: 120, difficulty: "Hard", lang: "JS" },
   ];
 
 export default function DailyChallenges() {

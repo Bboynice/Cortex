@@ -14,6 +14,7 @@ export type TestCase = { input: string; output: string };
 export type SupportedLanguage = "javascript" | "python" | "rust";
 
 const SENTINEL = "__CORTEX_TEST__";
+const REF_SENTINEL = "__CORTEX_REF__";
 
 function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -196,6 +197,153 @@ function buildPythonHarness(userCode: string, entry: string, cases: TestCase[]):
     "        except Exception as __e:",
     `            print('${SENTINEL}' + json.dumps({'i': __i, 'status': 'error', 'message': str(__e)}))`,
   ].join("\n");
+}
+
+// Mirrors buildJsHarness but instead of *checking* outputs, it captures whatever
+// the reference solution returns for each input. Used at task-generation time so
+// the AI doesn't have to compute outputs itself (which it gets wrong constantly).
+function buildJsReferenceHarness(
+  referenceSolution: string,
+  entry: string,
+  inputs: string[],
+): string {
+  const inputsJson = JSON.stringify(inputs);
+  return [
+    '"use strict";',
+    referenceSolution,
+    ";(function () {",
+    `  var __inputs = ${inputsJson};`,
+    `  if (typeof ${entry} !== 'function') {`,
+    "    for (var __k = 0; __k < __inputs.length; __k++) {",
+    `      console.log('${REF_SENTINEL}' + JSON.stringify({ i: __k, ok: false, error: '${entry} is not defined' }));`,
+    "    }",
+    "    return;",
+    "  }",
+    "  function __parse(s) { try { return JSON.parse(s); } catch (e) { return s; } }",
+    "  for (var __i = 0; __i < __inputs.length; __i++) {",
+    "    try {",
+    "      var __args = __parse(__inputs[__i]);",
+    "      var __got;",
+    "      if (Array.isArray(__args)) {",
+    "        try {",
+    `          __got = ${entry}.apply(null, __args);`,
+    "        } catch (eSpread) {",
+    `          __got = ${entry}(__args);`,
+    "        }",
+    "      } else {",
+    `        __got = ${entry}(__args);`,
+    "      }",
+    "      var __serialized = JSON.stringify(__got);",
+    "      if (typeof __serialized !== 'string') {",
+    `        console.log('${REF_SENTINEL}' + JSON.stringify({ i: __i, ok: false, error: 'reference returned a non-serializable value (likely undefined)' }));`,
+    "      } else {",
+    `        console.log('${REF_SENTINEL}' + JSON.stringify({ i: __i, ok: true, serialized: __serialized }));`,
+    "      }",
+    "    } catch (e) {",
+    `      console.log('${REF_SENTINEL}' + JSON.stringify({ i: __i, ok: false, error: String(e && e.message || e) }));`,
+    "    }",
+    "  }",
+    "})();",
+  ].join("\n");
+}
+
+function buildPythonReferenceHarness(
+  referenceSolution: string,
+  entry: string,
+  inputs: string[],
+): string {
+  const inputsLiteral = JSON.stringify(inputs);
+  return [
+    "import json",
+    "",
+    referenceSolution,
+    "",
+    `__inputs = ${inputsLiteral}`,
+    "",
+    "def __parse(s):",
+    "    try:",
+    "        return json.loads(s)",
+    "    except Exception:",
+    "        return s",
+    "",
+    `__fn = globals().get('${entry}')`,
+    "if not callable(__fn):",
+    "    for __k in range(len(__inputs)):",
+    `        print('${REF_SENTINEL}' + json.dumps({'i': __k, 'ok': False, 'error': '${entry} is not defined'}))`,
+    "else:",
+    "    for __i, __raw in enumerate(__inputs):",
+    "        try:",
+    "            __args = __parse(__raw)",
+    "            if isinstance(__args, list):",
+    "                try:",
+    "                    __got = __fn(*__args)",
+    "                except TypeError:",
+    "                    __got = __fn(__args)",
+    "            else:",
+    "                __got = __fn(__args)",
+    "            try:",
+    "                __serialized = json.dumps(__got)",
+    `                print('${REF_SENTINEL}' + json.dumps({'i': __i, 'ok': True, 'serialized': __serialized}))`,
+    "            except Exception as __se:",
+    `                print('${REF_SENTINEL}' + json.dumps({'i': __i, 'ok': False, 'error': 'reference returned non-JSON value: ' + str(__se)}))`,
+    "        except Exception as __e:",
+    `            print('${REF_SENTINEL}' + json.dumps({'i': __i, 'ok': False, 'error': str(__e)}))`,
+  ].join("\n");
+}
+
+export type DerivedOutput =
+  | { ok: true; output: string }
+  | { ok: false; error: string };
+
+// Executes `referenceSolution` against each input and returns whatever it
+// computes, JSON-encoded as a string. This is the trusted source of expected
+// outputs — much more reliable than asking the LLM to do arithmetic in its
+// head. Rust isn't supported (same reason grading isn't) — caller should
+// handle that case.
+export async function deriveExpectedOutputs(
+  referenceSolution: string,
+  language: SupportedLanguage,
+  entry: string,
+  inputs: string[],
+): Promise<DerivedOutput[]> {
+  if (inputs.length === 0) return [];
+  if (language === "rust") {
+    return inputs.map(() => ({
+      ok: false as const,
+      error: "Rust reference execution is not supported yet.",
+    }));
+  }
+
+  const harness =
+    language === "javascript"
+      ? buildJsReferenceHarness(referenceSolution, entry, inputs)
+      : buildPythonReferenceHarness(referenceSolution, entry, inputs);
+
+  const raw = await executeCode(harness, language);
+
+  const out: (DerivedOutput | undefined)[] = new Array(inputs.length).fill(undefined);
+  for (const line of raw.split("\n")) {
+    const idx = line.indexOf(REF_SENTINEL);
+    if (idx === -1) continue;
+    const payload = line.slice(idx + REF_SENTINEL.length).trim();
+    try {
+      const parsed = JSON.parse(payload) as
+        | { i: number; ok: true; serialized: string }
+        | { i: number; ok: false; error: string };
+      if (typeof parsed.i !== "number" || parsed.i < 0 || parsed.i >= inputs.length) continue;
+      if (parsed.ok) {
+        out[parsed.i] = { ok: true, output: parsed.serialized };
+      } else {
+        out[parsed.i] = { ok: false, error: String(parsed.error ?? "unknown error") };
+      }
+    } catch {
+      // ignore malformed lines
+    }
+  }
+
+  return out.map(
+    (r) => r ?? { ok: false as const, error: "No output emitted (reference may have crashed)." },
+  );
 }
 
 export async function runTestCases(

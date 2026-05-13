@@ -1,7 +1,7 @@
 // src/components/platform/editor/CodeWindow.tsx
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import CodeEditor from '@/src/components/platform/editor/CodeEditor';
 import { ErrorIndicator } from '@/src/components/ui/ErrorIndicator';
 import TerminalOutput from '@/src/components/platform/editor/TerminalOutput';
@@ -30,6 +30,9 @@ const languageToExtension = {
 const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWindowProps) => {
   const [cursorPos, setCursorPos] = useState<{ lineNumber: number; column: number }>({ lineNumber: 1, column: 1 });
   const [issueCounts, setIssueCounts] = useState<{ errors: number; warnings: number }>({ errors: 0, warnings: 0 });
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [terminalHeight, setTerminalHeight] = useState(112); // h-28 in pixels
   
 
   const footerStatus =
@@ -54,8 +57,42 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
     });
   };
 
+  function startResize(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault();
+    const startY = "touches" in e ? e.touches[0].clientY : e.clientY;
+    const startHeight = terminalHeight;
+  
+    // Compute the upper bound from the container, reserving room for header,
+    // footer, handle, and a minimum editor height so the editor never collapses.
+    const containerH = containerRef.current?.getBoundingClientRect().height ?? 0;
+    const HEADER = 48, FOOTER = 36, HANDLE = 6, EDITOR_MIN = 120, TERMINAL_MIN = 60;
+    const maxTerminal = Math.max(TERMINAL_MIN, containerH - HEADER - FOOTER - HANDLE - EDITOR_MIN);
+  
+    function onMove(ev: MouseEvent | TouchEvent) {
+      const y = "touches" in ev ? ev.touches[0].clientY : ev.clientY;
+      // Dragging up makes the terminal taller, so invert the delta.
+      const next = Math.min(maxTerminal, Math.max(TERMINAL_MIN, startHeight + (startY - y)));
+      setTerminalHeight(next);
+    }
+    function onUp() {
+      window.removeEventListener("mousemove", onMove as any);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove as any);
+      window.removeEventListener("touchend", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+  
+    window.addEventListener("mousemove", onMove as any);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove as any, { passive: false });
+    window.addEventListener("touchend", onUp);
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+  }
+
   return (
-    <div className="mt-4 mr-4 mb-4 flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content">
+    <div ref={containerRef} className="mt-4 mr-4 mb-4 flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content">
       <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border h-12">
         <div className="flex w-full min-w-0 items-center justify-between h-12 px-4">
           <div className="flex items-center gap-2 ">
@@ -116,8 +153,15 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
            }}
          />
       </div>
+      <div
+        role="separator"
+        aria-orientation="horizontal"
+        onMouseDown={startResize}
+        onTouchStart={startResize}
+        className="h-1.5 shrink-0 cursor-row-resize dark:bg-border hover:dark:bg-primary/60 transition-colors"
+      />
 
-      <TerminalOutput logs={logs} />
+      <TerminalOutput logs={logs} height={terminalHeight} />
 
       {/* Window Footer */}
       <div className="flex w-full shrink-0 items-center justify-between border-t-1 dark:border-border px-4 py-2 font-mono text-xs">
