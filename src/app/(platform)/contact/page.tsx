@@ -1,19 +1,83 @@
+'use client';
+
 import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
+
+const fieldLine =
+  "w-full rounded-none border-0 border-b pb-2 pt-3 " +
+  "dark:border-border dark:bg-transparent dark:text-content dark:placeholder:text-muted-foreground " +
+  "focus-visible:outline-none focus-visible:ring-0 dark:focus-visible:border-primary " +
+  "transition-[border-color] duration-150";
+
 export default function ContactPage() {
-    return (
-      <main className="w-full max-w-5xl px-6 py-16 bg-blue-500">
-        <h1 className="text-3xl font-extrabold tracking-tight text-content font-bold">Do not hesitate to contact us!</h1>
-        <p className="mt-3 text-muted-foreground font-medium">
-          Please share your concerns or suggestions with us.
-        </p>
-        <form className="flex flex-col gap-4 border border-border rounded-lg p-4 bg-red-500">
-          <input type="text" name="name" placeholder="Name" />
-          <input type="email" name="email" placeholder="Email" />
-          <textarea name="message" placeholder="Message" />
-          <GlowButton effect="glow" roundness={8}>Submit</GlowButton>
-        </form>
-      </main>
-    );
-  }
-  
-  
+  return (
+    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto pb-14 pt-24 md:pb-16 md:pt-28">
+      <div className="mx-auto w-full max-w-2xl shrink-0 px-6">
+        <header className="space-y-4 border-b pb-10 dark:border-border ">
+          <h1 className="font-display text-3xl font-semibold tracking-tight dark:text-content">
+            Contact
+          </h1>
+          <p className="text-base dark:text-muted-foreground">
+            Do not hesitate to contact us if you have any questions or feedback.
+          </p>
+          <div className="flex flex-row gap-x-10 text-sm dark:text-muted-foreground justify-between w-full">
+            <div>
+              <div className="font-medium dark:text-content/80">Response time</div>
+              <div className="mt-0.5">Admin is a student, so it make it a while to respond!</div>
+            </div>
+            <div>
+              <div className="font-medium dark:text-content/80">Direct email</div>
+              <div className="mt-0.5">
+                <a
+                  href="mailto:hello@cortex.sh"
+                  className="underline underline-offset-4 transition-colors dark:text-content dark:hover:text-primary"
+                >
+                  hello@cortex.sh
+                </a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="mt-10 flex w-full justify-center">
+          <form
+            className="flex w-full max-w-lg flex-col gap-6 rounded-lg border p-6 dark:border-border dark:bg-surface md:p-8"
+            action="#"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <input
+              type="text"
+              name="name"
+              placeholder="Name"
+              className={fieldLine}
+              autoComplete="name"
+            />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className={fieldLine}
+              autoComplete="email"
+            />
+            <input
+              type="text"
+              name="topic"
+              placeholder="Topic"
+              className={fieldLine}
+            />
+            <textarea
+              name="message"
+              placeholder="Message"
+              rows={4}
+              className={`${fieldLine} min-h-[6rem] resize-y`}
+            />
+            <div className="pt-2">
+              <GlowButton effect="glow" roundness={16} onClick={() => {}}>
+                Submit
+              </GlowButton>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
