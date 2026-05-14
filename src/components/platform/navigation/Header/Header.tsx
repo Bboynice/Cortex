@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useAuthStore } from '@/src/store/useAuthStore';
 
 const Header = () => {
   const pathname = usePathname();
@@ -13,6 +14,8 @@ const Header = () => {
     { name: 'Playground', href: '/playground' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  const { user, status } = useAuthStore();
 
   return (
     <header className="fixed top-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none w-full max-w-fit px-4 select-none">
@@ -53,12 +56,14 @@ const Header = () => {
           <div className="h-4 w-px bg-white/10 mx-2" />
 
           <div className="flex items-center gap-1 px-2">
-            <Link 
+            {status !== 'authenticated' && (
+              <Link 
               href="/login" 
               className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-white transition-colors"
             >
               Log In
             </Link>
+            )}
             <Link 
               href="/settings" 
               className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-muted-foreground hover:text-white"}`}

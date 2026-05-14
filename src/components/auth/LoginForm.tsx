@@ -1,9 +1,35 @@
-import Link from "next/link";
+"use client";
+
 import { loginAction } from "@/src/app/(auth)/actions";
-import SocialAuth from "@/src/components/auth/SocialAuth";
-import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import SocialAuth from "./SocialAuth";
+import Link from "next/link";
 
 export default function LoginFrom() {
+
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(event.currentTarget);
+    const result = await loginAction(formData);
+
+    if (result?.success && result.user) {
+      // Update Client State
+      setAuth(result.user);
+      // Navigate to Dashboard
+      router.push("/dashboard");
+    } else {
+      alert(result?.error || "Login failed");
+      setLoading(false);
+    }
+  }
   return (
     <div className="space-y-4">
       <SocialAuth />
@@ -14,7 +40,7 @@ export default function LoginFrom() {
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
-      <form action={loginAction} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
           name="email"
@@ -30,10 +56,11 @@ export default function LoginFrom() {
           required
         />
         <button
+          disabled={loading}
           type="submit"
           className="w-full rounded-xl bg-white text-black px-4 py-3 text-sm font-medium transition hover:opacity-90"
         >
-          Log In
+          {loading ? "Logging in..." : "Log In"}
         </button>
       </form>
 

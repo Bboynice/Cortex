@@ -1,9 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import { registerAction } from "@/src/app/(auth)/actions";
-import SocialAuth from "@/src/components/auth/SocialAuth";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { useRouter } from "next/navigation";
+import SocialAuth from "./SocialAuth";
 
 export default function RegisterForm() {
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const router = useRouter();
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const result = await registerAction(formData);
+
+    if (result.success && result.user) {
+      setAuth(result.user);
+      router.push("/dashboard");
+    }
+  }
   return (
+
     <div className="space-y-4">
       <SocialAuth />
 
@@ -13,7 +31,7 @@ export default function RegisterForm() {
         <div className="h-px flex-1 bg-white/10" />
       </div>
 
-      <form action={registerAction} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
           name="name"
