@@ -2,6 +2,7 @@
 import AnalyticsCard from "@/src/components/ui/AnalyticsCard";
 import { Lightbulb, Loader2, Sparkles, Check, FileText } from "lucide-react";
 import CortexLoader from "@/src/components/ui/CortexLoader";
+import { motion, useReducedMotion } from "framer-motion";
 
 export type InsightFeedbackKind = "issue" | "improvement" | "praise";
 
@@ -54,6 +55,8 @@ interface InsightPanelProps {
 
 
 export default function InsightPanel({ analysis, status = "idle", errorMessage, hasChallenge = true, onApplyFix, isApplyingFix = false, applyFixError, report, onGenerateReport, isGeneratingReport = false, generateReportError }: InsightPanelProps) {
+  const reduceMotion = useReducedMotion();
+
   if (!hasChallenge) {
     return (
       <section className="w-full flex flex-col dark:bg-background px-4 pb-4">
@@ -88,6 +91,8 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
     analysis?.overallSuggestion ??
     "Start typing your solution — I’ll analyze it periodically and surface improvements here.";
 
+  const suggestionBusy = status === "loading" || isApplyingFix;
+
   return (
     <section className="w-full flex flex-col dark:bg-background space-y-4 px-4 pb-4">
       <div className="flex items-center gap-2 px-2">
@@ -115,7 +120,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           description={codeQualitySummary} 
                           infoTooltip={codeQualityTooltip}
                           color="#ef4444"
-                          loading={status === "loading" ? true : false}
+                          loading={status === "loading" || isApplyingFix}
                         />
                         <AnalyticsCard 
                           title="Performance" 
@@ -123,7 +128,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           description={performanceSummary} 
                           infoTooltip={performanceTooltip}
                           color="#eab308"
-                          loading={status === "loading" ? true : false}
+                          loading={status === "loading" || isApplyingFix}
                         />
                         <AnalyticsCard 
                           title="Best Practices" 
@@ -131,12 +136,15 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
                           description={bestPracticesSummary} 
                           infoTooltip={bestPracticesTooltip}
                           color="#22c55e"
-                          loading={status === "loading" ? true : false}
+                          loading={status === "loading" || isApplyingFix}
                         />
           
       </div>
 
-      <div className={`w-full rounded-xl border dark:border-border dark:bg-card/50 transition-all ${status === "loading" ? "blur-sm opacity-50 dark:shadow-white" : ""}`}>
+      <div
+        className="w-full rounded-xl border dark:border-border dark:bg-card/50 transition-all"
+        aria-busy={suggestionBusy}
+      >
         <div className="flex items-start justify-between gap-4 px-4 py-3">
           <div className="flex items-center gap-2">
             <Lightbulb className="dark:text-yellow-400" size={18} aria-hidden="true" />
@@ -167,11 +175,24 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
         </div>
 
         <div className="px-4 pb-4">
-          <p className="text-sm dark:text-muted leading-relaxed whitespace-pre-wrap break-words">
+          <motion.p
+            className="text-sm dark:text-muted leading-relaxed whitespace-pre-wrap break-words"
+            initial={{ opacity: 0 }}
+            animate={
+              suggestionBusy && !reduceMotion
+                ? { opacity: [0.48, 1, 0.48] }
+                : { opacity: 1 }
+            }
+            transition={
+              suggestionBusy && !reduceMotion
+                ? { duration: 1.35, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 1.5, ease: "easeInOut" }
+            }
+          >
             {suggestion}
-          </p>
+          </motion.p>
           {applyFixError && (
-            <p className="mt-2 text-xs dark:text-red-400">{applyFixError}</p>
+            <motion.p className="mt-2 text-xs dark:text-red-400" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }}>{applyFixError}</motion.p>
           )}
         </div>
       </div>

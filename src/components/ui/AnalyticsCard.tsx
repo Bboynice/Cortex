@@ -2,7 +2,7 @@
 "use client";
 
 import { Info } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import ProgressBar from "./ProgressBar";
 
 interface AnalyticsCardProps {
@@ -40,9 +40,13 @@ export default function AnalyticsCard({
   loading = false,
 }: AnalyticsCardProps) {
   const resolvedColor = color ?? colorForScore(score, maxScore);
+  const reduceMotion = useReducedMotion();
 
   return (
-    <div className={`flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm ${loading ? "blur-sm opacity-50 shadow-white" : ""}`}>
+    <div
+      className="flex flex-col rounded-xl border border-border bg-card p-4 shadow-sm"
+      aria-busy={loading}
+    >
       <div className="flex items-center justify-between mb-2">
         <h3 className="font-medium text-content">{title}</h3>
         {infoTooltip ? (
@@ -58,13 +62,44 @@ export default function AnalyticsCard({
       </div>
 
       <div className="flex items-baseline gap-1 mb-3">
-        <motion.span className={`text-3xl font-bold ${loading ? "backdrop-blur-lg" : ""}`} style={{ color: resolvedColor }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }}> {score}</motion.span>
+        <motion.span
+          className="text-3xl font-bold tabular-nums"
+          style={{ color: resolvedColor }}
+          initial={{ opacity: 0 }}
+          animate={
+            loading && !reduceMotion
+              ? { opacity: [0.5, 1, 0.5] }
+              : { opacity: 1 }
+          }
+          transition={
+            loading && !reduceMotion
+              ? { duration: 1.35, repeat: Infinity, ease: "easeInOut" }
+              : { duration: 1.5, ease: "easeInOut" }
+          }
+        >
+          {score}
+        </motion.span>
         <span className="text-muted-foreground">/{maxScore}</span>
       </div>
 
       <ProgressBar value={score} max={maxScore} fill={resolvedColor} className="mb-2" />
 
-      <motion.p className="text-sm text-muted-foreground" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1.5, ease: "easeInOut" }}>{description}</motion.p>
+      <motion.p
+        className="text-sm text-muted-foreground"
+        initial={{ opacity: 0 }}
+        animate={
+          loading && !reduceMotion
+            ? { opacity: [0.48, 1, 0.48] }
+            : { opacity: 1 }
+        }
+        transition={
+          loading && !reduceMotion
+            ? { duration: 1.35, repeat: Infinity, ease: "easeInOut" }
+            : { duration: 1.5, ease: "easeInOut" }
+        }
+      >
+        {description}
+      </motion.p>
     </div>
 
 

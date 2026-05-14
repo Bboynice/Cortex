@@ -11,30 +11,39 @@ import { runTestCases, resolveEntry, summarizeResults, type TestResult } from '@
 import InsightPanel, { type InsightReport, type InsightAnalysis } from '@/src/components/platform/editor/InsightPanel';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/src/hooks/use-toast';
+import { usePlaygroundStore } from '@/src/store/usePlaygroundStore';
 
 export default function PlaygroundPage() {
   const searchParams = useSearchParams();
 
   type Language = "javascript" | "python" | "rust";
 
-  const [challenge, setChallenge] = useState<string | undefined>(undefined);
-  const [requirements, setRequirements] = useState<string[] | undefined>(undefined);
-  const [hints, setHints] = useState<{ title: string; description: string }[] | undefined>(undefined);
-  const [estimatedTime, setEstimatedTime] = useState<number | undefined>(undefined);
-  const [generatedLanguageLabel, setGeneratedLanguageLabel] = useState<string | undefined>(undefined);
-  const [generatedDifficultyLabel, setGeneratedDifficultyLabel] = useState<string | undefined>(undefined);
+  const code = usePlaygroundStore((s) => s.code);
+  const setCode = usePlaygroundStore((s) => s.setCode);
+  const challenge = usePlaygroundStore((s) => s.challenge);
+  const requirements = usePlaygroundStore((s) => s.requirements);
+  const hints = usePlaygroundStore((s) => s.hints);
+  const estimatedTime = usePlaygroundStore((s) => s.estimatedTime);
+  const testCases = usePlaygroundStore((s) => s.testCases);
+  const entryFunction = usePlaygroundStore((s) => s.entryFunction);
+  const language = usePlaygroundStore((s) => s.language);
+  const editorLanguage = usePlaygroundStore((s) => s.editorLanguage);
+  const difficulty = usePlaygroundStore((s) => s.difficulty);
+  const applySuccessfulGeneration = usePlaygroundStore((s) => s.applySuccessfulGeneration);
+  const setLanguage = usePlaygroundStore((s) => s.setLanguage);
+  const setDifficulty = usePlaygroundStore((s) => s.setDifficulty);
+  const setEditorLanguage = usePlaygroundStore((s) => s.setEditorLanguage);
+  const analysis = usePlaygroundStore((s) => s.analysis);
+  const setAnalysis = usePlaygroundStore((s) => s.setAnalysis);
+  const report = usePlaygroundStore((s) => s.report);
+  const setReport = usePlaygroundStore((s) => s.setReport);
+
   const [loading, setLoading] = useState(false);
-  const [language, setLanguage] = useState<Language>("javascript"); // dropdown selection
-  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
-  const [editorLanguage, setEditorLanguage] = useState<Language>("javascript"); // active editor language
   const [logs, setLogs] = useState<string[]>(["Click RUN to test your solution!"]);
-  const [analysis, setAnalysis] = useState<InsightAnalysis | null>(null);
   const [analysisStatus, setAnalysisStatus] = useState<"idle" | "loading" | "error">("idle");
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [isApplyingFix, setIsApplyingFix] = useState(false);
   const [applyFixError, setApplyFixError] = useState<string | null>(null);
-  const [testCases, setTestCases] = useState<{ input: string; output: string }[] | undefined>(undefined);
-  const [entryFunction, setEntryFunction] = useState<string | undefined>(undefined);
   const [testResults, setTestResults] = useState<TestResult[] | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
@@ -51,6 +60,10 @@ export default function PlaygroundPage() {
     { value: "medium" as const, label: "Medium" },
     { value: "hard" as const, label: "Hard" },
   ];
+
+  const generatedLanguageLabel = languageChoices.find((c) => c.value === language)?.label;
+  const generatedDifficultyLabel = difficultyChoices.find((c) => c.value === difficulty)?.label;
+
   const startCode: Record<Language, string> = {
     javascript: `function sumEvenNumbers(arr) {
   // Your code here
@@ -64,7 +77,6 @@ export default function PlaygroundPage() {
   return 0;
 }`,
   };
-  const [code, setCode] = useState<string>(startCode.javascript);
 
   const latestContextRef = useRef<{
     code: string;
@@ -75,7 +87,21 @@ export default function PlaygroundPage() {
 
   useEffect(() => {
     latestContextRef.current = { code, language: editorLanguage, challenge, requirements };
+    
   }, [code, editorLanguage, challenge, requirements]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only trigger if there is actual code written
+      if (code.length > 20) { 
+        e.preventDefault();
+        e.returnValue = ''; // Required for Chrome
+      }
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [code]);
 
   const lastSuccessfulHashRef = useRef<string | null>(null);
   const inflightRef = useRef<AbortController | null>(null);
@@ -83,13 +109,14 @@ export default function PlaygroundPage() {
   const reportInflightRef = useRef<AbortController | null>(null);
   const insightFirstTimeoutRef = useRef<number | null>(null);
   const insightIntervalRef = useRef<number | null>(null);
-  const [report, setReport] = useState<InsightReport | null>(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [generateReportError, setGenerateReportError] = useState<string | null>(null);
 
-  const ANALYSIS_AFTER_GENERATE_MS = 60_000;
-  const ANALYSIS_REPEAT_MS = 60_000;
+  const ANALYSIS_AFTER_GENERATE_MS = 1_000;
+  const ANALYSIS_REPEAT_MS = 600_000;
 
+
+  
   function clearInsightSchedule() {
     if (insightFirstTimeoutRef.current != null) {
       window.clearTimeout(insightFirstTimeoutRef.current);
@@ -183,8 +210,8 @@ export default function PlaygroundPage() {
     }
     setEditorLanguage(nextLanguage);
     setCode(startCode[nextLanguage]);
+    usePlaygroundStore.setState({ entryFunction: undefined });
     setTestResults(undefined);
-    setEntryFunction(undefined);
 
     setLoading(true);
     inflightRef.current?.abort();
@@ -198,19 +225,21 @@ export default function PlaygroundPage() {
     });
 
     if (result.success) {
-      setChallenge(result.challenge ?? "No challenge found");
-      setRequirements(result.requirements ?? []);
-      setHints(result.hints ?? []);
-      setEstimatedTime(result.estimatedTime ?? 0);
-      setTestCases(result.testCases ?? [{ input: "Error generating test cases", output: "Error generating test cases" }]);
-      setGeneratedLanguageLabel(languageChoices.find((c) => c.value === nextLanguage)?.label ?? undefined);
-      setGeneratedDifficultyLabel(difficultyChoices.find((c) => c.value === nextDifficulty)?.label ?? undefined);
-      setEntryFunction(result.entryFunction);
-
-      // Prefer the AI-supplied starter (its signature matches entryFunction)
-      // and fall back to the hardcoded snippet if missing.
       const nextStarter = result.starterCode?.trim() ? result.starterCode : startCode[nextLanguage];
-      setCode(nextStarter);
+
+      applySuccessfulGeneration({
+        code: nextStarter,
+        challenge: result.challenge ?? "No challenge found",
+        requirements: result.requirements ?? [],
+        hints: result.hints ?? [],
+        estimatedTime: result.estimatedTime ?? 0,
+        testCases:
+          result.testCases ?? [{ input: "Error generating test cases", output: "Error generating test cases" }],
+        entryFunction: result.entryFunction,
+        language: nextLanguage,
+        editorLanguage: nextLanguage,
+        difficulty: nextDifficulty,
+      });
 
       lastSuccessfulHashRef.current = null;
       latestContextRef.current = {
@@ -514,8 +543,8 @@ export default function PlaygroundPage() {
             requirements={requirements}
             hints={hints}
             estimatedTime={estimatedTime}
-            languageLabel={generatedLanguageLabel}
-            difficultyLabel={generatedDifficultyLabel}
+            languageLabel={languageChoices.find((c) => c.value === language)?.label}
+            difficultyLabel={difficultyChoices.find((c) => c.value === difficulty)?.label}
             isGenerating={loading}
             isGenerated={Boolean(challenge)}
             testCases={testCases}
