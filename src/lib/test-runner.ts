@@ -78,10 +78,11 @@ function buildJsHarness(userCode: string, entry: string, cases: TestCase[]): str
   const casesJson = JSON.stringify(cases);
   // The harness:
   //  1. Re-parses input/output, falling back to the raw string if not JSON.
-  //  2. Tries BOTH calling conventions when input is an array:
-  //       - spread: fn(...args)  -- AI followed the "[[1,2,3]]" spec
-  //       - single: fn(args)     -- AI returned the array directly
-  //     Whichever produces a value equal to `expected` wins.
+  //  2. When input parses to an array:
+  //       - length === 1: try BOTH spread fn(...a) and single fn(a) so [[1,2,3]] vs [1,2,3]
+  //         style cases both work.
+  //       - length !== 1: ONLY spread. Calling fn(args) would pass one value (e.g. fn(["",""]))
+  //         and leave later params undefined — wrong and surfaces as str2.length errors.
   //  3. Only marks `error` when the function literally cannot be invoked.
   return [
     '"use strict";',
@@ -102,10 +103,12 @@ function buildJsHarness(userCode: string, entry: string, cases: TestCase[]): str
     "      var __args = __parse(__tc.input);",
     "      var __expected = __parse(__tc.output);",
     "      var __strategies = [];",
-    "      if (Array.isArray(__args)) {",
-    `        __strategies.push(function () { return ${entry}.apply(null, __args); });`,
-    `        __strategies.push(function () { return ${entry}(__args); });`,
-    "      } else {",
+      "      if (Array.isArray(__args)) {",
+      `        __strategies.push(function () { return ${entry}.apply(null, __args); });`,
+      "        if (__args.length === 1) {",
+      `          __strategies.push(function () { return ${entry}(__args); });`,
+      "        }",
+      "      } else {",
     `        __strategies.push(function () { return ${entry}(__args); });`,
     "      }",
     "      var __firstActual = undefined;",
@@ -169,7 +172,8 @@ function buildPythonHarness(userCode: string, entry: string, cases: TestCase[]):
     "            __strategies = []",
     "            if isinstance(__args, list):",
     "                __strategies.append(('spread', lambda a=__args: __fn(*a)))",
-    "                __strategies.append(('single', lambda a=__args: __fn(a)))",
+    "                if len(__args) == 1:",
+    "                    __strategies.append(('single', lambda a=__args: __fn(a)))",
     "            else:",
     "                __strategies.append(('single', lambda a=__args: __fn(a)))",
     "            __first_actual = None",
@@ -225,10 +229,14 @@ function buildJsReferenceHarness(
     "      var __args = __parse(__inputs[__i]);",
     "      var __got;",
     "      if (Array.isArray(__args)) {",
-    "        try {",
+    "        if (__args.length === 1) {",
+    "          try {",
+    `            __got = ${entry}.apply(null, __args);`,
+    "          } catch (eSpread) {",
+    `            __got = ${entry}(__args);`,
+    "          }",
+    "        } else {",
     `          __got = ${entry}.apply(null, __args);`,
-    "        } catch (eSpread) {",
-    `          __got = ${entry}(__args);`,
     "        }",
     "      } else {",
     `        __got = ${entry}(__args);`,
@@ -275,10 +283,13 @@ function buildPythonReferenceHarness(
     "        try:",
     "            __args = __parse(__raw)",
     "            if isinstance(__args, list):",
-    "                try:",
+    "                if len(__args) == 1:",
+    "                    try:",
+    "                        __got = __fn(*__args)",
+    "                    except TypeError:",
+    "                        __got = __fn(__args)",
+    "                else:",
     "                    __got = __fn(*__args)",
-    "                except TypeError:",
-    "                    __got = __fn(__args)",
     "            else:",
     "                __got = __fn(__args)",
     "            try:",
