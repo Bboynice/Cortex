@@ -80,6 +80,22 @@ export default function PlaygroundPage() {
   const lastSuccessfulHashRef = useRef<string | null>(null);
   const inflightRef = useRef<AbortController | null>(null);
   const applyFixInflightRef = useRef<AbortController | null>(null);
+  const insightFirstTimeoutRef = useRef<number | null>(null);
+  const insightIntervalRef = useRef<number | null>(null);
+
+  const ANALYSIS_AFTER_GENERATE_MS = 60_000;
+  const ANALYSIS_REPEAT_MS = 60_000;
+
+  function clearInsightSchedule() {
+    if (insightFirstTimeoutRef.current != null) {
+      window.clearTimeout(insightFirstTimeoutRef.current);
+      insightFirstTimeoutRef.current = null;
+    }
+    if (insightIntervalRef.current != null) {
+      window.clearInterval(insightIntervalRef.current);
+      insightIntervalRef.current = null;
+    }
+  }
 
   async function sha256Base64(input: string) {
     const data = new TextEncoder().encode(input);
@@ -91,8 +107,6 @@ export default function PlaygroundPage() {
   }
 
   async function analyzeNow() {
-    if (analysisStatus === "loading") return;
-
     const ctx = latestContextRef.current;
     // Don't analyze until a challenge has been generated.
     if (!ctx.challenge) return;
@@ -169,6 +183,8 @@ export default function PlaygroundPage() {
     setEntryFunction(undefined);
 
     setLoading(true);
+    inflightRef.current?.abort();
+    setAnalysisStatus("idle");
 
     const result = await generateCodingChallenge({
       language: nextLanguage,
@@ -198,7 +214,9 @@ export default function PlaygroundPage() {
         challenge: result.challenge ?? undefined,
         requirements: result.requirements ?? [],
       };
-      analyzeNow();
+      setAnalysis(null);
+      setAnalysisStatus("idle");
+      setAnalysisError(null);
     } else {
       alert("Error generating challenge");
     }
@@ -380,15 +398,25 @@ export default function PlaygroundPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Analyze code on an interval, but only once a challenge has been generated.
+  // After a challenge exists: wait one minute before the first insights run,
+  // then re-run every minute. Regenerating swaps `challenge`, which clears timers
+  // and restarts this schedule so the AI always reads the newest task/context.
   useEffect(() => {
-    if (!challenge) return;
-    analyzeNow();
-    const id = window.setInterval(() => {
-      analyzeNow();
-    }, 999_999_999);
+    if (!challenge) {
+      clearInsightSchedule();
+      return;
+    }
+    clearInsightSchedule();
+    insightFirstTimeoutRef.current = window.setTimeout(() => {
+      insightFirstTimeoutRef.current = null;
+      void analyzeNow();
+      insightIntervalRef.current = window.setInterval(() => {
+        void analyzeNow();
+      }, ANALYSIS_REPEAT_MS);
+    }, ANALYSIS_AFTER_GENERATE_MS);
+
     return () => {
-      window.clearInterval(id);
+      clearInsightSchedule();
       inflightRef.current?.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

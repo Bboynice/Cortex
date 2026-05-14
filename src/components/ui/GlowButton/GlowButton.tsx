@@ -100,8 +100,8 @@ export default function MyButton({
           y="0"
           width="100%"
           height="100%"
-          rx="var(--roundness)" // Dynamically match button roundness
-          ry="var(--roundness)" // Dynamically match button roundness
+          rx={roundness}
+          ry={roundness}
         />
       </svg>
       )}

@@ -55,6 +55,7 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
     );
   }
 
+
   const codeQuality = analysis?.scores?.codeQuality ?? 0;
   const performance = analysis?.scores?.performance ?? 0;
   const bestPractices = analysis?.scores?.bestPractices ?? 0;
