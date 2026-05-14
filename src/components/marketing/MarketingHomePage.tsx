@@ -42,7 +42,7 @@ export default function MarketingHomePage() {
       <section className="rounded-xl border dark:border-border dark:bg-muted/20 backdrop-blur-lg p-6 shadow-sm sm:p-10">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
-            <h1 className="text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
+            <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
               Daily coding practice with{" "}
               <span className="dark:text-primary">AI-generated</span> challenges.
             </h1>
@@ -141,7 +141,7 @@ export default function MarketingHomePage() {
       </section>
 
       <section className="mt-10 rounded-xl border dark:border-border dark:bg-muted/20 backdrop-blur-lg p-6 shadow-sm sm:p-10 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight dark:text-content sm:text-3xl">
+        <h2 className="font-display text-2xl font-semibold tracking-tight dark:text-content sm:text-3xl">
           Try it. The first challenge is free.
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-6 dark:text-muted-foreground sm:text-base">

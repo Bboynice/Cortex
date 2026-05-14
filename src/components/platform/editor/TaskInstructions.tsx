@@ -2,7 +2,7 @@ import Pill from "@/src/components/ui/Pill";
 import { Loader2 } from "lucide-react";
 import NeonBorder from "@/src/components/ui/NeonBorder";
 import CortexLoader from "@/src/components/ui/CortexLoader";
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef} from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Copy, CheckCircle2, XCircle, AlertTriangle, MinusCircle } from "lucide-react";
 import { useToast } from "@/src/hooks/use-toast";
@@ -21,7 +21,11 @@ interface TaskInstructionsProps {
   testCases?: { input: string; output: string }[];
   testResults?: TestResult[];
   isSubmitting?: boolean;
+  instructionWidth?: number;
 }
+
+
+
 
 
 export default function TaskInstructions({ 
@@ -36,6 +40,7 @@ export default function TaskInstructions({
   testCases = [],
   testResults,
   isSubmitting = false,
+  instructionWidth,
 }: TaskInstructionsProps) {
   const [showTestCases, setShowTestCases] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -58,8 +63,19 @@ export default function TaskInstructions({
   const summary = summarizeResults(testResults);
   const hasResults = Boolean(testResults && testResults.length > 0);
   const passedAll = hasResults && summary.passed === summary.total && summary.total > 0;
+
+
+  
   return (
-    <div className="m-4 flex w-1/3 shrink-0 self-stretch flex-col items-center overflow-hidden rounded-lg border-1 dark:border-border dark:bg-surface dark:text-content">
+    <div 
+    style={instructionWidth != null ? { width: instructionWidth } : undefined}
+    className={[
+      "flex shrink-0 self-stretch flex-col items-center overflow-hidden",
+      "rounded-lg border-1 dark:border-border dark:bg-surface dark:text-content",
+      instructionWidth == null ? "w-1/3" : "",
+    ].join(" ")}
+    
+    >
         <div className={`w-full h-12 flex justify-center items-center pl-4 pr-4 shrink-0`}>
         <div className="w-full flex min-w-0 justify-between items-center gap-2">
           <div className="dark:text-muted-foreground h-auto py-2 shrink-0">AI Task Generator</div>
@@ -69,7 +85,6 @@ export default function TaskInstructions({
           </div>
         </div>
         </div>
-       
         <div className="w-full flex-1 min-h-0 overflow-y-auto p-4">
         <div className="w-full h-auto p-4 rounded-md border dark:border-border bg-cortex-heat dark:text-content ">
           <p className="text-lg font-semibold dark:text-white">Challenge:</p>

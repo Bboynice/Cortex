@@ -69,7 +69,7 @@ export default function MarketingShell({ children, title, description }: Marketi
         <main className="flex-1 py-10">
           {title ? (
             <section className="mx-auto max-w-3xl py-8 text-center sm:py-12">
-              <h1 className="text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
+              <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
                 {title}
               </h1>
               {description ? (

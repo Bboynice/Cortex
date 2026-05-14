@@ -92,7 +92,7 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
   }
 
   return (
-    <div ref={containerRef} className="mt-4 mr-4 mb-4 flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content">
+    <div ref={containerRef} className="flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content">
       <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border h-12">
         <div className="flex w-full min-w-0 items-center justify-between h-12 px-4">
           <div className="flex items-center gap-2 ">

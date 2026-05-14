@@ -24,10 +24,13 @@
 
   --animate-spin-slow: spin 3s linear infinite;
 
-  /* Bind the CSS variable injected by next/font/local in layout.tsx so the
-     Tailwind `font-sans` utility (and the body default) renders Chakra Petch
-     across the whole app. Falls back gracefully if the font fails to load. */
+  /* Bind the CSS variables injected by next/font/local in layout.tsx so the
+     Tailwind `font-sans` / `font-display` utilities resolve to Satoshi and
+     Clash Display respectively. Each chain falls back gracefully if the
+     font fails to load. `font-display` should be reserved for hero/heading
+     moments — Satoshi remains the workhorse for everything else. */
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-sans), ui-sans-serif, sans-serif;
 }
 
 @keyframes cortex-drift {

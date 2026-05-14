@@ -38,6 +38,8 @@ export default function PlaygroundPage() {
   const [testResults, setTestResults] = useState<TestResult[] | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addToast } = useToast();
+  const [instructionWidth, setInstructionWidth] = useState<number | null>(null);
+  const rowRef = useRef<HTMLDivElement>(null);
 
   const languageChoices = [
     { value: "javascript" as const, label: "JavaScript" },
@@ -202,6 +204,38 @@ export default function PlaygroundPage() {
     }
 
     setLoading(false);
+  }
+
+  function startResize(e: React.MouseEvent | React.TouchEvent) {
+    e.preventDefault();
+    const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const rowW = rowRef.current?.getBoundingClientRect().width ?? 0;
+    const PANEL_MIN = 240;
+    const CODE_MIN  = 360;
+    const HANDLE    = 6;
+    const maxWidth  = Math.max(PANEL_MIN, rowW - CODE_MIN - HANDLE);
+    // First-drag fallback: if no explicit width yet, start from the current 1/3.
+    const startWidth = instructionWidth ?? Math.round(rowW / 3);
+    function onMove(ev: MouseEvent | TouchEvent) {
+      const x = "touches" in ev ? ev.touches[0].clientX : ev.clientX;
+      const next = Math.min(maxWidth, Math.max(PANEL_MIN, startWidth + (x - startX)));
+      setInstructionWidth(next);
+    }
+    function onUp() {
+      window.removeEventListener("mousemove", onMove as any);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove as any);
+      window.removeEventListener("touchend", onUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    }
+    
+    window.addEventListener("mousemove", onMove as any);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove as any, { passive: false });
+    window.addEventListener("touchend", onUp);
+    document.body.style.cursor = "col-resize";   // note: col-resize, not row-resize
+    document.body.style.userSelect = "none";
   }
 
   function parseLangParam(raw: string | null): Language | undefined {
@@ -385,7 +419,7 @@ export default function PlaygroundPage() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 w-full items-stretch overflow-hidden">
+        <div ref={rowRef} className="flex min-h-0 flex-1 w-full items-stretch overflow-hidden p-4 gap-4">
           <TaskInstructions
             challenge={challenge}
             requirements={requirements}
@@ -398,6 +432,15 @@ export default function PlaygroundPage() {
             testCases={testCases}
             testResults={testResults}
             isSubmitting={isSubmitting}
+            instructionWidth={instructionWidth ?? undefined}
+          />
+
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            onMouseDown={startResize}
+            onTouchStart={startResize}
+            className="rounded-lg w-1.5 self-stretch shrink-0 cursor-col-resize dark:bg-border hover:dark:bg-primary/60 transition-colors"
           />
           <CodeWindow
             language={editorLanguage}
