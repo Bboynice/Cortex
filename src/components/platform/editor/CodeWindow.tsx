@@ -62,14 +62,19 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
     const startY = "touches" in e ? e.touches[0].clientY : e.clientY;
     const startHeight = terminalHeight;
   
-    // Compute the upper bound from the container, reserving room for header,
-    // footer, handle, and a minimum editor height so the editor never collapses.
-    const containerH = containerRef.current?.getBoundingClientRect().height ?? 0;
-    const HEADER = 48, FOOTER = 36, HANDLE = 6, EDITOR_MIN = 120, TERMINAL_MIN = 60;
-    const maxTerminal = Math.max(TERMINAL_MIN, containerH - HEADER - FOOTER - HANDLE - EDITOR_MIN);
-  
+    const HEADER = 48,
+      FOOTER = 36,
+      HANDLE = 6,
+      EDITOR_MIN = 120,
+      TERMINAL_MIN = 60;
+
     function onMove(ev: MouseEvent | TouchEvent) {
       const y = "touches" in ev ? ev.touches[0].clientY : ev.clientY;
+      const containerH = containerRef.current?.getBoundingClientRect().height ?? 0;
+      const maxTerminal = Math.max(
+        TERMINAL_MIN,
+        containerH - HEADER - FOOTER - HANDLE - EDITOR_MIN,
+      );
       // Dragging up makes the terminal taller, so invert the delta.
       const next = Math.min(maxTerminal, Math.max(TERMINAL_MIN, startHeight + (startY - y)));
       setTerminalHeight(next);
@@ -92,7 +97,10 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
   }
 
   return (
-    <div ref={containerRef} className="flex min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content">
+    <div
+      ref={containerRef}
+      className="flex h-full min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 dark:border-border dark:bg-foreground dark:text-content"
+    >
       <div className="flex w-full shrink-0 items-center justify-center border-b-1 dark:border-border h-12">
         <div className="flex w-full min-w-0 items-center justify-between h-12 px-4">
           <div className="flex items-center gap-2 ">

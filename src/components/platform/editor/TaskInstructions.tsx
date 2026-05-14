@@ -70,7 +70,7 @@ export default function TaskInstructions({
     <div 
     style={instructionWidth != null ? { width: instructionWidth } : undefined}
     className={[
-      "flex shrink-0 self-stretch flex-col items-center overflow-hidden",
+      "flex min-h-0 shrink-0 self-stretch flex-col items-center overflow-hidden",
       "rounded-lg border-1 dark:border-border dark:bg-surface dark:text-content",
       instructionWidth == null ? "w-1/3" : "",
     ].join(" ")}

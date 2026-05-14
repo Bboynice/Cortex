@@ -16,13 +16,13 @@ export default function Card({
       className={`flex flex-col rounded-lg bg-muted/20 backdrop-blur-lg p-4 shadow-sm w-full h-full ${className}`}
     >
       {title && (
-        <div className="flex items-center justify-between mb-2">
-          <h3 className=" text-xl font-bold text-ai-glow">{title}</h3>
+        <div className="flex items-center justify-between">
+          <h2 className=" text-2xl font-bold text-ai-glow">{title}</h2>
         </div>
       )}
 
       {description && (
-        <p className="text-sm font-semibold  tracking-wider text-content mb-3">
+        <p className="text-sm font-semibold  tracking-wider text-content mt-1">
           {description}
         </p>
       )}

@@ -8,7 +8,7 @@ import TaskInstructions from '@/src/components/platform/editor/TaskInstructions'
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
 import { runTestCases, resolveEntry, summarizeResults, type TestResult } from '@/src/lib/test-runner';
-import InsightPanel, { type InsightAnalysis } from '@/src/components/platform/editor/InsightPanel';
+import InsightPanel, { type InsightReport, type InsightAnalysis } from '@/src/components/platform/editor/InsightPanel';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/src/hooks/use-toast';
 
@@ -80,8 +80,12 @@ export default function PlaygroundPage() {
   const lastSuccessfulHashRef = useRef<string | null>(null);
   const inflightRef = useRef<AbortController | null>(null);
   const applyFixInflightRef = useRef<AbortController | null>(null);
+  const reportInflightRef = useRef<AbortController | null>(null);
   const insightFirstTimeoutRef = useRef<number | null>(null);
   const insightIntervalRef = useRef<number | null>(null);
+  const [report, setReport] = useState<InsightReport | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [generateReportError, setGenerateReportError] = useState<string | null>(null);
 
   const ANALYSIS_AFTER_GENERATE_MS = 60_000;
   const ANALYSIS_REPEAT_MS = 60_000;
@@ -184,6 +188,7 @@ export default function PlaygroundPage() {
 
     setLoading(true);
     inflightRef.current?.abort();
+    reportInflightRef.current?.abort();
     setAnalysisStatus("idle");
 
     const result = await generateCodingChallenge({
@@ -217,6 +222,8 @@ export default function PlaygroundPage() {
       setAnalysis(null);
       setAnalysisStatus("idle");
       setAnalysisError(null);
+      setReport(null);
+      setGenerateReportError(null);
     } else {
       alert("Error generating challenge");
     }
@@ -270,6 +277,54 @@ export default function PlaygroundPage() {
     const v = raw.toLowerCase();
     if (v === "easy" || v === "medium" || v === "hard") return v;
     return undefined;
+  }
+
+  async function handleGenerateReport() {
+    const ctx = latestContextRef.current;
+    if (!ctx.challenge) {
+      addToast("Generate a challenge first.", "warning");
+      return;
+    }
+    if (!ctx.code?.trim()) {
+      addToast("Add some code before requesting the report.", "warning");
+      return;
+    }
+    if (isGeneratingReport) return;
+
+    reportInflightRef.current?.abort();
+    const controller = new AbortController();
+    reportInflightRef.current = controller;
+
+    setIsGeneratingReport(true);
+    setGenerateReportError(null);
+
+    try {
+      const res = await fetch("/api/generate-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          code: ctx.code,
+          language: ctx.language,
+          challenge: ctx.challenge,
+          requirements: ctx.requirements ?? [],
+        }),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.message || errJson?.error || `HTTP ${res.status}`);
+      }
+
+      const data = (await res.json()) as InsightReport;
+      setReport(data);
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name === "AbortError") return;
+      setGenerateReportError(e instanceof Error ? e.message : "Failed to generate report");
+    } finally {
+      if (reportInflightRef.current === controller) reportInflightRef.current = null;
+      setIsGeneratingReport(false);
+    }
   }
 
   async function handleApplyFix() {
@@ -418,14 +473,16 @@ export default function PlaygroundPage() {
     return () => {
       clearInsightSchedule();
       inflightRef.current?.abort();
+      reportInflightRef.current?.abort();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challenge]);
 
   return (
-   <div className="h-full min-h-0 w-full overflow-y-auto pt-16 flex flex-col">
-      <section className="w-full flex flex-col flex-1 min-h-0">
-        <div className="flex h-auto w-full items-center justify-start dark:text-content shrink-0">
+    /* flex-1 + overflow-y-auto: fills <main> but scrolls when editor + insights exceed the viewport. */
+    <div className="flex min-h-0 flex-1 w-full flex-col overflow-y-auto pt-16 pb-10">
+      <section className="flex w-full shrink-0 flex-col">
+        <div className="flex h-auto w-full shrink-0 items-center justify-start dark:text-content">
           <div className="flex h-auto w-1/3 flex-row items-center justify-center gap-2">
             <div className="flex h-auto w-[90%] flex-row items-center justify-between gap-2">
               <MyButton effect="glow" onClick={() => handleGenerate()}>
@@ -447,7 +504,11 @@ export default function PlaygroundPage() {
           </div>
         </div>
 
-        <div ref={rowRef} className="flex min-h-0 flex-1 w-full items-stretch overflow-hidden p-4 gap-4">
+        {/* Fixed height (clamp) so terminal splitter works; 28–36rem / 52vh-ish band matches full-screen layout with insights visible below. */}
+        <div
+          ref={rowRef}
+          className="flex h-[clamp(36rem,52vh,36rem)] min-h-0 w-full shrink-0 items-stretch overflow-hidden p-4 pb-3 gap-4"
+        >
           <TaskInstructions
             challenge={challenge}
             requirements={requirements}
@@ -481,15 +542,21 @@ export default function PlaygroundPage() {
         </div>
       </section>
 
-      <InsightPanel
-        analysis={analysis}
-        status={analysisStatus}
-        errorMessage={analysisError}
-        hasChallenge={Boolean(challenge)}   
-        onApplyFix={handleApplyFix}
-        isApplyingFix={isApplyingFix}
-        applyFixError={applyFixError}
-      />
+      <div className="shrink-0">
+        <InsightPanel
+          analysis={analysis}
+          status={analysisStatus}
+          errorMessage={analysisError}
+          hasChallenge={Boolean(challenge)}
+          onApplyFix={handleApplyFix}
+          isApplyingFix={isApplyingFix}
+          applyFixError={applyFixError}
+          report={report}
+          onGenerateReport={handleGenerateReport}
+          isGeneratingReport={isGeneratingReport}
+          generateReportError={generateReportError}
+        />
+      </div>
    </div>
    
   );

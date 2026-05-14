@@ -1,6 +1,6 @@
 // src/components/platform/editor/InsightPanel.tsx
 import AnalyticsCard from "@/src/components/ui/AnalyticsCard";
-import { AlertTriangle, CheckCircle2, Lightbulb, Loader2, Sparkles, Wrench, Check} from "lucide-react";
+import { Lightbulb, Loader2, Sparkles, Check, FileText } from "lucide-react";
 import CortexLoader from "@/src/components/ui/CortexLoader";
 
 export type InsightFeedbackKind = "issue" | "improvement" | "praise";
@@ -11,6 +11,16 @@ export interface InsightFeedbackBlock {
   text: string;
   kind: InsightFeedbackKind;
 }
+
+export type InsightReport = {
+  headline: string;
+  verdict: string;
+  overview: string;
+  flow: { phase: string; detail: string }[];
+  loopAndComplexityNotes: string | null;
+  caution: string | null;
+  generatedAt: string;
+};
 
 export interface InsightAnalysis {
   scores: {
@@ -25,7 +35,7 @@ export interface InsightAnalysis {
   };
   feedback: InsightFeedbackBlock[];
   overallSuggestion: string;
-  analyzedAt: string; // ISO string
+  analyzedAt: string;
 }
 
 interface InsightPanelProps {
@@ -36,10 +46,14 @@ interface InsightPanelProps {
   onApplyFix?: () => void;
   isApplyingFix?: boolean;
   applyFixError?: string | null;
+  report?: InsightReport | null;
+  onGenerateReport?: () => void;
+  isGeneratingReport?: boolean;
+  generateReportError?: string | null;
 }
 
 
-export default function InsightPanel({ analysis, status = "idle", errorMessage, hasChallenge = true, onApplyFix, isApplyingFix = false, applyFixError }: InsightPanelProps) {
+export default function InsightPanel({ analysis, status = "idle", errorMessage, hasChallenge = true, onApplyFix, isApplyingFix = false, applyFixError, report, onGenerateReport, isGeneratingReport = false, generateReportError }: InsightPanelProps) {
   if (!hasChallenge) {
     return (
       <section className="w-full flex flex-col dark:bg-background px-4 pb-4">
@@ -70,7 +84,6 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
   const performanceSummary = analysis?.summaries?.performance ?? "Waiting for analysis…";
   const bestPracticesSummary = analysis?.summaries?.bestPractices ?? "Waiting for analysis…";
 
-  const feedbackBlocks = Array.isArray(analysis?.feedback) ? analysis!.feedback : [];
   const suggestion =
     analysis?.overallSuggestion ??
     "Start typing your solution — I’ll analyze it periodically and surface improvements here.";
@@ -161,6 +174,84 @@ export default function InsightPanel({ analysis, status = "idle", errorMessage, 
             <p className="mt-2 text-xs dark:text-red-400">{applyFixError}</p>
           )}
         </div>
+      </div>
+      <div
+        className={`w-full rounded-xl border dark:border-border dark:bg-card/50 transition-all ${
+          isGeneratingReport ? "blur-sm opacity-50 dark:shadow-white" : ""
+        }`}
+      >
+        <div className="flex items-start justify-between gap-4 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <FileText className="dark:text-yellow-400" size={18} aria-hidden="true" />
+            <h3 className="font-display text-base font-semibold uppercase tracking-wider dark:text-content/90">
+              The Architect — Structural Integrity Report
+            </h3>
+          </div>
+
+          <button
+            type="button"
+            onClick={onGenerateReport}
+            disabled={!onGenerateReport || isGeneratingReport || status === "loading"}
+            className="inline-flex shrink-0 items-center gap-2 rounded-md px-2 py-1 text-xs font-semibold font-sans dark:text-orange-400 dark:hover:bg-orange-500/10 dark:hover:text-orange-300 disabled:cursor-not-allowed disabled:opacity-50 dark:disabled:hover:bg-transparent"
+            aria-label="Generate structural integrity report"
+          >
+            {isGeneratingReport ? (
+              <>
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                <span>Generating…</span>
+              </>
+            ) : (
+              <>
+                <span>Generate Report</span>
+                <Sparkles size={14} className="opacity-80" aria-hidden="true" />
+              </>
+            )}
+          </button>
+        </div>
+
+        {generateReportError && (
+          <p className="px-4 pb-2 font-sans text-sm dark:text-red-400">{generateReportError}</p>
+        )}
+
+        {report ? (
+          <div className="space-y-4 px-4 pb-5 font-sans text-base leading-relaxed text-muted-foreground">
+            <p className="font-display text-xl font-semibold tracking-tight text-balance dark:text-content">
+              {report.headline}
+            </p>
+            <p className="text-[1.05rem] dark:text-content/90">{report.verdict}</p>
+            <p className="whitespace-pre-wrap break-words text-muted-foreground">{report.overview}</p>
+            <ul className="list-disc space-y-3 pl-5 marker:text-content/35">
+              {report.flow.map((item, i) => (
+                <li key={`${item.phase}-${i}`}>
+                  <span className="font-display text-base font-semibold dark:text-content">{item.phase}</span>
+                  <span className="text-muted-foreground"> — {item.detail}</span>
+                </li>
+              ))}
+            </ul>
+
+            {report.loopAndComplexityNotes ? (
+              <p className="border-t border-border pt-4 text-base dark:border-border">
+                <span className="font-display text-base font-semibold dark:text-content">Loops &amp; complexity: </span>
+                <span className="text-muted-foreground">{report.loopAndComplexityNotes}</span>
+              </p>
+            ) : null}
+
+            {report.caution ? (
+              <p className="rounded-md border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 font-sans text-sm leading-relaxed text-yellow-100/95">
+                {report.caution}
+              </p>
+            ) : null}
+
+            <p className="font-sans text-xs uppercase tracking-wider text-content/45">
+              Generated {new Date(report.generatedAt).toLocaleString()}
+            </p>
+          </div>
+        ) : (
+          <div className="px-4 pb-5 font-sans text-base leading-relaxed text-muted-foreground/90">
+            Click <span className="font-medium text-content">Generate Report</span> for a deep
+            structural walkthrough of your solution.
+          </div>
+        )}
       </div>
     </section>
   );
