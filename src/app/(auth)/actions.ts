@@ -36,3 +36,10 @@ export async function registerAction(formData: FormData) {
 
   return { success: true, user: MOCK_USER };
 }
+
+export async function logoutAction() {
+  const cookieStore = await cookies();
+  cookieStore.delete("cortex-session");
+
+  return { success: true };
+}

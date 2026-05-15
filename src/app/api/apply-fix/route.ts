@@ -1,11 +1,22 @@
 import { openai } from "@/src/lib/ai-client";
 
+/** When present, these rows come from the playground grader (reference solution outputs). */
+type ApplyFixTestFailure = {
+  index: number;
+  input: string;
+  expected: string;
+  status: "fail" | "error";
+  actual?: string;
+  message?: string;
+};
+
 type ApplyFixRequest = {
   code?: string;
   language?: string;
   suggestion?: string;
   challenge?: string;
   requirements?: string[];
+  testFailures?: ApplyFixTestFailure[];
 };
 
 function asString(x: unknown, fallback = "") {
@@ -26,6 +37,49 @@ function stripFences(code: string): string {
   return fenced ? fenced[1] : code;
 }
 
+function normalizeTestFailures(raw: unknown): ApplyFixTestFailure[] {
+  if (!Array.isArray(raw)) return [];
+  const out: ApplyFixTestFailure[] = [];
+  for (const row of raw) {
+    if (!row || typeof row !== "object") continue;
+    const o = row as Record<string, unknown>;
+    const index = typeof o.index === "number" && Number.isFinite(o.index) ? o.index : -1;
+    const input = asString(o.input);
+    const expected = asString(o.expected);
+    const status = o.status === "fail" || o.status === "error" ? o.status : null;
+    if (index < 0 || !input || !expected || !status) continue;
+    if (status === "fail") {
+      out.push({
+        index,
+        input,
+        expected,
+        status: "fail",
+        actual: o.actual !== undefined ? asString(o.actual) : "",
+      });
+    } else {
+      out.push({
+        index,
+        input,
+        expected,
+        status: "error",
+        message: asString(o.message),
+      });
+    }
+  }
+  return out;
+}
+
+function formatTestFailuresForPrompt(failures: ApplyFixTestFailure[]): string {
+  return failures
+    .map((f) => {
+      if (f.status === "fail") {
+        return `Case #${f.index}: status=FAIL | input=${f.input} | expected (reference)=${f.expected} | got=${f.actual ?? ""}`;
+      }
+      return `Case #${f.index}: status=ERROR | input=${f.input} | expected (reference)=${f.expected} | runtime: ${f.message || "(no message)"}`;
+    })
+    .join("\n");
+}
+
 export async function POST(req: Request) {
   try {
     const body = (await req.json()) as ApplyFixRequest;
@@ -34,6 +88,7 @@ export async function POST(req: Request) {
     const suggestion = asString(body?.suggestion).trim();
     const challenge = asString(body?.challenge).trim();
     const requirements = Array.isArray(body?.requirements) ? body!.requirements! : [];
+    const testFailures = normalizeTestFailures(body?.testFailures);
 
     if (!code.trim()) {
       return Response.json({ error: "Missing code" }, { status: 400 });
@@ -44,16 +99,26 @@ export async function POST(req: Request) {
 
     const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
+    const failuresBlock =
+      testFailures.length > 0
+        ? [
+            "",
+            "Automated test failures below are from the playground grader; \"expected\" is the reference solution output. Align return values, edge cases, and conventions so these cases pass — including when that differs from textbook definitions.",
+            "",
+            formatTestFailuresForPrompt(testFailures),
+          ].join("\n")
+        : "";
+
     const response = await openai.chat.completions.create({
       model,
       response_format: { type: "json_object" },
       temperature: 0.1,
-      max_tokens: 1200,
+      max_tokens: 2000,
       messages: [
         {
           role: "system",
           content:
-            'You are a senior software engineer. You rewrite the user\'s code to apply ONE specific improvement suggestion — nothing more. Return ONLY valid JSON of the shape {"code": string}. Do not include markdown fences, comments about the change, or any prose. Prefer simple, idiomatic code. Do NOT add features, defensive checks, comments, type annotations, or abstractions that the suggestion did not ask for. Keep the same function/variable names and public signatures unless the suggestion explicitly requires changing them. If the suggestion does not actually apply, return the code unchanged.',
+            'You are a senior software engineer. Rewrite the user\'s code and return ONLY valid JSON: {"code": string}. No markdown fences or prose outside JSON. Prefer simple, idiomatic code.\n\nPriorities:\n1) If the user message includes an \"Automated test failures\" section, those expected values are authoritative for the grader. Fix logic so outputs match reference expectations for those rows (including types such as null vs number).\n2) Apply the improvement suggestion when it does not conflict with (1).\n3) Keep the same entry function name and overall structure unless (1) or the suggestion requires changes.\n4) Avoid unrelated refactors or extra features.\n\nHandling inputs or return shapes implied by failing tests is required behavior — not \"unnecessary defensive code\". Only skip extras that neither the task nor the failures imply.',
         },
         {
           role: "user",
@@ -61,10 +126,13 @@ export async function POST(req: Request) {
             `Language: ${language}`,
             challenge ? `Task: ${challenge}` : "",
             requirements.length ? `Requirements: ${requirements.join(" | ")}` : "",
+            failuresBlock,
             "",
-            `Suggestion to apply: ${suggestion}`,
+            `Improvement suggestion (from code review): ${suggestion}`,
             "",
-            "Rewrite the following code to apply ONLY the suggestion above. Keep everything else the same. Do not refactor unrelated parts. Return JSON: {\"code\": \"...\"}.",
+            testFailures.length > 0
+              ? "Rewrite the code so it satisfies the failing cases above (reference outputs) while addressing the suggestion where compatible. Return JSON: {\"code\": \"...full updated source...\"}."
+              : "Rewrite the code to apply the suggestion only. Keep everything else the same where possible. Return JSON: {\"code\": \"...\"}.",
             "",
             "Current code:",
             code,

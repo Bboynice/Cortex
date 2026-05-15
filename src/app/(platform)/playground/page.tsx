@@ -7,11 +7,71 @@ import DropdownMenu from '@/src/components/ui/Dropdown';
 import TaskInstructions from '@/src/components/platform/editor/TaskInstructions';
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
-import { runTestCases, resolveEntry, summarizeResults, type TestResult } from '@/src/lib/test-runner';
+import {
+  runTestCases,
+  resolveEntry,
+  summarizeResults,
+  type TestCase,
+  type TestResult,
+} from '@/src/lib/test-runner';
 import InsightPanel, { type InsightReport, type InsightAnalysis } from '@/src/components/platform/editor/InsightPanel';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/src/hooks/use-toast';
 import { usePlaygroundStore } from '@/src/store/usePlaygroundStore';
+
+/** Rows sent to /api/apply-fix so the model sees reference expected vs actual from Submit. */
+function buildApplyFixTestFailurePayload(
+  cases: TestCase[] | undefined,
+  results: TestResult[] | undefined,
+):
+  | {
+      index: number;
+      input: string;
+      expected: string;
+      status: "fail" | "error";
+      actual?: string;
+      message?: string;
+    }[]
+  | undefined {
+  if (!cases?.length || !results?.length) return undefined;
+  const out: {
+    index: number;
+    input: string;
+    expected: string;
+    status: "fail" | "error";
+    actual?: string;
+    message?: string;
+  }[] = [];
+  for (const r of results) {
+    if (r.status !== "fail" && r.status !== "error") continue;
+    const tc = cases[r.i];
+    if (!tc) continue;
+    if (r.status === "fail") {
+      let actualStr = "";
+      try {
+        actualStr = JSON.stringify(r.actual);
+      } catch {
+        actualStr = String(r.actual);
+      }
+      out.push({
+        index: r.i,
+        input: tc.input,
+        expected: tc.output,
+        status: "fail",
+        actual: actualStr,
+      });
+    } else {
+      out.push({
+        index: r.i,
+        input: tc.input,
+        expected: tc.output,
+        status: "error",
+        message: r.message,
+      });
+    }
+  }
+  return out.length ? out : undefined;
+}
 
 export default function PlaygroundPage() {
   const searchParams = useSearchParams();
@@ -379,6 +439,7 @@ export default function PlaygroundPage() {
           suggestion,
           challenge: ctx.challenge,
           requirements: ctx.requirements,
+          testFailures: buildApplyFixTestFailurePayload(testCases, testResults),
         }),
       });
 

@@ -1,12 +1,7 @@
 'use client';
 
 import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
-
-const fieldLine =
-  "w-full rounded-none border-0 border-b pb-2 pt-3 " +
-  "dark:border-border dark:bg-transparent dark:text-content dark:placeholder:text-muted-foreground " +
-  "focus-visible:outline-none focus-visible:ring-0 dark:focus-visible:border-primary " +
-  "transition-[border-color] duration-150";
+import LabeledInput from "@/src/components/ui/LabeledInput";
 
 export default function ContactPage() {
   return (
@@ -44,32 +39,10 @@ export default function ContactPage() {
             action="#"
             onSubmit={(e) => e.preventDefault()}
           >
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              className={fieldLine}
-              autoComplete="name"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              className={fieldLine}
-              autoComplete="email"
-            />
-            <input
-              type="text"
-              name="topic"
-              placeholder="Topic"
-              className={fieldLine}
-            />
-            <textarea
-              name="message"
-              placeholder="Message"
-              rows={4}
-              className={`${fieldLine} min-h-[6rem] resize-y`}
-            />
+            <LabeledInput type="text" name="name" placeholder="Name" autoComplete="name" />
+            <LabeledInput type="email" name="email" placeholder="Email" autoComplete="email" />
+            <LabeledInput type="text" name="topic" placeholder="Topic" />
+            <LabeledInput multiline name="message" placeholder="Message" rows={4} />
             <div className="pt-2">
               <GlowButton effect="glow" roundness={16} onClick={() => {}}>
                 Submit

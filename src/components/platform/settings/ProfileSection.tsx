@@ -3,75 +3,128 @@
 import Pill from "@/src/components/ui/Pill";
 import LabeledInput from "@/src/components/ui/LabeledInput";
 import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
-import { AlertTriangle, Camera, Crown, Github, Plus, Save, ShieldCheck, Unlink2, User2 } from "lucide-react";
+import { AlertTriangle, Crown, Github, Plus, Save, ShieldCheck, Unlink2, User2 } from "lucide-react";
 import { useModalStore } from "@/src/hooks/use-modal-store";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import CortexPilotLicense from "@/src/components/ui/CortexPilotLicense";
-
+import { logoutAction } from "@/src/app/(auth)/actions";
+import { useRouter } from "next/navigation";
 export default function ProfileSection() {
+  const router = useRouter();
+  const clearAuth = useAuthStore((state) => state.clearAuth);
   // UI only (no functionality yet)
   const { onOpen } = useModalStore();
   const { user } = useAuthStore();
   const fullName = user?.name ?? "Unknown";
   const email = user?.email ?? "Unknown";
   const username = user?.email?.split("@")[0] || "Unknown";
-  const points = user?.points ?? 9990;
+  const points = user?.points ?? 5934;
 
+  const handleLogout = async () => {
+    clearAuth();
+    await logoutAction();
+    router.push("/");
+    router.refresh();
 
+  };
 
   return (
     <div className="w-full max-w-none space-y-6">
-      {/* Profile Information */}
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-        <CortexPilotLicense licenseId={'434'} name={fullName} points={points} />
-      </section>
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      {/* Profile Information + Connected Accounts */}
+      <section className="rounded-2xl border border-border bg-card/40 p-7 shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:p-8">
         <header className="flex items-center gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
-            <User2 size={18} aria-hidden="true" />
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
+            <User2 size={20} aria-hidden="true" />
           </span>
-          <h2 className="text-lg font-semibold text-content tracking-tight">Profile Information</h2>
+          <h2 className="text-xl font-semibold text-content tracking-tight">Profile Information</h2>
         </header>
 
-        <div className="mt-6 flex items-start gap-5">
-          <div className="relative shrink-0">
-            <div className="h-16 w-16 overflow-hidden rounded-full border border-border bg-background/40">
-              {/* no src yet to avoid empty string warnings */}
-              <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-                AT
+        <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-8">
+          {/* Left: identity + pilot license */}
+          <div className="flex min-h-0 min-w-0 h-full flex-col gap-8 min-[520px]:flex-row min-[520px]:items-center min-[520px]:gap-5">
+            <div className="flex min-w-0 flex-1 flex-col gap-6">
+              <div className="space-y-2">
+                <div className="text-2xl font-semibold tracking-tight text-content sm:text-3xl sm:leading-tight">
+                  {fullName}
+                </div>
+                <div className="text-base text-muted-foreground">{email}</div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Pill
+                  text="Verified"
+                  variant="content"
+                  icon={<ShieldCheck size={16} className="text-emerald-300" aria-hidden="true" />}
+                  className="bg-emerald-500/15 text-emerald-200 px-3.5 py-2 text-sm rounded-lg"
+                />
+                <Pill
+                  text="Pro Member"
+                  variant="content"
+                  icon={<Crown size={16} className="text-orange-300" aria-hidden="true" />}
+                  className="bg-orange-500/15 text-orange-200 px-3.5 py-2 text-sm rounded-lg"
+                />
+              </div>
+
+              <GlowButton color="primary" effect="none" roundness={8} className="w-fit text-sm font-semibold" onClick={handleLogout}>
+                Log Out
+              </GlowButton>
+            </div>
+
+            <div className="relative flex shrink-0 justify-center min-[520px]:justify-start">
+              <div className="w-[380px] max-w-full overflow-x-auto [scrollbar-width:thin]">
+                <CortexPilotLicense licenseId="434" name={fullName} points={points} />
               </div>
             </div>
-            <button
-              type="button"
-              className="absolute -bottom-1 -right-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-orange-500 text-white shadow-lg hover:brightness-110 active:brightness-95"
-              aria-label="Change avatar (UI only)"
-            >
-              <Camera size={16} aria-hidden="true" />
-            </button>
           </div>
 
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <div className="text-base font-semibold text-content">{fullName}</div>
-            <div className="text-xs text-muted-foreground">{email}</div>
+          {/* Right: connected accounts — stretches to match left column height */}
+          <div className="flex min-h-0 min-w-0 h-full flex-col border-t border-border/60 pt-10 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <div className="flex shrink-0 items-center gap-3">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-500/15 text-slate-200">
+                <Github size={18} aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold text-content tracking-tight">Connected Accounts</h3>
+            </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Pill
-                text="Verified"
-                variant="content"
-                icon={<ShieldCheck size={14} className="text-emerald-300" aria-hidden="true" />}
-                className="bg-emerald-500/15 text-emerald-200 px-3 py-1.5 text-xs rounded-lg"
-              />
-              <Pill
-                text="Pro Member"
-                variant="content"
-                icon={<Crown size={14} className="text-orange-300" aria-hidden="true" />}
-                className="bg-orange-500/15 text-orange-200 px-3 py-1.5 text-xs rounded-lg"
-              />
+            <div className="mt-6 flex min-h-0 flex-1 flex-col justify-start">
+              <div className="space-y-3">
+                <div className="flex flex-col gap-4 rounded-xl border border-border bg-background/25 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-[#24292f]/50 ring-1 ring-white/5">
+                      <Github size={20} className="text-white" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-content">GitHub</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground truncate">@{username}</div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-background px-4 py-2 text-sm font-semibold text-muted-foreground ring-1 ring-border hover:text-content active:brightness-95 sm:self-center"
+                  >
+                    <Unlink2 size={16} aria-hidden="true" />
+                    Disconnect
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border/80 bg-background/20 px-4 py-3 text-sm font-medium text-muted-foreground hover:border-border hover:bg-background/25 hover:text-content active:brightness-95"
+                >
+                  <Plus size={16} aria-hidden="true" />
+                  Connect Another Account
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </section>
+      <section className="rounded-2xl border border-border p-6 dark:bg-surface shadow-[0_12px_40px_rgba(0,0,0,0.35)] ">
+     
+        
 
-        <div className="mt-6 space-y-5 border-t border-border/80 pt-6">
+        <div className=" w-full h-full space-y-5 pt-6 dark:bg-surface">
           <LabeledInput
             label="Full Name"
             defaultValue={fullName}
@@ -91,12 +144,9 @@ export default function ProfileSection() {
             className="bg-foreground/40"
             autoComplete="username"
           />
-        </div>
-
-        <div className="mt-6 border-t border-border/80 pt-6">
-          <GlowButton
-            effect="none"
+             <GlowButton
             color="primary"
+            effect="glow"
             className="normal-case px-6 py-3 rounded-xl text-sm font-semibold gap-2 justify-start w-fit"
           >
             <span className="inline-flex items-center gap-2">
@@ -105,48 +155,8 @@ export default function ProfileSection() {
             </span>
           </GlowButton>
         </div>
-      </section>
 
-      {/* Connected Accounts */}
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
-        <header className="flex items-center gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted/10 text-muted-foreground">
-            <Github size={18} aria-hidden="true" />
-          </span>
-          <h2 className="text-lg font-semibold text-content tracking-tight">Connected Accounts</h2>
-        </header>
-
-        <div className="mt-6 space-y-3">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/40 border border-border">
-                <Github size={18} className="text-white" aria-hidden="true" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-content">GitHub</div>
-                <div className="text-xs text-muted-foreground truncate">@{username}</div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-xl bg-muted/20 px-4 py-2 text-sm font-semibold text-content hover:bg-muted/25 active:brightness-95"
-            >
-              <Unlink2 size={16} aria-hidden="true" />
-              Disconnect
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="w-full rounded-xl border border-border bg-background/20 px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-background/25 hover:text-content active:brightness-95"
-          >
-            <span className="inline-flex items-center justify-center gap-2">
-              <Plus size={16} aria-hidden="true" />
-              Connect Another Account
-            </span>
-          </button>
-        </div>
+      
       </section>
 
       {/* Danger Zone */}
