@@ -6,7 +6,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  heatLevel: number;
+  points: number;
 }
 
 interface AuthState {
@@ -14,7 +14,7 @@ interface AuthState {
   status: "loading" | "authenticated" | "unauthenticated";
   setAuth: (user: User) => void;
   clearAuth: () => void;
-  updateHeatLevel: (delta: number) => void;
+  updatePoints: (delta: number) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,12 +27,12 @@ export const useAuthStore = create<AuthState>()(
 
       clearAuth: () => set({ user: null, status: "unauthenticated" }),
 
-      updateHeatLevel: (delta) =>
+      updatePoints: (delta) =>
         set((state) => ({
           user: state.user
             ? {
                 ...state.user,
-                heatLevel: state.user.heatLevel + delta,
+                points: state.user.points + delta,
               }
             : null,
         })),

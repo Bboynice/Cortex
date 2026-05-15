@@ -20,12 +20,14 @@ function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Looks for *any* function definition in the user's code. Used as a fallback
-// when the AI's entryFunction hint isn't actually defined.
+// Looks for `function`-style declarations. Used when the AI's entryFunction hint
+// isn't usable. Prefer the LAST top-level declaration so helper-first layouts
+// (tokenize → parse → solve) grade correctly instead of blindly picking the first.
 export function findEntryFunction(code: string, language: SupportedLanguage): string | null {
   if (language === "javascript") {
-    const fnDecl = code.match(/function\s+([A-Za-z_$][\w$]*)\s*\(/);
-    if (fnDecl?.[1]) return fnDecl[1];
+    const tops = [...code.matchAll(/^function\s+([A-Za-z_$][\w$]*)\s*\(/gm)];
+    if (tops.length > 1) return tops[tops.length - 1]![1]!;
+    if (tops.length === 1) return tops[0]![1]!;
     // const fn = (...) => / function (...) / async (...) => / x => / function ...
     const expr = code.match(
       /(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][\w$]*\s*=>)/,
@@ -33,12 +35,16 @@ export function findEntryFunction(code: string, language: SupportedLanguage): st
     return expr?.[1] ?? null;
   }
   if (language === "python") {
-    const m = code.match(/def\s+([A-Za-z_][\w]*)\s*\(/);
-    return m?.[1] ?? null;
+    const tops = [...code.matchAll(/^[ \t]*def\s+([A-Za-z_][\w]*)\s*\(/gm)];
+    if (tops.length > 1) return tops[tops.length - 1]![1]!;
+    if (tops.length === 1) return tops[0]![1]!;
+    return null;
   }
   if (language === "rust") {
-    const m = code.match(/fn\s+([A-Za-z_][\w]*)\s*\(/);
-    return m?.[1] ?? null;
+    const tops = [...code.matchAll(/^[ \t]*(?:pub\([^)]*\)\s+|pub\s+)?fn\s+([A-Za-z_][\w]*)\s*\(/gm)];
+    if (tops.length > 1) return tops[tops.length - 1]![1]!;
+    if (tops.length === 1) return tops[0]![1]!;
+    return null;
   }
   return null;
 }

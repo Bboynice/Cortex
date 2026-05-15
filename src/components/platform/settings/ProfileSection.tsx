@@ -5,18 +5,26 @@ import LabeledInput from "@/src/components/ui/LabeledInput";
 import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
 import { AlertTriangle, Camera, Crown, Github, Plus, Save, ShieldCheck, Unlink2, User2 } from "lucide-react";
 import { useModalStore } from "@/src/hooks/use-modal-store";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import CortexPilotLicense from "@/src/components/ui/CortexPilotLicense";
 
 export default function ProfileSection() {
   // UI only (no functionality yet)
-  const fullName = "Alex Thompson";
-  const email = "alex.thompson@email.com";
-  const username = "alexthompson";
   const { onOpen } = useModalStore();
+  const { user } = useAuthStore();
+  const fullName = user?.name ?? "Unknown";
+  const email = user?.email ?? "Unknown";
+  const username = user?.email?.split("@")[0] || "Unknown";
+  const points = user?.points ?? 9990;
+
 
 
   return (
     <div className="w-full max-w-none space-y-6">
       {/* Profile Information */}
+      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+        <CortexPilotLicense licenseId={'434'} name={fullName} points={points} />
+      </section>
       <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <header className="flex items-center gap-3">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">

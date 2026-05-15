@@ -10,9 +10,9 @@ const fieldLine =
 
 export default function ContactPage() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto pb-14 pt-24 md:pb-16 md:pt-28">
-      <div className="mx-auto w-full max-w-2xl shrink-0 px-6">
-        <header className="space-y-4 border-b pb-10 dark:border-border ">
+    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto pb-14 pt-24 md:pb-16 md:pt-28 bg-cortex-heat ">
+      <div className="mx-auto w-full  shrink-0 px-6">
+        <header className="space-y-4 border-b pb-10 dark:border-white ">
           <h1 className="font-display text-3xl font-semibold tracking-tight dark:text-content">
             Contact
           </h1>
@@ -40,7 +40,7 @@ export default function ContactPage() {
 
         <div className="mt-10 flex w-full justify-center">
           <form
-            className="flex w-full max-w-lg flex-col gap-6 rounded-lg border p-6 dark:border-border dark:bg-surface md:p-8"
+            className="flex w-full flex-col gap-6 rounded-lg border p-6 dark:border-border dark:bg-surface md:p-8"
             action="#"
             onSubmit={(e) => e.preventDefault()}
           >

@@ -67,7 +67,7 @@
     radial-gradient(ellipse 35% 50% at 80% 25%, hsl(24 99% 47% / 0.7) 0%, transparent 65%),
     radial-gradient(ellipse 30% 30% at 55% 45%, hsl(4 99% 38% / 0.5) 0%, transparent 60%);
   filter: blur(40px);
-  opacity: 0.85;
+  opacity: var(--heat-intensity, 0.85);
   animation: cortex-drift 25s ease-in-out infinite;
 }
 
