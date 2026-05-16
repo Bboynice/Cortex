@@ -3,11 +3,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ThemeToggle from "@/src/components/ui/ThemeToogle";
+import { useAuthStore } from "@/src/store/useAuthStore";
 
 type MarketingShellProps = {
   children: ReactNode;
-  title?: string;
-  description?: string;
 };
 
 const navLinks = [
@@ -17,8 +17,11 @@ const navLinks = [
   { href: "/privacy", label: "Privacy", match: "/privacy" },
 ];
 
-export default function MarketingShell({ children, title, description }: MarketingShellProps) {
+export default function MarketingShell({ children }: MarketingShellProps) {
   const pathname = usePathname();
+  const { user } = useAuthStore();
+
+  const isAuthenticated = !!user;
 
   return (
     <div className="min-h-screen w-full dark:bg-cortex-aura dark:text-content">
@@ -50,36 +53,27 @@ export default function MarketingShell({ children, title, description }: Marketi
             </nav>
 
             <div className="flex items-center gap-2">
-              <Link
-                href="/login"
-                className="hidden rounded-md px-3 py-1.5 text-sm font-medium dark:text-muted-foreground dark:hover:text-content transition-colors sm:inline-flex"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center rounded-md dark:bg-primary px-4 py-2 text-sm font-semibold dark:text-primary-foreground hover:brightness-110 active:brightness-95 transition"
-              >
-                Get started
-              </Link>
+              <ThemeToggle />
+              {isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center rounded-md dark:bg-primary px-4 py-2 text-sm font-semibold dark:text-primary-foreground hover:brightness-110 active:brightness-95 transition"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="inline-flex items-center rounded-md dark:bg-primary px-4 py-2 text-sm font-semibold dark:text-primary-foreground hover:brightness-110 active:brightness-95 transition"
+                >
+                  Sign in
+                </Link>
+              )}
             </div>
           </div>
         </header>
 
         <main className="flex-1 py-10">
-          {title ? (
-            <section className="mx-auto max-w-3xl py-8 text-center sm:py-12">
-              <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
-                {title}
-              </h1>
-              {description ? (
-                <p className="mt-4 text-base leading-7 dark:text-muted-foreground sm:text-lg">
-                  {description}
-                </p>
-              ) : null}
-            </section>
-          ) : null}
-
           {children}
         </main>
 

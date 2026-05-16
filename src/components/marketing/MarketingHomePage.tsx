@@ -1,7 +1,6 @@
 'use client';
 
 import Link from "next/link";
-import MarketingShell from "@/src/components/marketing/MarketingShell";
 
 const features = [
   {
@@ -38,7 +37,7 @@ const steps = [
 
 export default function MarketingHomePage() {
   return (
-    <MarketingShell>
+    <>
       <section className="rounded-xl border dark:border-border dark:bg-muted/20 backdrop-blur-lg p-6 shadow-sm sm:p-10">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
           <div>
@@ -162,6 +161,6 @@ export default function MarketingHomePage() {
           </Link>
         </div>
       </section>
-    </MarketingShell>
+    </>
   );
 }

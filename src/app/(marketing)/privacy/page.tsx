@@ -1,29 +1,30 @@
-import MarketingShell from "@/src/components/marketing/MarketingShell";
-
 const principles = [
   {
     title: "Your code is yours",
-    description:
-      "What you write in the editor stays in your account. We don't train external models on it and we don't sell it.",
+    description: "What you write in the editor stays in your account. We don't train external models on it and we don't sell it.",
   },
   {
     title: "Minimal collection",
-    description:
-      "We collect what's needed to run the product: account, code submissions, AI feedback. Nothing extra for ads or analytics resale.",
+    description: "We collect what's needed to run the product: account, code submissions, AI feedback. Nothing extra for ads or analytics resale.",
   },
   {
     title: "Easy to leave",
-    description:
-      "Delete your account from Settings and your data goes with it. No retention games, no email loops to escape.",
+    description: "Delete your account from Settings and your data goes with it. No retention games, no email loops to escape.",
   },
 ];
 
 export default function PrivacyPage() {
   return (
-    <MarketingShell
-      title="Privacy"
-      description="A short page about what we collect, why, and what you can do about it."
-    >
+    <>
+      <section className="mx-auto max-w-3xl py-8 text-center sm:py-12">
+        <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
+          Privacy
+        </h1>
+        <p className="mt-4 text-base leading-7 dark:text-muted-foreground sm:text-lg">
+          A short page about what we collect, why, and what you can do about it.
+        </p>
+      </section>
+
       <section className="rounded-xl border dark:border-border dark:bg-muted/20 backdrop-blur-lg p-6 shadow-sm sm:p-8">
         <h2 className="text-2xl font-semibold tracking-tight dark:text-content">The short version</h2>
         <p className="mt-4 text-sm leading-7 dark:text-muted-foreground sm:text-base">
@@ -60,6 +61,6 @@ export default function PrivacyPage() {
           <li>— Delete your account at any time. Removal is permanent.</li>
         </ul>
       </section>
-    </MarketingShell>
+    </>
   );
 }

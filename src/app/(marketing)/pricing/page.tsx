@@ -1,5 +1,4 @@
 import Link from "next/link";
-import MarketingShell from "@/src/components/marketing/MarketingShell";
 
 const plans = [
   {
@@ -65,19 +64,23 @@ const faqs = [
 
 export default function PricingPage() {
   return (
-    <MarketingShell
-      title="Pricing"
-      description="Simple plans. Start free, upgrade when the loop sticks."
-    >
+    <>
+      <section className="mx-auto max-w-3xl py-8 text-center sm:py-12">
+        <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
+          Pricing
+        </h1>
+        <p className="mt-4 text-base leading-7 dark:text-muted-foreground sm:text-lg">
+          Simple plans. Start free, upgrade when the loop sticks.
+        </p>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-3">
         {plans.map((plan) => (
           <div
             key={plan.name}
             className={[
               "flex flex-col rounded-xl border dark:bg-muted/20 backdrop-blur-lg p-6 shadow-sm",
-              plan.featured
-                ? "dark:border-primary/40"
-                : "dark:border-border",
+              plan.featured ? "dark:border-primary/40" : "dark:border-border",
             ].join(" ")}
           >
             <div className="flex items-center justify-between gap-3">
@@ -135,6 +138,6 @@ export default function PricingPage() {
           ))}
         </div>
       </section>
-    </MarketingShell>
+    </>
   );
 }
