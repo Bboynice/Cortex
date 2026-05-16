@@ -32,8 +32,14 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
     const isSaveCodeDialog = type === "save-code";
     const isConfirmDialog = type === "confirm-delete";
     const isProfileDialog = type === "save-profile";
+    const isUserSettingsDialog = type === "user-settings";
 
-    if (!isOpen || (!isSaveCodeDialog && !isConfirmDialog && !isProfileDialog)) return null;
+    if (
+      !isOpen ||
+      (!isSaveCodeDialog && !isConfirmDialog && !isProfileDialog && !isUserSettingsDialog)
+    ) {
+      return null;
+    }
 
     const modalTitle = (data?.title as string | undefined) ?? title ?? "Submit solution?";
     const modalDescription =
@@ -48,7 +54,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
           | undefined
           | (() => void | Promise<void | SubmissionResult | undefined>);
 
-        if (isConfirmDialog || isProfileDialog) {
+        if (isConfirmDialog || isProfileDialog || isUserSettingsDialog) {
           if (action) await action();
           onClose();
           return;
@@ -71,7 +77,12 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
         addToast("Submitted.", "success");
         onClose();
       } catch {
-        addToast(isConfirmDialog || isProfileDialog ? "Something went wrong." : "Failed to submit.", "error");
+        addToast(
+          isConfirmDialog || isProfileDialog || isUserSettingsDialog
+            ? "Something went wrong."
+            : "Failed to submit.",
+          "error",
+        );
         onClose();
       } finally {
         setIsSubmitting(false);
