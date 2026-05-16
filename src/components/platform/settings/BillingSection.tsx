@@ -146,7 +146,7 @@ export default function BillingSection() {
     //     </div>
     //   </section>
     // </div>
-    <div className="flex items-start justify-start h-full">
+    <div className="flex h-full items-start justify-start dark:text-muted-foreground">
       Billing coming soon...
     </div>
   );

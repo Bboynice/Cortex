@@ -12,19 +12,19 @@ export default function AISection() {
   const [autoSuggestions, setAutoSuggestions] = useState("enabled");
   const [reportVerbosity, setReportVerbosity] = useState("compact");
   const [architectMode, setArchitectMode] = useState("mentor");
-  const [preferredModel, setPreferredModel] = useState("gpt-5.4");
+  const [preferredModel, setPreferredModel] = useState("gpt-4o-mini");
   const { addToast } = useToast();
   const { onOpen } = useModalStore();
   return (
     <div className="w-full max-w-none space-y-6">
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <section className="rounded-2xl border dark:border-border dark:bg-card/40 p-6 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <header className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl dark:bg-violet-500/15 dark:text-violet-300">
                 <BrainCircuit size={18} aria-hidden="true" />
               </span>
-              <h2 className="text-lg font-semibold tracking-tight text-content">AI Preferences</h2>
+              <h2 className="text-lg font-semibold tracking-tight dark:text-content">AI Preferences</h2>
             </div>
           </div>
 
@@ -32,14 +32,14 @@ export default function AISection() {
             <Pill
               text="GPT-5.4 Ready"
               variant="content"
-              icon={<Sparkles size={14} className="text-violet-200" aria-hidden="true" />}
-              className="rounded-lg bg-violet-500/15 px-3 py-1.5 text-xs text-violet-100"
+              icon={<Sparkles size={14} className="dark:text-violet-200" aria-hidden="true" />}
+              className="rounded-lg dark:bg-violet-500/15 px-3 py-1.5 text-xs dark:text-violet-100"
             />
             <Pill
               text="Workspace Aware"
               variant="content"
-              icon={<ShieldCheck size={14} className="text-emerald-300" aria-hidden="true" />}
-              className="rounded-lg bg-emerald-500/15 px-3 py-1.5 text-xs text-emerald-100"
+              icon={<ShieldCheck size={14} className="dark:text-emerald-300" aria-hidden="true" />}
+              className="rounded-lg dark:bg-emerald-500/15 px-3 py-1.5 text-xs dark:text-emerald-100"
             />
           </div>
         </header>
@@ -48,17 +48,17 @@ export default function AISection() {
           <LabeledInput
             label="Assistant Name"
             defaultValue="Cortex Copilot"
-            className="bg-foreground/40"
+            className="dark:bg-foreground/40"
             helperText="Used across your AI workspace and assistant headers."
           />
           <LabeledInput
             label="Response Style"
             defaultValue="Concise, practical, and implementation-first"
-            className="bg-foreground/40"
+            className="dark:bg-foreground/40"
           />
           <div className="flex w-full flex-col gap-2">
-            <span className="text-sm font-semibold text-muted-foreground">Preferred Model</span>
-            <div className="inline-flex w-fit max-w-full items-center rounded-xl bg-background/25 px-4 py-3">
+            <span className="text-sm font-semibold dark:text-muted-foreground">Preferred Model</span>
+            <div className="inline-flex w-fit max-w-full items-center rounded-xl dark:bg-background/25 px-4 py-3">
               <Dropdown
                 choices={[
                   { value: "gpt-5-nano", label: "GPT-5 Nano" },
@@ -72,16 +72,16 @@ export default function AISection() {
                 onChange={(value) => setPreferredModel(value)}
               />
             </div>
-            <p className="text-xs text-muted-foreground">Default model for new sessions.</p>
+            <p className="text-xs dark:text-muted-foreground">Default model for new sessions.</p>
           </div>
           <LabeledInput
             label="Code Generation Focus"
             defaultValue="Readable, reusable, and production-safe"
-            className="bg-foreground/40"
+            className="dark:bg-foreground/40"
           />
         </div>
 
-        <div className="mt-6 border-t border-border/80 pt-6">
+        <div className="mt-6 border-t dark:border-border/80 pt-6">
           <GlowButton
             effect="none"
             color="primary"
@@ -106,19 +106,19 @@ export default function AISection() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <section className="rounded-2xl border dark:border-border dark:bg-card/40 p-6 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <header className="flex items-center gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl dark:bg-cyan-500/15 dark:text-cyan-300">
             <Bot size={18} aria-hidden="true" />
           </span>
-          <h2 className="text-lg font-semibold tracking-tight text-content">Assistant Behavior</h2>
+          <h2 className="text-lg font-semibold tracking-tight dark:text-content">Assistant Behavior</h2>
         </header>
 
         <div className="mt-6 space-y-3">
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
+        <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-background/25 px-4 py-4">
             <div>
-              <div className="text-sm font-semibold text-content">Auto Suggestions</div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="text-sm font-semibold dark:text-content">Auto Suggestions</div>
+              <p className="mt-1 text-xs dark:text-muted-foreground">
                 Suggest follow-up prompts and implementation ideas after each response.
               </p>
             </div>
@@ -134,10 +134,10 @@ export default function AISection() {
               }}
             />
           </div>
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-background/25 px-4 py-4">
             <div>
-              <div className="text-sm font-semibold text-content">Report Verbosity</div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="text-sm font-semibold dark:text-content">Report Verbosity</div>
+              <p className="mt-1 text-xs dark:text-muted-foreground">
                 Determines how big or concise the report generation will be: choose between a compact or a loose style.
            
            
@@ -158,10 +158,10 @@ export default function AISection() {
             />
           </div>
           
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-background/25 px-4 py-4">
             <div>
-              <div className="text-sm font-semibold text-content">The Arhitect Mode</div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="text-sm font-semibold dark:text-content">The Arhitect Mode</div>
+              <p className="mt-1 text-xs dark:text-muted-foreground">
                 Determines the style of report generation: choose between an encouraging, friendly tone or a strict, professional format.
            
            
@@ -186,32 +186,32 @@ export default function AISection() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <section className="rounded-2xl border dark:border-border dark:bg-card/40 p-6 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <header className="flex items-center gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-300">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl dark:bg-orange-500/15 dark:text-orange-300">
             <Wand2 size={18} aria-hidden="true" />
           </span>
-          <h2 className="text-lg font-semibold tracking-tight text-content">Usage & Limits</h2>
+          <h2 className="text-lg font-semibold tracking-tight dark:text-content">Usage & Limits</h2>
         </header>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-xl border border-border bg-background/25 p-4">
+          <div className="rounded-xl border dark:border-border dark:bg-background/25 p-4">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-content">Monthly AI Credits</span>
-              <span className="text-xs font-medium text-muted-foreground">7,500 / 10,000 used</span>
+              <span className="text-sm font-semibold dark:text-content">Monthly AI Credits</span>
+              <span className="text-xs font-medium dark:text-muted-foreground">7,500 / 10,000 used</span>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/70">
-              <div className="h-full w-[75%] rounded-full bg-primary" />
+            <div className="mt-3 h-2 overflow-hidden rounded-full dark:bg-background/70">
+              <div className="h-full w-[75%] rounded-full dark:bg-primary" />
             </div>
           </div>
 
-          <div className="rounded-xl border border-border bg-background/25 p-4">
+          <div className="rounded-xl border dark:border-border dark:bg-background/25 p-4">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-content">Context Window Budget</span>
-              <span className="text-xs font-medium text-muted-foreground">42% active</span>
+              <span className="text-sm font-semibold dark:text-content">Context Window Budget</span>
+              <span className="text-xs font-medium dark:text-muted-foreground">42% active</span>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/70">
-              <div className="h-full w-[42%] rounded-full bg-cyan-400" />
+            <div className="mt-3 h-2 overflow-hidden rounded-full dark:bg-background/70">
+              <div className="h-full w-[42%] rounded-full dark:bg-cyan-400" />
             </div>
           </div>
         </div>

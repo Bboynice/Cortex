@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ThemeProvider } from "@/src/components/providers/ThemeProvider";
+import { QueryProvider } from "@/src/components/providers/QueryProvider";
 
 // Self-hosted via `next/font/local`: Next inlines preloads, strips unused
 // glyphs at build time, and avoids any FOIT/FOUT. The font files live under
@@ -52,8 +54,37 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`dark ${satoshi.variable} ${clashDisplay.variable}`}>
-      <body className="font-sans">{children}</body>
+    <html 
+      lang="en" 
+      suppressHydrationWarning
+      className={`${satoshi.variable} ${clashDisplay.variable}`}
+    >
+      <head>
+        {/* This blocking inline script evaluates instantly before the browser 
+          paints the layout elements, pulling dark/light states from localStorage 
+          or native system settings to prevent white screen flashbangs.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.getItem('cortex-theme') === 'dark' || (!('cortex-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (_) {}
+            `,
+          }}
+        />
+      </head>
+      <body className="font-sans">
+        <QueryProvider>
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </QueryProvider>
+      </body>
     </html>
   );
 }

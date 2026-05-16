@@ -38,7 +38,7 @@ export default function SegmentedControl<T extends string = string>({
       role="tablist"
       className={[
         "relative inline-flex w-full items-stretch gap-1 rounded-2xl p-1",
-        "border border-border bg-foreground/60 backdrop-blur",
+        "border dark:border-border dark:bg-foreground/60 backdrop-blur",
         className ?? "",
       ].join(" ")}
     >
@@ -58,14 +58,14 @@ export default function SegmentedControl<T extends string = string>({
             className={[
               "relative flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5",
               "text-sm font-semibold transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
-              selected ? "text-primary" : "text-muted hover:text-content",
+              "focus-visible:outline-none focus-visible:ring-2 dark:focus-visible:ring-primary/40",
+              selected ? "dark:text-primary" : "dark:text-muted dark:hover:text-content",
             ].join(" ")}
           >
             {selected && (
               <motion.span
                 layoutId="segmented-active"
-                className="absolute inset-0 rounded-xl bg-white/6 shadow-sm ring-1 ring-white/10"
+                className="absolute inset-0 rounded-xl dark:bg-white/6 dark:shadow-sm dark:ring-1 dark:ring-white/10"
                 transition={{ type: "spring", stiffness: 520, damping: 42 }}
               />
             )}

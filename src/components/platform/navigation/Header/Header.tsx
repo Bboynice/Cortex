@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/src/store/useAuthStore';
+import ThemeToggle from '@/src/components/ui/ThemeToogle';
 
 const Header = () => {
   const pathname = usePathname();
@@ -30,14 +31,14 @@ const Header = () => {
           {/* 3. LIGHT SWEEP EFFECT (The "AI" look) */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
 
-          <nav className="flex items-center gap-1 px-2">
+          <nav className="flex items-stretch gap-1 px-2">
             {navLinks.map((link) => {
               const isActive = pathname.startsWith(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isActive ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                  className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isActive ? "text-white" : "text-muted-foreground hover:text-white"}`}
                 >
                   {isActive && (
                     <motion.div
@@ -55,18 +56,18 @@ const Header = () => {
           {/* Separator Line */}
           <div className="h-4 w-px bg-white/10 mx-2" />
 
-          <div className="flex items-center gap-1 px-2">
+          <div className="flex items-stretch gap-1 px-2">
             {status !== 'authenticated' && (
               <Link 
               href="/login" 
-              className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-white transition-colors"
+              className="flex items-center px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-white transition-colors"
             >
               Log In
             </Link>
             )}
             <Link 
               href="/settings" 
-              className={`relative px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-muted-foreground hover:text-white"}`}
+              className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-muted-foreground hover:text-white"}`}
             >
               {isAccountActive && (
                 <motion.div
@@ -77,6 +78,7 @@ const Header = () => {
               )}
               <span className="relative z-10">Account</span>
             </Link>
+            <ThemeToggle />
           </div>
         </div>
       </div>

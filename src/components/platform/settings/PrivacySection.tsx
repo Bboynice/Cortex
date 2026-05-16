@@ -17,16 +17,16 @@ export default function PrivacySection() {
   const { onOpen } = useModalStore();
   return (
     <div className="w-full max-w-none space-y-6">
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <section className="rounded-2xl border dark:border-border dark:bg-card/40 p-6 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <header className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/15 text-sky-300">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl dark:bg-sky-500/15 dark:text-sky-300">
                 <ShieldCheck size={18} aria-hidden="true" />
               </span>
-              <h2 className="text-lg font-semibold tracking-tight text-content">Privacy Controls</h2>
+              <h2 className="text-lg font-semibold tracking-tight dark:text-content">Privacy Controls</h2>
             </div>
-            <p className="mt-3 text-sm text-muted-foreground">
+            <p className="mt-3 text-sm dark:text-muted-foreground">
               Manage visibility, data handling, and account security preferences.
             </p>
           </div>
@@ -34,16 +34,16 @@ export default function PrivacySection() {
           <Pill
             text="Protected"
             variant="content"
-            icon={<LockKeyhole size={14} className="text-emerald-300" aria-hidden="true" />}
-            className="rounded-lg bg-emerald-500/15 px-3 py-1.5 text-xs text-emerald-100"
+            icon={<LockKeyhole size={14} className="dark:text-emerald-300" aria-hidden="true" />}
+            className="rounded-lg dark:bg-emerald-500/15 px-3 py-1.5 text-xs dark:text-emerald-100"
           />
         </header>
 
         <div className="mt-6 space-y-3">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-background/25 px-4 py-4">
             <div>
-              <div className="text-sm font-semibold text-content">Profile Visibility</div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="text-sm font-semibold dark:text-content">Profile Visibility</div>
+              <p className="mt-1 text-xs dark:text-muted-foreground">
                 Control whether your public profile is visible to other users.
               </p>
             </div>
@@ -67,19 +67,19 @@ export default function PrivacySection() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-card/40 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
+      <section className="rounded-2xl border dark:border-border dark:bg-card/40 p-6 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]">
         <header className="flex items-center gap-3">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/15 text-violet-300">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl dark:bg-violet-500/15 dark:text-violet-300">
             <EyeOff size={18} aria-hidden="true" />
           </span>
-          <h2 className="text-lg font-semibold tracking-tight text-content">Data Management and Essential Cookies</h2>
+          <h2 className="text-lg font-semibold tracking-tight dark:text-content">Data Management and Essential Cookies</h2>
         </header>
 
         <div className="mt-6 flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-background/25 px-4 py-4">
             <div>
-              <div className="text-sm font-semibold text-content">Allow Essential Cookies</div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="text-sm font-semibold dark:text-content">Allow Essential Cookies</div>
+              <p className="mt-1 text-xs dark:text-muted-foreground">
                 Allow essential cookies to keep your account secure and functional.
               </p>
             </div>
@@ -98,10 +98,10 @@ export default function PrivacySection() {
           </div>
     
 
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-background/25 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-background/25 px-4 py-4">
             <div>
-              <div className="text-sm font-semibold text-content">Clear Session History</div>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <div className="text-sm font-semibold dark:text-content">Clear Session History</div>
+              <p className="mt-1 text-xs dark:text-muted-foreground">
                 Clear all data and history associated with your account, including saved prompts, generated summaries, session records, and reset your statistics to start fresh.
               </p>
             </div>
