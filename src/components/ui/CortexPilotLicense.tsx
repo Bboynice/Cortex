@@ -87,9 +87,12 @@ export default function CortexPilotLicense({
           rotateX: rX,
           rotateY: rY,
           transformStyle: "preserve-3d",
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden",
           borderColor: borderColor, // Dynamic border
-          // Small, tight industrial shadow
-          boxShadow: "0 10px 30px -10px rgba(0,0,0,0.7)" 
+          // Soft shadow avoids a harsh dark band when the card tilts in 3D
+          boxShadow:
+            "0 20px 50px -18px rgba(0,0,0,0.55), 0 2px 8px -2px rgba(0,0,0,0.35)",
         }}
         // The container IS the cortex-heat background
         className="relative w-full h-full rounded-3xl border bg-cortex-heat overflow-hidden isolation-isolate transition-colors duration-1000"
@@ -99,11 +102,17 @@ export default function CortexPilotLicense({
         <motion.div 
           animate={{ opacity: blackMaskOpacity }}
           transition={{ duration: 1.2, ease: "easeInOut" }}
-          className="absolute inset-0 bg-black z-[1] pointer-events-none"
+          className="pointer-events-none absolute inset-0 z-[1] rounded-3xl bg-black"
         />
 
-        {/* 2. GLASS EFFECT */}
-        <div className={`absolute inset-0 z-[2] transition-all duration-1000 ${Number(heatLevel) > 0 ? 'backdrop-blur-xl bg-black/20' : 'bg-black/90'}`} />
+        {/* 2. GLASS EFFECT — gradients only: backdrop-filter + 3D rotate causes dark edge halos in Chromium/WebKit */}
+        <div
+          className={`pointer-events-none absolute inset-0 z-[2] rounded-3xl transition-all duration-1000 ${
+            Number(heatLevel) > 0
+              ? "bg-gradient-to-br from-white/[0.14] via-white/[0.04] to-black/45 ring-1 ring-inset ring-white/[0.08]"
+              : "bg-black/90"
+          }`}
+        />
 
         {/* 3. LANYARD SLOT */}
         <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 bg-white/10 rounded-full z-30 opacity-30" />
@@ -209,12 +218,12 @@ export default function CortexPilotLicense({
           <motion.div 
             animate={{ x: ["-100%", "200%"] }}
             transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-            className="absolute inset-0 z-[5] bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-20 pointer-events-none"
+            className="pointer-events-none absolute inset-0 z-[5] skew-x-20 rounded-3xl bg-gradient-to-r from-transparent via-white/5 to-transparent"
           />
         )}
 
         {/* 6. GLASS GLOSS */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent pointer-events-none z-[50] opacity-50" />
+        <div className="pointer-events-none absolute inset-0 z-[50] rounded-3xl bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-50" />
       </motion.div>
     </div>
   );

@@ -7,6 +7,7 @@ export interface User {
   name: string;
   avatar?: string;
   points: number;
+  username: string;
 }
 
 interface AuthState {
@@ -15,6 +16,7 @@ interface AuthState {
   setAuth: (user: User) => void;
   clearAuth: () => void;
   updatePoints: (delta: number) => void;
+  updateProfile: (data: Partial<Pick<User, "name" | "email" | "username">>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -36,6 +38,7 @@ export const useAuthStore = create<AuthState>()(
               }
             : null,
         })),
+      updateProfile: (data) => set((state) => ({ user: state.user ? { ...state.user, ...data } : null })),
     }),
     { name: "cortex-auth-vault" }
   )

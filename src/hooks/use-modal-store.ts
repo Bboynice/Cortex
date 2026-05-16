@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ModalType = "save-code" | "user-settings" | "confirm-delete";
+type ModalType = "save-code" | "user-settings" | "confirm-delete" | "save-profile";
 
 interface ModalStore {
   type: ModalType | null;

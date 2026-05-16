@@ -29,7 +29,11 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
       }
     }, [isOpen]);
 
-    if(!isOpen || type !== "save-code") return null;
+    const isSaveCodeDialog = type === "save-code";
+    const isConfirmDialog = type === "confirm-delete";
+    const isProfileDialog = type === "save-profile";
+
+    if (!isOpen || (!isSaveCodeDialog && !isConfirmDialog && !isProfileDialog)) return null;
 
     const modalTitle = (data?.title as string | undefined) ?? title ?? "Submit solution?";
     const modalDescription =
@@ -43,6 +47,13 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
         const action = data?.action as
           | undefined
           | (() => void | Promise<void | SubmissionResult | undefined>);
+
+        if (isConfirmDialog || isProfileDialog) {
+          if (action) await action();
+          onClose();
+          return;
+        }
+
         const ret = action ? await action() : await onSubmit?.();
 
         // If the submit action ran tests and reported a count, keep the modal
@@ -60,7 +71,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
         addToast("Submitted.", "success");
         onClose();
       } catch {
-        addToast("Failed to submit.", "error");
+        addToast(isConfirmDialog || isProfileDialog ? "Something went wrong." : "Failed to submit.", "error");
         onClose();
       } finally {
         setIsSubmitting(false);
@@ -97,7 +108,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
               <X size={16} aria-hidden="true" />
             </button>
 
-            {result ? (
+            {isSaveCodeDialog && result ? (
               <>
                 <div className="pr-10">
                   <div className="flex items-center gap-2">
@@ -177,7 +188,11 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
                     onClick={handleSubmit}
                   >
                     {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isSubmitting ? "Running tests..." : modalSubmitText}
+                    {isSubmitting
+                      ? isSaveCodeDialog
+                        ? "Running tests..."
+                        : "Please wait…"
+                      : modalSubmitText}
                   </button>
                 </div>
               </>

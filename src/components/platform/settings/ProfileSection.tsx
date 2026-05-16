@@ -9,16 +9,25 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import CortexPilotLicense from "@/src/components/ui/CortexPilotLicense";
 import { logoutAction } from "@/src/app/(auth)/actions";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useToast } from "@/src/hooks/use-toast";
+
+
 export default function ProfileSection() {
   const router = useRouter();
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const { addToast } = useToast();
   // UI only (no functionality yet)
   const { onOpen } = useModalStore();
-  const { user } = useAuthStore();
+  const { user, updateProfile } = useAuthStore();
   const fullName = user?.name ?? "Unknown";
   const email = user?.email ?? "Unknown";
   const username = user?.email?.split("@")[0] || "Unknown";
-  const points = user?.points ?? 5934;
+  const points = user?.points ?? 820;
+
+  const [tempName, setTempName] = useState(user?.name ?? "");
+  const [tempEmail, setTempEmail] = useState(user?.email ?? "");
+  const [tempUsername, setTempUsername] = useState(user?.username ?? "");
 
   const handleLogout = async () => {
     clearAuth();
@@ -28,8 +37,17 @@ export default function ProfileSection() {
 
   };
 
+  const handleSaveProfile = async () => {
+   try {
+    updateProfile({ name: tempName, email: tempEmail, username: tempUsername });
+    addToast("Profile updated successfully", "success");
+   } catch (error) {
+    addToast("Failed to update profile", "error");
+   }
+  };
+
   return (
-    <div className="w-full max-w-none space-y-6">
+    <div className="w-full max-w-none space-y-6 ">
       {/* Profile Information + Connected Accounts */}
       <section className="rounded-2xl border border-border bg-card/40 p-7 shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:p-8">
         <header className="flex items-center gap-3">
@@ -65,7 +83,21 @@ export default function ProfileSection() {
                 />
               </div>
 
-              <GlowButton color="primary" effect="none" roundness={8} className="w-fit text-sm font-semibold" onClick={handleLogout}>
+              <GlowButton
+                color="primary"
+                effect="none"
+                roundness={8}
+                className="w-fit text-sm font-semibold"
+                onClick={() =>
+                  onOpen("confirm-delete", {
+                    title: "Confirm Log Out",
+                    description: "Are you sure you want to log out?",
+                    submitText: "Log Out",
+                    cancelText: "Cancel", 
+                    action: handleLogout,
+                  })
+                }
+              >
                 Log Out
               </GlowButton>
             </div>
@@ -127,26 +159,41 @@ export default function ProfileSection() {
         <div className=" w-full h-full space-y-5 pt-6 dark:bg-surface">
           <LabeledInput
             label="Full Name"
-            defaultValue={fullName}
+            defaultValue={tempName}
             className="bg-foreground/40"
             autoComplete="name"
+            value={tempName}
+            onChange={(e) => setTempName(e.target.value)}
           />
           <LabeledInput
             label="Email Address"
-            defaultValue={email}
+            defaultValue={tempEmail}
             disabled
             className="bg-foreground/40 opacity-90"
             autoComplete="email"
+            value={tempEmail}
+            onChange={(e) => setTempEmail(e.target.value)}
           />
           <LabeledInput
             label="Username"
-            defaultValue={username}
+            defaultValue={tempUsername}
             className="bg-foreground/40"
             autoComplete="username"
+            value={tempUsername}
+            onChange={(e) => setTempUsername(e.target.value)}
           />
              <GlowButton
             color="primary"
             effect="glow"
+            onClick={() =>
+              onOpen("save-profile", {
+                title: "Confirm Save Changes",
+                description: "Are you sure you want to save changes?",
+                submitText: "Save Changes",
+                cancelText: "Cancel",
+                action: handleSaveProfile,
+              })
+            }
             className="normal-case px-6 py-3 rounded-xl text-sm font-semibold gap-2 justify-start w-fit"
           >
             <span className="inline-flex items-center gap-2">
