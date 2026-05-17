@@ -11,7 +11,8 @@ type MarketingShellProps = {
 };
 
 const navLinks = [
-  { href: "/#features", label: "Features", match: "/" },
+  // Use `/` not `/#features` — hash navigation scrolls mid-page; other tabs load at top.
+  { href: "/", label: "Features", match: "/" },
   { href: "/pricing", label: "Pricing", match: "/pricing" },
   { href: "/about", label: "About", match: "/about" },
   { href: "/privacy", label: "Privacy", match: "/privacy" },
@@ -35,10 +36,19 @@ export default function MarketingShell({ children }: MarketingShellProps) {
             <nav className="hidden items-center gap-1 md:flex">
               {navLinks.map((link) => {
                 const isActive = pathname === link.match;
+                const scrollHomeToTop = link.href === "/" && pathname === "/";
                 return (
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={
+                      scrollHomeToTop
+                        ? (e) => {
+                            e.preventDefault();
+                            window.scrollTo({ top: 0, behavior: "smooth" });
+                          }
+                        : undefined
+                    }
                     className={[
                       "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                       isActive

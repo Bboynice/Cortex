@@ -81,6 +81,23 @@
   background-repeat: repeat;
 }
 
+/* Pilot license: glow must paint ABOVE the base fill — base .bg-cortex-heat uses #000
+   with ::before/::after at z-index:-1, which stacks UNDER that fill (invisible). */
+.bg-cortex-heat.cortex-heat-reactive {
+  background-color: transparent;
+}
+
+.bg-cortex-heat.cortex-heat-reactive::before {
+  z-index: 0;
+  opacity: var(--heat-intensity, 0.85);
+  filter: blur(40px) brightness(var(--heat-brightness, 1)) saturate(var(--heat-saturate, 1.1));
+}
+
+.bg-cortex-heat.cortex-heat-reactive::after {
+  z-index: 1;
+  opacity: var(--heat-grain, 0.1);
+}
+
 @keyframes cortex-slow-drift {
   0% {
     transform: translate(-50%, -50%) rotate(0deg) scale(1);

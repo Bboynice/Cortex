@@ -56,7 +56,7 @@ export default function ProfileSection() {
   return (
     <div className="w-full max-w-none space-y-6 ">
       {/* Profile Information + Connected Accounts */}
-      <section className="rounded-2xl border dark:border-border dark:bg-card/40 p-7 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:p-8">
+      <section className="overflow-visible rounded-2xl border dark:border-border dark:bg-card/40 p-7 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:p-8">
         <header className="flex items-center gap-3">
           <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl dark:bg-orange-500/15 dark:text-orange-400">
             <User2 size={20} aria-hidden="true" />
@@ -64,9 +64,9 @@ export default function ProfileSection() {
           <h2 className="text-xl font-semibold dark:text-content tracking-tight">Profile Information</h2>
         </header>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-8">
+        <div className="mt-8 grid gap-10 overflow-visible lg:grid-cols-2 lg:items-stretch lg:gap-8">
           {/* Left: identity + pilot license */}
-          <div className="flex min-h-0 min-w-0 h-full flex-col gap-8 min-[520px]:flex-row min-[520px]:items-center min-[520px]:gap-5">
+          <div className="flex min-h-0 min-w-0 h-full flex-col gap-8 overflow-visible min-[520px]:flex-row min-[520px]:items-start min-[520px]:gap-5">
             <div className="flex min-w-0 flex-1 flex-col gap-6">
               <div className="space-y-2">
                 <div className="text-2xl font-semibold tracking-tight dark:text-content sm:text-3xl sm:leading-tight">
@@ -109,10 +109,8 @@ export default function ProfileSection() {
               </GlowButton>
             </div>
 
-            <div className="relative flex shrink-0 justify-center min-[520px]:justify-start">
-              <div className="w-[380px] max-w-full overflow-x-auto [scrollbar-width:thin]">
-                <CortexPilotLicense licenseId="434" name={username} points={points} />
-              </div>
+            <div className="relative flex shrink-0 justify-center overflow-visible py-2 min-[520px]:justify-start">
+              <CortexPilotLicense licenseId="434" name={username} points={points} />
             </div>
           </div>
 
