@@ -10,7 +10,7 @@ module.exports = {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        surface: "hsl(var(--foreground))",
+        surface: "hsl(var(--card))",
         content: "hsl(var(--text))",
         card: "hsl(var(--card))",
         border: "hsl(var(--border))",

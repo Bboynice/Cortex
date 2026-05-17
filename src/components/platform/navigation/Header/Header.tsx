@@ -23,7 +23,8 @@ const Header = () => {
       <div className="pointer-events-auto relative group">
         
         {/* 1. THE AURORA GLOW (Behind the glass) */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 blur-xl opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+        {/* Fixed brand tint — not theme tokens — so header looks identical in light/dark */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-[hsl(17_84%_49%/0.2)] via-[hsl(17_84%_49%/0.15)] to-[hsl(17_84%_49%/0.2)] blur-xl opacity-50 transition duration-1000 group-hover:opacity-100 group-hover:duration-200" />
 
         {/* 2. THE MAIN GLASS BODY */}
         <div className="relative h-14 flex items-center bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl px-2 shadow-[0_0_30px_-10px_rgba(0,0,0,0.5)] overflow-hidden">
@@ -38,7 +39,7 @@ const Header = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isActive ? "text-white" : "text-muted-foreground hover:text-white"}`}
+                  className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isActive ? "text-white" : "text-white/55 hover:text-white"}`}
                 >
                   {isActive && (
                     <motion.div
@@ -60,14 +61,14 @@ const Header = () => {
             {status !== 'authenticated' && (
               <Link 
               href="/login" 
-              className="flex items-center px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-white transition-colors"
+              className="flex items-center px-4 py-1.5 text-sm font-medium text-white/55 transition-colors hover:text-white"
             >
               Log In
             </Link>
             )}
             <Link 
               href="/settings" 
-              className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-muted-foreground hover:text-white"}`}
+              className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-white/55 hover:text-white"}`}
             >
               {isAccountActive && (
                 <motion.div

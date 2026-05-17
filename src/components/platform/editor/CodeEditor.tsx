@@ -1,10 +1,11 @@
 // src/components/platform/editor/CodeEditor.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
-import Editor, { OnChange, OnMount } from '@monaco-editor/react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import Editor, { loader, OnChange, OnMount } from '@monaco-editor/react';
 import type { editor as MonacoEditor } from 'monaco-editor';
 import CortexLoader from '@/src/components/ui/CortexLoader';
+import { useCortexTheme } from '@/src/components/providers/ThemeProvider';
 
 interface CodeEditorProps {
   code: string;
@@ -14,7 +15,20 @@ interface CodeEditorProps {
   onMarkersChange?: (markers: MonacoEditor.IMarker[]) => void;
 }
 
+const editorOptions = {
+  minimap: { enabled: false },
+  fontSize: 14,
+  lineNumbers: 'on' as const,
+  renderValidationDecorations: 'on' as const,
+  scrollBeyondLastLine: false,
+  automaticLayout: true,
+  padding: { top: 16, bottom: 16 },
+  fontFamily: 'JetBrains Mono, monospace',
+};
+
 const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionChange, onMarkersChange }: CodeEditorProps) => {
+  const { theme } = useCortexTheme();
+  const monacoTheme = theme === 'dark' ? 'vs-dark' : 'vs';
   const cursorListenerRef = useRef<{ dispose: () => void } | null>(null);
 
   const handleEditorChange: OnChange = (value) => {
@@ -23,8 +37,8 @@ const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionC
 
   const handleMount: OnMount = (editor, monaco) => {
     cursorListenerRef.current?.dispose();
+    monaco.editor.setTheme(monacoTheme);
 
-    // Ensure Monaco validation decorations (red squiggles) are enabled for JS/TS.
     try {
       monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: false,
@@ -46,6 +60,22 @@ const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionC
     });
   };
 
+  // Same monaco instance as <Editor />; setTheme here tracks toggles immediately (see @monaco-editor/react loader).
+  useLayoutEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const monaco = await loader.init();
+        if (!cancelled) monaco.editor.setTheme(monacoTheme);
+      } catch {
+        /* loader cancelled on unmount */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [monacoTheme]);
+
   useEffect(() => {
     return () => {
       cursorListenerRef.current?.dispose();
@@ -56,10 +86,11 @@ const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionC
   return (
     <div className="h-full w-full overflow-hidden">
       <Editor
+        key={monacoTheme}
         height="100%"
         language={language}
         value={code}
-        theme="vs-dark" // Use a dark theme to match your design
+        theme={monacoTheme}
         onChange={handleEditorChange}
         onMount={handleMount}
         onValidate={onMarkersChange}
@@ -67,17 +98,8 @@ const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionC
           <>
             <CortexLoader size={6} />
           </>
-      }
-        options={{
-          minimap: { enabled: false }, // Hide the minimap like in your design
-          fontSize: 14,
-          lineNumbers: 'on',
-          renderValidationDecorations: 'on',
-          scrollBeyondLastLine: false,
-          automaticLayout: true,
-          padding: { top: 16, bottom: 16 },
-          fontFamily: 'JetBrains Mono, monospace', // Use a nice coding font
-        }}
+        }
+        options={editorOptions}
       />
     </div>
   );

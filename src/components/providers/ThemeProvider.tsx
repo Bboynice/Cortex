@@ -12,7 +12,10 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof document === "undefined") return "dark";
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -36,14 +39,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Prevent server/client markup flashes during boot
-  if (!mounted) {
-    return <div className="invisible">{children}</div>;
-  }
-
+  // Keep `ThemeContext.Provider` on every render so hooks like `useCortexTheme` never run outside
+  // the provider (e.g. CodeEditor during the pre-mount "invisible" boot phase).
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+      {!mounted ? <div className="invisible">{children}</div> : children}
     </ThemeContext.Provider>
   );
 }

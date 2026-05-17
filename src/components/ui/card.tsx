@@ -17,17 +17,17 @@ export default function Card({
     >
       {title && (
         <div className="flex items-center justify-between">
-          <h2 className=" text-2xl font-bold text-ai-glow">{title}</h2>
+          <h2 className="text-2xl font-bold text-ai-glow">{title}</h2>
         </div>
       )}
 
       {description && (
-        <p className="text-sm font-semibold  tracking-wider text-content mt-1">
+        <p className="mt-1 text-sm font-semibold tracking-wider text-content">
           {description}
         </p>
       )}
 
-      <div className="text-xs font-bold text-muted-foreground">
+      <div className="text-xs font-bold text-content/70 dark:text-muted-foreground">
         {children}
       </div>
     </div>

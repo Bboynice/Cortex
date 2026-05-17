@@ -71,14 +71,14 @@ export default function TaskInstructions({
     style={instructionWidth != null ? { width: instructionWidth } : undefined}
     className={[
       "flex min-h-0 shrink-0 self-stretch flex-col items-center overflow-hidden",
-      "rounded-lg border-1 dark:border-border dark:bg-surface dark:text-content",
+      "rounded-lg border-1 border-border bg-card text-content dark:border-border dark:bg-surface dark:text-content",
       instructionWidth == null ? "w-1/3" : "",
     ].join(" ")}
     
     >
         <div className={`w-full h-12 flex justify-center items-center pl-4 pr-4 shrink-0`}>
         <div className="w-full flex min-w-0 justify-between items-center gap-2">
-          <div className="dark:text-muted-foreground h-auto py-2 shrink-0">AI Task Generator</div>
+          <div className="h-auto shrink-0 py-2 text-muted-foreground dark:text-muted-foreground">AI Task Generator</div>
           <div className="w-auto h-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
             {languageLabel && <Pill text={languageLabel} variant="content" />}
             {difficultyLabel && <Pill text={difficultyLabel} variant="primary" />}
@@ -244,30 +244,32 @@ export default function TaskInstructions({
                                 : "border-border/40",
                       ].join(" ")}
                     >
-                      <div className="flex w-full flex-row items-center justify-between gap-2 min-w-0">
-                        <div className="flex flex-row flex-wrap gap-x-3 gap-y-0.5 min-w-0">
-                          <span className="text-sm dark:text-content/50">
+                      <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                          <span className="block min-w-0 text-sm dark:text-content/50">
                             Input:{" "}
                             <b
                               title="Copy to clipboard"
                               onClick={() => handleCopy(testCase.input)}
-                              className="text-sm font-mono hover:text-primary transition-colors cursor-pointer select-none"
+                              className="inline-block max-w-full break-words font-mono text-sm [overflow-wrap:anywhere] hover:text-primary transition-colors cursor-pointer select-none"
                             >
                               {testCase.input}
                             </b>
                           </span>
-                          <span className="text-sm dark:text-content/50">
+                          <span className="block min-w-0 text-sm dark:text-content/50">
                             Output:{" "}
                             <b
                               title="Copy to clipboard"
                               onClick={() => handleCopy(testCase.output)}
-                              className="text-sm font-mono hover:text-primary transition-colors cursor-pointer select-none"
+                              className="inline-block max-w-full break-words font-mono text-sm [overflow-wrap:anywhere] hover:text-primary transition-colors cursor-pointer select-none"
                             >
                               {testCase.output}
                             </b>
                           </span>
                         </div>
-                        <TestCaseStatus result={result} isSubmitting={isSubmitting} />
+                        <div className="shrink-0 self-end sm:self-start">
+                          <TestCaseStatus result={result} isSubmitting={isSubmitting} />
+                        </div>
                       </div>
                       {result && <ResultDetail result={result} />}
                     </div>
@@ -365,16 +367,19 @@ function ResultDetail({ result }: { result: TestResult }) {
     const expected = JSON.stringify(result.expected);
     const actual = result.actual === null ? "(no value)" : JSON.stringify(result.actual);
     return (
-      <div className="mt-1.5 flex flex-row flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-        <span className="uppercase tracking-wide text-[10px] text-content/40">Expected</span>
-        <code className="font-mono px-1.5 py-0.5 rounded bg-content/[0.08] text-content/80">
-          {expected}
-        </code>
-        <span className="text-content/30">→</span>
-        <span className="uppercase tracking-wide text-[10px] text-content/40">Got</span>
-        <code className="font-mono px-1.5 py-0.5 rounded bg-red-500/15 text-red-400">
-          {actual}
-        </code>
+      <div className="mt-1.5 flex w-full min-w-0 flex-col gap-1.5 text-xs">
+        <div className="min-w-0">
+          <span className="uppercase tracking-wide text-[10px] text-content/40">Expected</span>
+          <code className="mt-0.5 block w-full min-w-0 max-w-full break-words rounded bg-content/[0.08] px-1.5 py-0.5 font-mono text-content/80 [overflow-wrap:anywhere]">
+            {expected}
+          </code>
+        </div>
+        <div className="min-w-0">
+          <span className="uppercase tracking-wide text-[10px] text-content/40">Got</span>
+          <code className="mt-0.5 block w-full min-w-0 max-w-full break-words rounded bg-red-500/15 px-1.5 py-0.5 font-mono text-red-400 [overflow-wrap:anywhere]">
+            {actual}
+          </code>
+        </div>
       </div>
     );
   }

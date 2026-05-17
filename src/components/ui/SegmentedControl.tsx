@@ -37,8 +37,8 @@ export default function SegmentedControl<T extends string = string>({
     <div
       role="tablist"
       className={[
-        "relative inline-flex w-full items-stretch gap-1 rounded-2xl p-1",
-        "border dark:border-border dark:bg-foreground/60 backdrop-blur",
+        "relative inline-flex w-full items-stretch gap-1 rounded-2xl border border-border bg-card p-1 text-content shadow-sm",
+        "dark:border-border dark:bg-muted/15 dark:shadow-none dark:backdrop-blur",
         className ?? "",
       ].join(" ")}
     >
@@ -56,17 +56,25 @@ export default function SegmentedControl<T extends string = string>({
               onChange?.(choice.value);
             }}
             className={[
-              "relative flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5",
+              "relative flex flex-1 items-center justify-center gap-2 rounded-xl bg-transparent px-4 py-2.5",
               "text-sm font-semibold transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 dark:focus-visible:ring-primary/40",
-              selected ? "dark:text-primary" : "dark:text-muted dark:hover:text-content",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 ",
+              selected
+                ? "text-primary dark:text-primary "
+                : "text-muted-foreground hover:text-content dark:text-muted-foreground dark:hover:text-content",
             ].join(" ")}
           >
             {selected && (
               <motion.span
                 layoutId="segmented-active"
-                className="absolute inset-0 rounded-xl dark:bg-white/6 dark:shadow-sm dark:ring-1 dark:ring-white/10"
-                transition={{ type: "spring", stiffness: 520, damping: 42 }}
+                className={[
+                  "absolute inset-0 rounded-xl ring-1 shadow-sm",
+                  /* Light: sits on white card — use muted + border tokens, not another white */
+                  "bg-muted/45 ring-border",
+                  /* Dark: same tokens; muted is silver on lifted black per globals */
+                  "dark:bg-muted/35 dark:ring-border dark:shadow-sm",
+                ].join(" ")}
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
 

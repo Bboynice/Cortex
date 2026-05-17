@@ -572,7 +572,7 @@ export default function PlaygroundPage() {
     /* flex-1 + overflow-y-auto: fills <main> but scrolls when editor + insights exceed the viewport. */
     <div className="flex min-h-0 flex-1 w-full flex-col overflow-y-auto pt-16 pb-10">
       <section className="flex w-full shrink-0 flex-col">
-        <div className="flex h-auto w-full shrink-0 items-center justify-start dark:text-content">
+        <div className="flex h-auto w-full shrink-0 items-center justify-start text-content dark:text-content">
           <div className="flex h-auto w-1/3 flex-row items-center justify-center gap-2">
             <div className="flex h-auto w-[90%] flex-row items-center justify-between gap-2">
               <MyButton effect="glow" onClick={() => handleGenerate()}>
@@ -619,7 +619,7 @@ export default function PlaygroundPage() {
             aria-orientation="vertical"
             onMouseDown={startResize}
             onTouchStart={startResize}
-            className="rounded-lg w-1.5 self-stretch shrink-0 cursor-col-resize dark:bg-border hover:dark:bg-primary/60 transition-colors"
+            className="w-1.5 shrink-0 cursor-col-resize self-stretch rounded-lg bg-border transition-colors hover:bg-primary/60 dark:bg-border dark:hover:bg-primary/60"
           />
           <CodeWindow
             language={editorLanguage}

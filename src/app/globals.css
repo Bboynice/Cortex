@@ -7,6 +7,7 @@
   --color-foreground: hsl(var(--foreground));     /* Header/Footer/Overlays */
   --color-content: hsl(var(--text));              /* Primary code and title text */
   --color-surface: hsl(var(--card));              /* Sidebar, Terminal, and Editor panes */
+  --color-card: hsl(var(--card));                 /* Panels (alias for shadcn-style bg-card) */
   --color-border: hsl(var(--border));             /* Panel dividers and input outlines */
   
   /* The "Action" Colors */
@@ -326,7 +327,8 @@
     --accent: 17 84% 49%;
     
     --ai-core: 4 99% 38%;               /* "Deep Heat" Red */
-    --ai-glow: 32 39% 76%;              /* Soft Cream Highlight */
+    /* Same danger / pulse hue as .dark — cream (32 39% 76%) failed contrast on light surfaces */
+    --ai-glow: 4 99% 38%;               /* #C10801 — warnings, errors, heat accents */
   }
 
   .dark {

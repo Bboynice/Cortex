@@ -75,9 +75,9 @@ export default function ThemeToggle() {
             style={{ transformOrigin: "50px 50px" }}
             animate={{ 
               rotate: isDark ? -40 : 140,
-              // Dark: 1 long crescent line (65 length) | Light: 4 split radiating ray segments (8 length each)
               strokeDasharray: isDark ? "65 35" : "8 17",
-              stroke: isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(232, 80, 2, 0.6)"
+              // Header stays dark-glass; keep icon on white strokes (no theme orange)
+              stroke: "rgba(255, 255, 255, 0.4)",
             }}
             transition={springTransition}
             strokeLinecap="round"
@@ -94,9 +94,8 @@ export default function ThemeToggle() {
             style={{ transformOrigin: "50px 50px" }}
             animate={{ 
               rotate: isDark ? 50 : -130,
-              // Dark: Clean balancing crescent wrap | Light: Tighter inner burst flares
               strokeDasharray: isDark ? "55 45" : "6 19",
-              stroke: isDark ? "rgba(255, 255, 255, 0.7)" : "rgba(232, 80, 2, 0.8)"
+              stroke: "rgba(255, 255, 255, 0.7)",
             }}
             transition={springTransition}
             strokeLinecap="round"
@@ -113,10 +112,9 @@ export default function ThemeToggle() {
             style={{ transformOrigin: "50px 50px" }}
             animate={{ 
               rotate: isDark ? -90 : 270,
-              // Dark: Becomes a closed dark circle | Light: Becomes a solid bright core center
-              strokeDasharray: isDark ? "100 0" : "100 0",
-              stroke: isDark ? "rgba(255, 255, 255, 0.9)" : "rgba(232, 80, 2, 1)",
-              scale: isDark ? 0.9 : 1.1 // Core expands slightly when sun activates
+              strokeDasharray: "100 0",
+              stroke: "rgba(255, 255, 255, 0.9)",
+              scale: isDark ? 0.9 : 1.1,
             }}
             transition={springTransition}
           />
