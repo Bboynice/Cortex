@@ -71,14 +71,14 @@ export default function TaskInstructions({
     style={instructionWidth != null ? { width: instructionWidth } : undefined}
     className={[
       "flex min-h-0 shrink-0 self-stretch flex-col items-center overflow-hidden",
-      "rounded-lg border-1 border-border bg-card text-content dark:border-border dark:bg-surface dark:text-content",
+      "theme-sync rounded-lg border border-border bg-card text-content",
       instructionWidth == null ? "w-1/3" : "",
     ].join(" ")}
     
     >
         <div className={`w-full h-12 flex justify-center items-center pl-4 pr-4 shrink-0`}>
         <div className="w-full flex min-w-0 justify-between items-center gap-2">
-          <div className="h-auto shrink-0 py-2 text-muted-foreground dark:text-muted-foreground">AI Task Generator</div>
+          <div className="h-auto shrink-0 py-2 text-muted-foreground">AI Task Generator</div>
           <div className="w-auto h-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
             {languageLabel && <Pill text={languageLabel} variant="content" />}
             {difficultyLabel && <Pill text={difficultyLabel} variant="primary" />}
@@ -86,13 +86,13 @@ export default function TaskInstructions({
         </div>
         </div>
         <div className="w-full flex-1 min-h-0 overflow-y-auto p-4">
-        <div className="w-full h-auto p-4 rounded-md border dark:border-border bg-cortex-heat dark:text-content ">
-          <p className="text-lg font-semibold dark:text-white">Challenge:</p>
-         {isGenerating ?  <CortexLoader size={3} /> : <p className="dark:text-white/70">{challenge}</p>}
-          <p className="text-lg font-semibold dark:text-white mt-3">Requirements:</p>
+        <div className="h-auto w-full rounded-md border border-border bg-cortex-heat p-4 text-white">
+          <p className="text-lg font-semibold">Challenge:</p>
+         {isGenerating ? <CortexLoader size={3} className="text-white" /> : <p className="text-white/70">{challenge}</p>}
+          <p className="mt-3 text-lg font-semibold">Requirements:</p>
           <div className="flex flex-col gap-2">
-            {isGenerating ? <CortexLoader size={3} /> : 
-            <ul className="list-disc list-inside space-y-1 dark:text-white/50">
+            {isGenerating ? <CortexLoader size={3} className="text-white" /> : 
+            <ul className="list-inside list-disc space-y-1 text-white/50">
               {(requirements.length ? requirements : ["No requirements found"]).map((requirement, idx) => (
                 <li key={`${idx}-${requirement}`}>{requirement}</li>
               ))}
@@ -101,14 +101,14 @@ export default function TaskInstructions({
         </div>
       </div>
       <div className="w-full justify-start items-center flex flex-col w-full h-auto p-4">
-        <div className="h-auto w-full flex justify-center items-center flex-col gap-4 border-b dark:border-border pb-4">
+        <div className="flex h-auto w-full flex-col items-center justify-center gap-4 border-b border-border pb-4">
           {hints.map((hint, idx) => (
             <div key={`${idx}-${hint.title}`} className="w-full flex h-auto justify-center items-center flex-row gap-4">
                   <svg
                     width="32"
                     height="32"
                     viewBox="0 0 24 24"
-                    className="shrink-0 dark:text-primary"
+                    className="shrink-0 text-primary"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2.5"
@@ -121,12 +121,12 @@ export default function TaskInstructions({
                   <div className="w-full flex justify-start flex-col">
                     {isGenerating ? (
                       <div className="py-1">
-                        <CortexLoader size={3} />
+                        <CortexLoader size={3} className="text-content" />
                       </div>
                     ) : (
                       <>
-                        <h1 className="text-lg font-semi-bold dark:text-muted-foreground">{hint.title}</h1>
-                        <p className="text-sm dark:text-muted">{hint.description}</p>
+                        <h1 className="text-lg font-semi-bold text-muted-foreground">{hint.title}</h1>
+                        <p className="text-sm text-muted-foreground">{hint.description}</p>
                       </>
                     )}
                   </div>
@@ -136,7 +136,7 @@ export default function TaskInstructions({
         <div className="flex w-full justify-start items-center h-auto items-center flex-row gap-1 py-2">
           <div className="flex justify-start items-center flex-row gap-1 w-1/2">
           <svg
-            className="h-[1.15em] w-[1.15em] dark:text-content/70"
+            className="h-[1.15em] w-[1.15em] text-content/70"
             viewBox="0 0 24 24"
             aria-hidden="true"
             fill="none"
@@ -153,15 +153,15 @@ export default function TaskInstructions({
             />
             <circle cx="12" cy="12" r="1" fill="currentColor" fillOpacity="0.85" />
           </svg>
-          <p className="text-sm dark:text-muted">Estimated:</p>
-            {isGenerating ? <CortexLoader size={3} /> : 
-            <p className="text-sm dark:text-content/50">{estimatedTime} minutes</p>
+          <p className="text-sm text-muted-foreground">Estimated:</p>
+            {isGenerating ? <CortexLoader size={3} className="text-content" /> : 
+            <p className="text-sm text-content/50">{estimatedTime} minutes</p>
             }
             </div>
             {isGenerated && !isGenerating && (
               <p
                 onClick={() => setShowTestCases(!showTestCases)}
-                className="text-sm dark:text-content/50 w-1/2 justify-end items-end flex hover:text-primary transition-colors hover:underline cursor-pointer select-none"
+                className="flex w-1/2 cursor-pointer select-none items-end justify-end text-sm text-content/50 hover:text-primary hover:underline"
               >
                 {showTestCases ? "Hide" : "See"} Test Cases
               </p>
@@ -178,9 +178,9 @@ export default function TaskInstructions({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="w-full overflow-hidden"
           >
-            <div className="w-[calc(100%-2rem)] mx-4 mb-4 flex flex-col items-start justify-start gap-1 p-4 border dark:border-border rounded-md bg-none dark:text-content">
+            <div className="mx-4 mb-4 flex w-[calc(100%-2rem)] flex-col items-start justify-start gap-1 rounded-md border border-border p-4 text-content">
               <div className="flex w-full flex-row items-center justify-between">
-                <div className="text-lg font-semibold dark:text-white">Test Cases:</div>
+                <div className="text-lg font-semibold text-content">Test Cases:</div>
                 {(isSubmitting || hasResults) && (
                   <div className="flex flex-row items-center gap-2">
                     {isSubmitting && (
@@ -232,7 +232,7 @@ export default function TaskInstructions({
                     <div
                       key={`${idx}-${testCase.input}`}
                       className={[
-                        "w-full rounded-md border p-2.5 transition-colors",
+                        "w-full rounded-md border p-2.5",
                         result?.status === "pass"
                           ? "border-green-500/20 bg-green-500/[0.04]"
                           : result?.status === "fail"
@@ -246,22 +246,22 @@ export default function TaskInstructions({
                     >
                       <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                          <span className="block min-w-0 text-sm dark:text-content/50">
+                          <span className="block min-w-0 text-sm text-content/50">
                             Input:{" "}
                             <b
                               title="Copy to clipboard"
                               onClick={() => handleCopy(testCase.input)}
-                              className="inline-block max-w-full break-words font-mono text-sm [overflow-wrap:anywhere] hover:text-primary transition-colors cursor-pointer select-none"
+                              className="inline-block max-w-full cursor-pointer select-none break-words font-mono text-sm [overflow-wrap:anywhere] hover:text-primary"
                             >
                               {testCase.input}
                             </b>
                           </span>
-                          <span className="block min-w-0 text-sm dark:text-content/50">
+                          <span className="block min-w-0 text-sm text-content/50">
                             Output:{" "}
                             <b
                               title="Copy to clipboard"
                               onClick={() => handleCopy(testCase.output)}
-                              className="inline-block max-w-full break-words font-mono text-sm [overflow-wrap:anywhere] hover:text-primary transition-colors cursor-pointer select-none"
+                              className="inline-block max-w-full cursor-pointer select-none break-words font-mono text-sm [overflow-wrap:anywhere] hover:text-primary"
                             >
                               {testCase.output}
                             </b>

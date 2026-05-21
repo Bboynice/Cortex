@@ -99,9 +99,9 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
   return (
     <div
       ref={containerRef}
-      className="flex h-full min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border-1 border-border bg-card text-content dark:border-border dark:bg-surface dark:text-content"
+      className="theme-sync flex h-full min-h-0 min-w-0 flex-1 self-stretch flex-col overflow-hidden rounded-lg border border-border bg-card text-content"
     >
-      <div className="flex h-12 w-full shrink-0 items-center justify-center border-b-1 border-border dark:border-border">
+      <div className="flex h-12 w-full shrink-0 items-center justify-center border-b border-border">
         <div className="flex h-12 w-full min-w-0 items-center justify-between px-4">
           <div className="flex items-center gap-2 ">
             <div className="flex gap-1.5">
@@ -109,7 +109,7 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
               <ErrorIndicator color="yellow-500" size={3} />
               <ErrorIndicator color="green-500" size={3} />
             </div>
-            <span className="ml-2 rounded-md border-1 border-border bg-muted/30 p-2 font-mono text-sm font-semibold text-content dark:border-border dark:bg-content/10 dark:text-content">
+            <span className="ml-2 rounded-md border border-border bg-muted/30 p-2 font-mono text-sm font-semibold text-content">
               solution.{languageToExtension[language]}
             </span>
           </div>
@@ -117,7 +117,7 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
             <button
               type="button"
               onClick={() => onRun?.(code)}
-              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-accent px-4 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-accent dark:text-primary-foreground"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-accent px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
@@ -127,7 +127,7 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
             <button
               type="button"
               onClick={handleSubmit}
-              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-110 active:brightness-95 dark:bg-primary dark:text-primary-foreground"
+              className="inline-flex h-8 items-center justify-center gap-2 rounded-[8px] bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95"
             >
               <svg
                 width="16"
@@ -168,13 +168,13 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
         aria-orientation="horizontal"
         onMouseDown={startResize}
         onTouchStart={startResize}
-        className="h-1.5 shrink-0 cursor-row-resize bg-border transition-colors hover:bg-primary/60 dark:bg-border dark:hover:bg-primary/60"
+        className="h-1.5 shrink-0 cursor-row-resize bg-border hover:bg-primary/60"
       />
 
       <TerminalOutput logs={logs} height={terminalHeight} />
 
       {/* Window Footer */}
-      <div className="flex w-full shrink-0 items-center justify-between border-t-1 border-border px-4 py-2 font-mono text-xs text-content dark:border-border dark:text-content">
+      <div className="flex w-full shrink-0 items-center justify-between border-t border-border px-4 py-2 font-mono text-xs text-content">
         <div className="flex items-center gap-2">
           <ErrorIndicator color={footerStatus.color} size={2} />
           <span>{footerStatus.label}</span>

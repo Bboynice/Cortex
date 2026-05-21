@@ -3,13 +3,9 @@
 import GlowButton from "@/src/components/ui/GlowButton/GlowButton";
 import LabeledInput from "@/src/components/ui/LabeledInput";
 
-/** Heat bg is always dark; don’t rely on body `text-content` (dark in light theme). */
-const heatFieldClass =
-  "text-white placeholder:text-white/45";
-
 export default function ContactPage() {
   return (
-    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto bg-cortex-heat pb-14 pt-24 text-white md:pb-16 md:pt-28">
+    <div className="theme-sync flex min-h-0 flex-1 flex-col justify-center overflow-y-auto bg-cortex-heat pb-14 pt-24 text-white md:pb-16 md:pt-28">
       <div className="mx-auto w-full shrink-0 px-6">
         <header className="space-y-4 border-b border-white/25 pb-10">
           <h1 className="font-display text-3xl font-semibold tracking-tight">
@@ -28,7 +24,7 @@ export default function ContactPage() {
               <div className="mt-0.5">
                 <a
                   href="mailto:hello@cortex.sh"
-                  className="text-white underline underline-offset-4 transition-colors hover:text-primary"
+                  className="text-white underline underline-offset-4 hover:text-primary"
                 >
                   hello@cortex.sh
                 </a>
@@ -39,14 +35,14 @@ export default function ContactPage() {
 
         <div className="mt-10 flex w-full justify-center">
           <form
-            className="flex w-full flex-col gap-6 rounded-lg border border-white/20 bg-black/35 p-6 backdrop-blur-md dark:border-border dark:bg-surface md:p-8"
+            className="theme-sync flex w-full flex-col gap-6 rounded-lg border border-white/20 bg-surface p-6 backdrop-blur-md dark:border-border dark:bg-surface md:p-8"
             action="#"
             onSubmit={(e) => e.preventDefault()}
           >
-            <LabeledInput type="text" name="name" placeholder="Name" autoComplete="name" className={heatFieldClass} />
-            <LabeledInput type="email" name="email" placeholder="Email" autoComplete="email" className={heatFieldClass} />
-            <LabeledInput type="text" name="topic" placeholder="Topic" className={heatFieldClass} />
-            <LabeledInput multiline name="message" placeholder="Message" rows={4} className={heatFieldClass} />
+            <LabeledInput type="text" name="name" placeholder="Name" autoComplete="name" />
+            <LabeledInput type="email" name="email" placeholder="Email" autoComplete="email" />
+            <LabeledInput type="text" name="topic" placeholder="Topic" />
+            <LabeledInput multiline name="message" placeholder="Message" rows={4} />
             <div className="pt-2">
               <GlowButton effect="glow" roundness={16} onClick={() => {}}>
                 Submit

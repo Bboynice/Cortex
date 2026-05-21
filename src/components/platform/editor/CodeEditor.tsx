@@ -95,9 +95,7 @@ const CodeEditor = ({ code, onChange, language = 'javascript', onCursorPositionC
         onMount={handleMount}
         onValidate={onMarkersChange}
         loading={
-          <>
-            <CortexLoader size={6} />
-          </>
+          <CortexLoader size={6} className="text-content" />
         }
         options={editorOptions}
       />

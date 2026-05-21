@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 
 @theme {
   /* Main UI Mapping */
@@ -372,5 +374,26 @@
   }
   body {
     @apply bg-background text-content selection:bg-primary/30;
+  }
+}
+
+/* Surfaces that should flip with :root / .dark instantly (no 150–300ms color fade) */
+@layer utilities {
+  .theme-sync {
+    transition-property: transform, opacity, filter, box-shadow, border-radius, width, height;
+  }
+}
+
+/* Contact / heat forms: placeholders must stay light even when html is in light theme */
+@layer components {
+  /* DELETED THE ::placeholder BLOCK HERE */
+
+  /* KEEP THIS: Prevents Chrome from making autofilled inputs white/yellow */
+  [data-input-surface="heat"] .cortex-field:-webkit-autofill,
+  [data-input-surface="heat"] .cortex-field:-webkit-autofill:hover,
+  [data-input-surface="heat"] .cortex-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff;
+    caret-color: #fff;
+    transition: background-color 9999s ease-out 0s;
   }
 }

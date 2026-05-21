@@ -33,13 +33,13 @@ export default function AISection() {
               text="GPT-5.4 Ready"
               variant="content"
               icon={<Sparkles size={14} className="dark:text-violet-200" aria-hidden="true" />}
-              className="rounded-lg dark:bg-violet-500/15 px-3 py-1.5 text-xs dark:text-violet-100"
+              className="rounded-lg dark:bg-violet-500/15 px-3 py-1.5 text-xs"
             />
             <Pill
               text="Workspace Aware"
               variant="content"
               icon={<ShieldCheck size={14} className="dark:text-emerald-300" aria-hidden="true" />}
-              className="rounded-lg dark:bg-emerald-500/15 px-3 py-1.5 text-xs dark:text-emerald-100"
+              className="rounded-lg dark:bg-emerald-500/15 px-3 py-1.5 text-xs"
             />
           </div>
         </header>
@@ -48,13 +48,11 @@ export default function AISection() {
           <LabeledInput
             label="Assistant Name"
             defaultValue="Cortex Copilot"
-            className="dark:bg-foreground/40"
             helperText="Used across your AI workspace and assistant headers."
           />
           <LabeledInput
             label="Response Style"
             defaultValue="Concise, practical, and implementation-first"
-            className="dark:bg-foreground/40"
           />
           <div className="flex w-full flex-col gap-2">
             <span className="text-sm font-semibold dark:text-muted-foreground">Preferred Model</span>
@@ -77,7 +75,6 @@ export default function AISection() {
           <LabeledInput
             label="Code Generation Focus"
             defaultValue="Readable, reusable, and production-safe"
-            className="dark:bg-foreground/40"
           />
         </div>
 

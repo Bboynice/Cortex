@@ -24,7 +24,7 @@ export default function ProfileSection() {
   const fullName = user?.name ?? "Unknown";
   const email = user?.email ?? "Unknown";
   const username = user?.username ?? "Unknown";
-  const points = user?.points ?? 820;
+  const points = user?.points ?? 0;
 
   const [tempName, setTempName] = useState(user?.name ?? "");
   const [tempEmail, setTempEmail] = useState(user?.email ?? "");
@@ -81,13 +81,13 @@ export default function ProfileSection() {
                   text="Verified"
                   variant="content"
                   icon={<ShieldCheck size={16} className="dark:text-emerald-300" aria-hidden="true" />}
-                  className="dark:bg-emerald-500/15 dark:text-emerald-200 px-3.5 py-2 text-sm rounded-lg"
+                  className="dark:bg-emerald-500/15 px-3.5 py-2 text-sm rounded-lg"
                 />
                 <Pill
                   text="Pro Member"
                   variant="content"
                   icon={<Crown size={16} className="dark:text-orange-300" aria-hidden="true" />}
-                  className="dark:bg-orange-500/15 dark:text-orange-200 px-3.5 py-2 text-sm rounded-lg"
+                  className="dark:bg-orange-500/15 px-3.5 py-2 text-sm rounded-lg"
                 />
               </div>
 
@@ -141,7 +141,6 @@ export default function ProfileSection() {
         <div className=" w-full h-full space-y-5 pt-6 dark:bg-surface">
           <LabeledInput
             label="Full Name"
-            className="dark:bg-foreground/40"
             autoComplete="name"
             value={tempName}
             onChange={(e) => setTempName(e.target.value)}

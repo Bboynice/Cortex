@@ -61,7 +61,7 @@ export default function MyButton({
         ${colorClass}
         hover:brightness-110
         active:bg-white/10
-        transition
+        theme-sync
         overflow-hidden
         ${className}
       `}

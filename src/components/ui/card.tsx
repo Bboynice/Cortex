@@ -13,7 +13,7 @@ export default function Card({
 }: CardProps) {
   return (
     <div
-      className={`flex flex-col rounded-lg bg-muted/20 backdrop-blur-lg p-4 shadow-sm w-full h-full ${className}`}
+      className={`theme-sync flex h-full w-full flex-col rounded-lg bg-muted/20 p-4 shadow-sm backdrop-blur-lg ${className}`}
     >
       {title && (
         <div className="flex items-center justify-between">
@@ -27,7 +27,7 @@ export default function Card({
         </p>
       )}
 
-      <div className="text-xs font-bold text-content/70 dark:text-muted-foreground">
+      <div className="text-xs font-bold text-muted-foreground">
         {children}
       </div>
     </div>

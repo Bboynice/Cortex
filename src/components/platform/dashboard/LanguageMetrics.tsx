@@ -31,10 +31,10 @@ export default function LanguageMetrics({ language, score, maxScore }: LanguageM
     ]
 
     return (
-        <div className="flex flex-col dark:bg-muted/20 backdrop-blur-lg rounded-xl w-full h-full min-h-0 p-4 shadow-sm">
-            <div className="flex items-center gap-2 h-7 mb-3 px-1 shrink-0">
-                <BarChart3 className="dark:text-primary" size={18} aria-hidden="true" />
-                <h3 className="text-sm font-semibold uppercase tracking-wider dark:text-muted-foreground">
+        <div className="theme-sync flex h-full min-h-0 w-full flex-col rounded-xl bg-muted/20 p-4 shadow-sm backdrop-blur-lg">
+            <div className="mb-3 flex h-7 shrink-0 items-center gap-2 px-1">
+                <BarChart3 className="text-primary" size={18} aria-hidden="true" />
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                     Language Focus
                 </h3>
             </div>
@@ -45,10 +45,10 @@ export default function LanguageMetrics({ language, score, maxScore }: LanguageM
                     return (
                         <div
                             key={`${lang.language}-${index}`}
-                            className="flex flex-col gap-2 rounded-xl border dark:border-border dark:bg-card p-4 shadow-sm"
+                            className="theme-sync flex flex-col gap-2 rounded-xl border border-border bg-card p-4 shadow-sm"
                         >
                             <div className="flex items-center justify-between">
-                                <h4 className="font-medium dark:text-content">{lang.language}</h4>
+                                <h4 className="font-medium text-content">{lang.language}</h4>
                                 <div className="flex items-baseline gap-1">
                                     <span
                                         className="text-2xl font-bold"
@@ -56,11 +56,11 @@ export default function LanguageMetrics({ language, score, maxScore }: LanguageM
                                     >
                                         {lang.score}
                                     </span>
-                                    <span className="text-xs dark:text-muted-foreground">/100</span>
+                                    <span className="text-xs text-muted-foreground">/100</span>
                                 </div>
                             </div>
                             <ProgressBar value={lang.score} max={100} height={8} fill={fill} />
-                            <p className="text-sm dark:text-muted-foreground">{lang.description}</p>
+                            <p className="text-sm text-muted-foreground">{lang.description}</p>
                         </div>
                     );
                 })}

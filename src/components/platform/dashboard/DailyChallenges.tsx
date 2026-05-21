@@ -40,10 +40,10 @@ export default function DailyChallenges() {
     }
 
     return (
-        <div className="flex flex-col dark:bg-muted/20 backdrop-blur-lg rounded-xl w-full h-full min-h-0 p-4 shadow-sm">
-            <div className="flex items-center gap-2 h-7 mb-3 px-1 shrink-0">
-                <Sparkles className="dark:text-primary" size={18} aria-hidden="true" />
-                <h3 className="text-sm font-semibold uppercase tracking-wider dark:text-muted-foreground">
+        <div className="theme-sync flex h-full min-h-0 w-full flex-col rounded-xl bg-muted/20 p-4 shadow-sm backdrop-blur-lg">
+            <div className="mb-3 flex h-7 shrink-0 items-center gap-2 px-1">
+                <Sparkles className="text-primary" size={18} aria-hidden="true" />
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                     Daily Challenges
                 </h3>
             </div>

@@ -35,7 +35,7 @@ export default function PrivacySection() {
             text="Protected"
             variant="content"
             icon={<LockKeyhole size={14} className="dark:text-emerald-300" aria-hidden="true" />}
-            className="rounded-lg dark:bg-emerald-500/15 px-3 py-1.5 text-xs dark:text-emerald-100"
+            className="rounded-lg dark:bg-emerald-500/15 px-3 py-1.5 text-xs"
           />
         </header>
 

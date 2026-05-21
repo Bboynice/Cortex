@@ -5,9 +5,19 @@ import React, { useId } from "react";
 
 
 
+/** Tailwind orange-400 — matches insight action buttons */
+const ORANGE_STROKE = "#fb923c";
+
 interface CortexLoaderProps {
+  /** Scales SVG as `size * 10` px when `sizePx` is not set */
   size?: number;
+  /** Exact width/height in px (e.g. 14 to match `text-xs` / lucide `size={14}`) */
+  sizePx?: number;
+  /** Overrides variant stroke color */
   color?: string;
+  /** `content` = currentColor (use className for light/dark). `orange` = brand accent. */
+  variant?: "content" | "orange";
+  className?: string;
   gradient?: {
     from: string;
     via?: string;
@@ -18,7 +28,10 @@ interface CortexLoaderProps {
 }
 export default function CortexLoader({
   size = 10,
-  color = "currentColor",
+  sizePx,
+  color,
+  variant = "content",
+  className,
   gradient,
 }: CortexLoaderProps) {
   const DURATION_S = 4.8;
@@ -30,14 +43,18 @@ export default function CortexLoader({
     strokeDashoffset: { type: "tween" as const, duration: DURATION_S, repeat: Infinity, ease: EASE, times },
   });
   const gradientId = useId();
-  const stroke = gradient ? `url(#${gradientId})` : color;
+  const dimension = sizePx ?? size * 10;
+  const stroke = gradient
+    ? `url(#${gradientId})`
+    : (color ?? (variant === "orange" ? ORANGE_STROKE : "currentColor"));
   const START_ROTATE = -45; // top-right gap alignment baseline
   return (
     <svg
-      width={size * 10}
-      height={size * 10}
-      className="block"
+      width={dimension}
+      height={dimension}
+      className={className ? `block shrink-0 ${className}` : "block shrink-0"}
       viewBox="0 0 100 100"
+      aria-hidden="true"
     >
       {gradient ? (
         <defs>

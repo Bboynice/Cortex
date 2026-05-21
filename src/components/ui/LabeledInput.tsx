@@ -2,14 +2,24 @@
 
 import * as React from "react";
 
-/** Matches contact form field line: underline inputs, transparent dark bg */
-const fieldLine =
-  "w-full rounded-none border-0 border-b pb-2 pt-3 " +
-  "dark:border-border dark:bg-transparent dark:text-content dark:placeholder:text-muted-foreground " +
-  "focus-visible:outline-none focus-visible:ring-0 dark:focus-visible:border-primary " +
-  "transition-[border-color] duration-150 disabled:cursor-not-allowed";
+/** Shared underline field chrome */
+const fieldBase =
+  "cortex-field theme-sync w-full rounded-none border-0 border-b !bg-transparent pb-2 pt-3 " +
+  "focus-visible:outline-none focus-visible:ring-0 focus-visible:border-primary " +
+  "disabled:cursor-not-allowed";
+
+/** Theme tokens — for settings, dashboard, etc. */
+const surfaceDefault =
+  "border-border text-content placeholder:text-muted-foreground ";
+
+/**
+ * Fixed light-on-dark colors for `bg-cortex-heat` / dark glass forms.
+ * Does not use `--text` / `--muted-foreground`, so light app theme cannot wash out placeholders.
+ */
 
 const fieldMultiline = "min-h-[6rem] resize-y";
+
+export type LabeledInputSurface = "default" | "heat";
 
 type SharedLabeledProps = {
   label?: string;
@@ -17,6 +27,8 @@ type SharedLabeledProps = {
   errorText?: string;
   containerClassName?: string;
   labelClassName?: string;
+  /** `heat` = contact / cortex-heat (always white field text). `default` = follows :root / .dark tokens. */
+  surface?: LabeledInputSurface;
 };
 
 export type LabeledInputProps = SharedLabeledProps &
@@ -39,6 +51,7 @@ export default function LabeledInput(props: LabeledInputProps) {
     className,
     id,
     multiline,
+    surface = "default",
     ...rest
   } = props;
 
@@ -48,9 +61,10 @@ export default function LabeledInput(props: LabeledInputProps) {
   const errorId = errorText ? `${inputId}-error` : undefined;
 
   const controlClassName = [
-    fieldLine,
+    fieldBase,
+    surfaceDefault,
     multiline ? fieldMultiline : "",
-    errorText ? "dark:!border-red-500/60 dark:focus-visible:!border-red-500/70" : "",
+    errorText ? "!border-red-500/60 focus-visible:!border-red-500/70" : "",
     className ?? "",
   ]
     .filter(Boolean)
@@ -59,11 +73,18 @@ export default function LabeledInput(props: LabeledInputProps) {
   const describedBy = [helperId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <div className={["flex w-full flex-col gap-2", containerClassName].filter(Boolean).join(" ")}>
+    <div
+      className={["theme-sync flex w-full flex-col gap-2", containerClassName].filter(Boolean).join(" ")}
+    >
       {label ? (
         <label
           htmlFor={inputId}
-          className={["text-sm font-semibold text-muted-foreground", labelClassName].filter(Boolean).join(" ")}
+          className={[
+            "text-sm font-semibold dark:text-muted-foreground",
+            labelClassName,
+          ]
+            .filter(Boolean)
+            .join(" ")}
         >
           {label}
         </label>
@@ -88,7 +109,7 @@ export default function LabeledInput(props: LabeledInputProps) {
       )}
 
       {errorText ? (
-        <p id={errorId} className="text-xs font-medium text-red-400">
+        <p id={errorId} className="text-xs font-medium text-red-500">
           {errorText}
         </p>
       ) : helperText ? (
