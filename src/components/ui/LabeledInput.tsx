@@ -80,7 +80,7 @@ export default function LabeledInput(props: LabeledInputProps) {
         <label
           htmlFor={inputId}
           className={[
-            "text-sm font-semibold dark:text-muted-foreground",
+            "text-sm font-semibold text-muted-foreground",
             labelClassName,
           ]
             .filter(Boolean)

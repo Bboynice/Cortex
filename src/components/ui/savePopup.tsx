@@ -92,10 +92,10 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
     const allPassed = result !== null && result.passed === result.total && result.total > 0;
 
     const secondaryBtn =
-      "inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-content transition-colors hover:bg-muted/50 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 dark:border-border dark:bg-card/60 dark:text-content dark:hover:bg-muted/20 dark:active:brightness-95";
+      "theme-sync inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-content hover:bg-muted/50 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";
 
     const primaryBtn =
-      "inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-primary dark:text-primary-foreground dark:hover:brightness-110 dark:active:brightness-95";
+      "theme-sync inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";
 
     return (
       <motion.span 
@@ -103,7 +103,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="fixed inset-0 z-50 select-none bg-black/45 backdrop-blur-sm dark:bg-black/60"
+      className="theme-sync fixed inset-0 z-50 select-none bg-black/50 backdrop-blur-sm"
       onClick={isSubmitting ? undefined : onClose}
       role="presentation"
       >
@@ -114,12 +114,12 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
           aria-modal="true"
           aria-label={modalTitle}
         >
-          <span className="relative flex w-full flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-5 shadow-2xl dark:border-border/80 dark:bg-surface">
+          <span className="theme-sync relative flex w-full flex-col gap-3 overflow-hidden rounded-lg border border-border bg-card p-5 shadow-2xl">
             <button
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-[10px] border border-neutral-300 text-neutral-700 transition-colors hover:bg-neutral-100/90 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/15 dark:text-zinc-400 dark:hover:bg-white/10 dark:hover:text-zinc-400"
+              className="theme-sync absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-[10px] border border-border text-muted-foreground hover:bg-muted/30 hover:text-content disabled:cursor-not-allowed disabled:opacity-60"
               aria-label="Close"
             >
               <X className="shrink-0" size={16} strokeWidth={2.25} aria-hidden="true" />
@@ -130,18 +130,18 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
                 <div className="pr-10">
                   <div className="flex items-center gap-2">
                     {allPassed ? (
-                      <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-500" />
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
+                      <XCircle className="h-5 w-5 text-red-600" />
                     )}
-                    <h1 className="text-lg font-semibold text-content dark:text-content">
+                    <h1 className="text-lg font-semibold text-content">
                       {allPassed ? "Solution accepted" : "Some test cases failed"}
                     </h1>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground dark:text-muted-foreground">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     <span
                       className={`font-mono font-semibold ${
-                        allPassed ? "text-green-600 dark:text-green-500" : "text-red-600 dark:text-red-500"
+                        allPassed ? "text-green-600" : "text-red-600"
                       }`}
                     >
                       {result.passed} / {result.total}
@@ -149,7 +149,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
                     test cases passed.
                   </p>
                   {!allPassed && (
-                    <p className="mt-1 text-xs text-muted-foreground dark:text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       Open the test cases panel to see which ones failed.
                     </p>
                   )}
@@ -175,7 +175,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
                   )}
                   <button
                     type="button"
-                    className={`inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:brightness-110 active:brightness-95 dark:bg-primary dark:text-primary-foreground dark:hover:brightness-110 dark:active:brightness-95`}
+                    className={primaryBtn}
                     onClick={onClose}
                   >
                     Close
@@ -185,8 +185,8 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
             ) : (
               <>
                 <div className="pr-10">
-                  <h1 className="text-lg font-semibold text-content dark:text-content">{modalTitle}</h1>
-                  <p className="mt-1 text-sm text-muted-foreground dark:text-muted-foreground">{modalDescription}</p>
+                  <h1 className="text-lg font-semibold text-content">{modalTitle}</h1>
+                  <p className="mt-1 text-sm text-muted-foreground">{modalDescription}</p>
                 </div>
 
                 <div className="mt-2 flex w-full flex-row justify-end gap-2">

@@ -37,8 +37,7 @@ export default function SegmentedControl<T extends string = string>({
     <div
       role="tablist"
       className={[
-        "relative inline-flex w-full items-stretch gap-1 rounded-2xl border border-border bg-card p-1 text-content shadow-sm",
-        "dark:border-border dark:bg-muted/15 dark:shadow-none dark:backdrop-blur",
+        "theme-sync relative inline-flex w-full items-stretch gap-1 rounded-2xl border border-border bg-card p-1 text-content shadow-sm backdrop-blur",
         className ?? "",
       ].join(" ")}
     >
@@ -57,23 +56,15 @@ export default function SegmentedControl<T extends string = string>({
             }}
             className={[
               "relative flex flex-1 items-center justify-center gap-2 rounded-xl bg-transparent px-4 py-2.5",
-              "text-sm font-semibold transition-colors",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 ",
-              selected
-                ? "text-primary dark:text-primary "
-                : "text-muted-foreground hover:text-content dark:text-muted-foreground dark:hover:text-content",
+              "text-sm font-semibold",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35",
+              selected ? "text-primary" : "text-muted-foreground hover:text-content",
             ].join(" ")}
           >
             {selected && (
               <motion.span
                 layoutId="segmented-active"
-                className={[
-                  "absolute inset-0 rounded-xl ring-1 shadow-sm",
-                  /* Light: sits on white card — use muted + border tokens, not another white */
-                  "bg-muted/45 ring-border",
-                  /* Dark: same tokens; muted is silver on lifted black per globals */
-                  "dark:bg-muted/35 dark:ring-border dark:shadow-sm",
-                ].join(" ")}
+                className="absolute inset-0 rounded-xl bg-muted/40 shadow-sm ring-1 ring-border"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
