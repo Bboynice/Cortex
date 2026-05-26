@@ -16,7 +16,7 @@ const principles = [
 export default function PrivacyPage() {
   return (
     <>
-      <section className="mx-auto max-w-3xl py-8 text-center sm:py-12">
+      <section className="mx-auto max-w-3xl pb-8 text-center sm:pb-10">
         <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
           Privacy
         </h1>

@@ -1,31 +1,63 @@
 "use client";
 
 import Link from "next/link";
-import { registerAction } from "@/src/app/(auth)/actions";
-import { useAuthStore } from "@/src/store/useAuthStore";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { createClient } from "@/src/lib/supabase/client";
+import { mapSupabaseUser } from "@/src/lib/auth";
 import SocialAuth from "./SocialAuth";
 
 export default function RegisterForm() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const router = useRouter();
+  const supabase = createClient();
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // FIX: Corrected syntax to standard const arrow function
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const result = await registerAction(formData);
+    setLoading(true);
+    setErrorMsg(null);
 
-    if (result.success && result.user) {
-      setAuth({
-        ...result.user,
-        points: 0,
-        username: result.user.email.split("@")[0],
-      });
+    const formData = new FormData(event.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const name = formData.get("name") as string;
+
+    // FIX: Wire directly to Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+        },
+      },
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (data.user) {
+      setAuth(
+        mapSupabaseUser(data.user, {
+          email,
+          name: name.trim(),
+          points: 0,
+          username: name.trim().split(/\s+/)[0] || email.split("@")[0] || "user",
+        })
+      );
       router.push("/dashboard");
     }
-  }
-  return (
+  };
 
+  return (
     <div className="space-y-4">
       <SocialAuth />
 
@@ -37,7 +69,7 @@ export default function RegisterForm() {
         <div className="h-px flex-1 bg-border dark:bg-white/10" />
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleRegister} className="space-y-4">
         <input
           type="text"
           name="name"
@@ -58,12 +90,21 @@ export default function RegisterForm() {
           placeholder="Password"
           className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-content outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-white/10 dark:bg-transparent dark:text-white dark:placeholder:text-white/40"
           required
+          minLength={6}
         />
+
+        {errorMsg && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm font-medium text-red-500">
+            {errorMsg}
+          </div>
+        )}
+
         <button
           type="submit"
-          className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 dark:bg-white dark:text-black dark:hover:opacity-95"
+          disabled={loading}
+          className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-60 dark:bg-white dark:text-black dark:hover:opacity-95"
         >
-          Create account
+          {loading ? "Creating..." : "Create account"}
         </button>
       </form>
 

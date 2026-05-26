@@ -20,13 +20,13 @@ const navLinks = [
 
 export default function MarketingShell({ children }: MarketingShellProps) {
   const pathname = usePathname();
-  const { user } = useAuthStore();
+  const { user, status } = useAuthStore();
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = status === "authenticated";
 
   return (
     <div className="min-h-screen w-full dark:bg-cortex-aura dark:text-content">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-4 sm:px-6">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-4 px-4 sm:px-6">
         <header className="sticky top-0 z-30 pt-4">
           <div className="flex items-center justify-between gap-4 rounded-xl border dark:border-border dark:bg-muted/20 backdrop-blur-lg px-4 py-3 shadow-sm">
             <Link href="/" className="text-base font-semibold dark:text-content">
@@ -83,7 +83,7 @@ export default function MarketingShell({ children }: MarketingShellProps) {
           </div>
         </header>
 
-        <main className="flex-1 py-10">
+        <main className="flex-1 pb-10">
           {children}
         </main>
 

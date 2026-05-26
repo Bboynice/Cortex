@@ -65,12 +65,12 @@ const faqs = [
 export default function PricingPage() {
   return (
     <>
-      <section className="mx-auto max-w-3xl py-8 text-center sm:py-12">
+      <section className="mx-auto w-full pb-8 text-start sm:pb-10">
         <h1 className="font-display text-4xl font-semibold tracking-tight dark:text-content sm:text-5xl">
-          Pricing
+          Choose your plan here.
         </h1>
         <p className="mt-4 text-base leading-7 dark:text-muted-foreground sm:text-lg">
-          Simple plans. Start free, upgrade when the loop sticks.
+          Simple plans. Start free, upgrade when you're ready.
         </p>
       </section>
 

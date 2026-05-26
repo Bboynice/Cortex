@@ -1,39 +1,48 @@
 "use client";
 
-import { loginAction } from "@/src/app/(auth)/actions";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import SocialAuth from "./SocialAuth";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { createClient } from "@/src/lib/supabase/client";
+import { mapSupabaseUser } from "@/src/lib/auth";
+import SocialAuth from "./SocialAuth";
 
 export default function LoginForm() {
-
   const setAuth = useAuthStore((state) => state.setAuth);
   const router = useRouter();
+  const supabase = createClient();
+  
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
+    setErrorMsg(null);
 
     const formData = new FormData(event.currentTarget);
-    const result = await loginAction(formData);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
 
-    if (result?.success && result.user) {
-      // Update Client State
-      setAuth({
-        ...result.user,
-        points: 1000,
-        username: result.user.email.split("@")[0],
-      });
-      // Navigate to Dashboard
-      router.push("/dashboard");
-    } else {
-      alert(result?.error || "Login failed");
+    // FIX: Wire directly to Supabase authentication
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setErrorMsg(error.message);
       setLoading(false);
+      return;
     }
-  }
+
+    if (data.user) {
+      setAuth(mapSupabaseUser(data.user, { points: 1000 }));
+      router.push("/dashboard");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <SocialAuth />
@@ -61,6 +70,13 @@ export default function LoginForm() {
           className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-content outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary/30 dark:border-white/10 dark:bg-transparent dark:text-white dark:placeholder:text-white/40"
           required
         />
+
+        {errorMsg && (
+          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm font-medium text-red-500">
+            {errorMsg}
+          </div>
+        )}
+
         <button
           disabled={loading}
           type="submit"

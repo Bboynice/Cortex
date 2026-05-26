@@ -25,7 +25,17 @@ export const useToast = create<ToastStore>((set) => ({
         : Math.random().toString(36).slice(2);
 
     const defaultDuration =
-      type === "success" ? 2500 : type === "info" ? 3200 : type === "warning" ? 4000 : type === "copy" ? 2000 : 5000;
+      type === "success"
+        ? 2500
+        : type === "info"
+          ? 3200
+          : type === "warning"
+            ? 4000
+            : type === "copy"
+              ? message.length > 120
+                ? 6000
+                : 2000
+              : 5000;
 
     const finalDurationMs = durationMs ?? defaultDuration;
 

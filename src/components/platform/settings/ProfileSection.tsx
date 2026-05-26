@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useToast } from "@/src/hooks/use-toast";
 import AccountCard from "@/src/components/ui/AccountCard";
+import { createClient } from "@/src/lib/supabase/client";
 
 
 export default function ProfileSection() {
@@ -37,6 +38,8 @@ export default function ProfileSection() {
   }, [user]);
 
   const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     clearAuth();
     await logoutAction();
     router.push("/");

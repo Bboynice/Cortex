@@ -58,27 +58,29 @@ const Header = () => {
           <div className="h-4 w-px bg-white/10 mx-2" />
 
           <div className="flex items-stretch gap-1 px-2">
-            {status !== 'authenticated' && (
-              <Link 
-              href="/login" 
-              className="flex items-center px-4 py-1.5 text-sm font-medium text-white/55 transition-colors hover:text-white"
-            >
-              Log In
-            </Link>
+            {status === "unauthenticated" && (
+              <Link
+                href="/login"
+                className="flex items-center px-4 py-1.5 text-sm font-medium text-white/55 transition-colors hover:text-white"
+              >
+                Log In
+              </Link>
             )}
-            <Link 
-              href="/settings" 
-              className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-white/55 hover:text-white"}`}
-            >
-              {isAccountActive && (
-                <motion.div
-                  layoutId="nav-pill"
-                  className="absolute inset-0 bg-white/10 rounded-lg border border-white/10"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10">Account</span>
-            </Link>
+            {status === "authenticated" && (
+              <Link
+                href="/settings"
+                className={`relative flex items-center px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-lg ${isAccountActive ? "text-white" : "text-white/55 hover:text-white"}`}
+              >
+                {isAccountActive && (
+                  <motion.div
+                    layoutId="nav-pill"
+                    className="absolute inset-0 bg-white/10 rounded-lg border border-white/10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <span className="relative z-10">Account</span>
+              </Link>
+            )}
             <ThemeToggle />
           </div>
         </div>

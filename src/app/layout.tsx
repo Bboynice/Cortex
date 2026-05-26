@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/src/components/providers/ThemeProvider";
 import { QueryProvider } from "@/src/components/providers/QueryProvider";
+import { AuthProvider } from "@/src/components/providers/AuthProvider";
 
 // Self-hosted via `next/font/local`: Next inlines preloads, strips unused
 // glyphs at build time, and avoids any FOIT/FOUT. The font files live under
@@ -81,7 +82,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="font-sans">
         <QueryProvider>
           <ThemeProvider>
-            {children}
+            <AuthProvider>{children}</AuthProvider>
           </ThemeProvider>
         </QueryProvider>
       </body>

@@ -13,7 +13,11 @@ export default function ToastContainer() {
       aria-relevant="additions removals"
     >
       <AnimatePresence>
-        {toasts.map((toast) => (
+        {toasts.map((toast) => {
+          const isCopyToast = toast.type === "copy";
+          const isLongMessage = toast.message.length > 120;
+
+          return (
           <motion.div
             key={toast.id}
             initial={{ opacity: 0, x: 50, scale: 0.9 }}
@@ -29,15 +33,27 @@ export default function ToastContainer() {
                   ? 'border-red-500/40 dark:border-red-500/35'
                   : toast.type === 'warning'
                     ? 'border-yellow-500/50 dark:border-yellow-500/35'
-                    : toast.type === 'copy'
+                    : isCopyToast
                       ? 'border-primary dark:border-primary'
                       : 'border-blue-500/40 dark:border-blue-500/35',
             ].join(' ')}
             role="status"
           >
             <div className="flex items-start gap-2 p-4">
-              <div className="flex h-8 min-w-0 flex-1 items-center">
-                <div className="break-words text-sm font-medium text-content dark:text-content">
+              <div
+                className={[
+                  "flex min-w-0 flex-1",
+                  isCopyToast && isLongMessage ? "items-start" : "h-8 items-center",
+                ].join(" ")}
+              >
+                <div
+                  className={[
+                    "break-words text-sm font-medium text-content dark:text-content",
+                    isCopyToast && isLongMessage
+                      ? "max-h-48 w-full overflow-y-auto overscroll-contain whitespace-pre-wrap pr-1"
+                      : "",
+                  ].join(" ")}
+                >
                   {toast.message}
                 </div>
               </div>
@@ -52,7 +68,8 @@ export default function ToastContainer() {
               </button>
             </div>
           </motion.div>
-        ))}
+          );
+        })}
       </AnimatePresence>
     </div>
   );
