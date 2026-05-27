@@ -16,7 +16,7 @@ interface AuthState {
   setAuth: (user: User) => void;
   clearAuth: () => void;
   updatePoints: (delta: number) => void;
-  updateProfile: (data: Partial<Pick<User, "name" | "email" | "username">>) => void;
+  updateProfile: (data: Partial<Pick<User, "name" | "email" | "username" | "points">>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(

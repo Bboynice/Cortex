@@ -5,15 +5,92 @@ import Pill from "@/src/components/ui/Pill";
 import { EyeOff, LockKeyhole, ShieldCheck } from "lucide-react";
 import Dropdown from "@/src/components/ui/Dropdown";
 import { useToast } from "@/src/hooks/use-toast";
-import { useState } from "react";
+import { useState , useEffect} from "react";
 import { useModalStore } from "@/src/hooks/use-modal-store";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { createClient } from "@/src/lib/supabase/client";
 
 export default function PrivacySection() {
   const { addToast } = useToast();
-  const [profileVisibility, setProfileVisibility] = useState("public");
-  const [essentialCookies, setEssentialCookies] = useState("enabled");
   const { onOpen } = useModalStore();
+  const { user , updateProfile} = useAuthStore();
+  const [profileVisibility, setProfileVisibility] = useState("public");
+  const [analyticsCookies, setAnalyticsCookies] = useState("enabled");
+  useEffect(() => {
+    async function fetchSettings() {
+      if (!user?.id) return;
+      const supabase = createClient();
 
+      const [profileRes, settingsRes] = await Promise.all([
+        supabase.from("profiles").select("profile_visibility").eq("id", user.id).single(),
+        supabase.from("user_settings").select("allow_analytics_cookies").eq("user_id", user.id).single()
+      ]);
+
+      if (profileRes.data?.profile_visibility) {
+        setProfileVisibility(profileRes.data.profile_visibility);
+      }
+      if (settingsRes.data !== null) {
+        setAnalyticsCookies(settingsRes.data.allow_analytics_cookies ? "enabled" : "disabled");
+      }
+    }
+    fetchSettings();
+  }, [user?.id]);
+
+  const handleProfileVisibilityChange = async (value: string) => {
+    setProfileVisibility(value);
+    if (!user?.id) return;
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ profile_visibility: value })
+      .eq("id", user.id);
+
+    if (error) {
+      addToast("Failed to update visibility.", "error");
+    } else {
+      addToast(`Profile visibility has been set to ${value}.`, "success");
+    }
+  };
+
+  const handleAnalyticsCookiesChange = async (value: string) => {
+    setAnalyticsCookies(value);
+    if (!user?.id) return;
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("user_settings")
+      .update({ allow_analytics_cookies: value === "enabled" })
+      .eq("user_id", user.id);
+
+    if (error) {
+      addToast("Failed to update cookie preferences.", "error");
+    } else {
+      addToast(`Analytics cookies have been ${value}.`, "success");
+    }
+  };
+
+  // 3. Clear History Action
+  const handleClearHistory = async () => {
+    try {
+      const supabase = createClient();
+      
+      // Trigger the secure database wipe RPC
+      const { error } = await supabase.rpc("clear_user_history");
+      if (error) throw new Error(error.message);
+
+      // Instantly reset their local points to zero
+      updateProfile({ points: 0 });
+      addToast("Session history has been cleared.", "success");
+
+      // Hard refresh to wipe any cached UI state
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error: any) {
+      addToast(error.message || "Failed to clear history.", "error");
+    }
+  };
   return (
     <div className="w-full max-w-none space-y-6">
       <section className="settings-section">
@@ -52,10 +129,7 @@ export default function PrivacySection() {
                 { value: "public", label: "Public" },
               ]}
               value={profileVisibility}
-              onChange={(value) => {
-                setProfileVisibility(value);
-                addToast(`Profile visibility has been set to ${value}.`, "success");
-              }}
+              onChange={handleProfileVisibilityChange}
             />
           </div>
         </div>
@@ -72,9 +146,9 @@ export default function PrivacySection() {
         <div className="mt-6 flex flex-col gap-4">
           <div className="settings-row flex items-center justify-between gap-4">
             <div>
-              <div className="text-sm font-semibold text-content">Allow Essential Cookies</div>
+              <div className="text-sm font-semibold text-content">Allow Analytics Cookies</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Allow essential cookies to keep your account secure and functional.
+                Allow analytics cookies to help us improve our service.
               </p>
             </div>
             <Dropdown
@@ -82,11 +156,8 @@ export default function PrivacySection() {
                 { value: "enabled", label: "Enabled" },
                 { value: "disabled", label: "Disabled" },
               ]}
-              value={essentialCookies}
-              onChange={(value) => {
-                setEssentialCookies(value);
-                addToast(`Essential cookies have been ${value}.`, "success");
-              }}
+              value={analyticsCookies}
+              onChange={handleAnalyticsCookiesChange}
             />
           </div>
 
@@ -102,15 +173,7 @@ export default function PrivacySection() {
               roundness={12}
               color="primary"
               className="w-fit shrink-0 justify-start rounded-xl px-5 py-3 text-sm font-semibold normal-case"
-              onClick={() => {
-                onOpen("confirm-delete", {
-                  title: "Clear Session History",
-                  description: "Are you sure you want to clear your session history?",
-                  action: async () => {
-                    addToast("Session history has been cleared.", "success");
-                  },
-                });
-              }}
+              onClick={handleClearHistory}
             >
               Clear History
             </GlowButton>

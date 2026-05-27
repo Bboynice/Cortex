@@ -14,22 +14,51 @@ import { useToast } from "@/src/hooks/use-toast";
 import AccountCard from "@/src/components/ui/AccountCard";
 import { createClient } from "@/src/lib/supabase/client";
 
-
 export default function ProfileSection() {
   const router = useRouter();
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const { addToast } = useToast();
   const { onOpen } = useModalStore();
   const { user, updateProfile } = useAuthStore();
+
   const fullName = user?.name ?? "Unknown";
   const email = user?.email ?? "Unknown";
   const username = user?.username ?? "Unknown";
   const points = user?.points ?? 0;
-
   const [tempName, setTempName] = useState(user?.name ?? "");
   const [tempEmail, setTempEmail] = useState(user?.email ?? "");
   const [tempUsername, setTempUsername] = useState(user?.username ?? "");
 
+  // FIX 1: Fetch real database profile on mount/reload to prevent data flashing
+  useEffect(() => {
+    async function fetchFreshProfile() {
+      if (!user?.id) return;
+      const supabase = createClient();
+      
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name, username, points")
+        .eq("id", user.id)
+        .single();
+
+      if (data && !error) {
+        // Sync local inputs
+        setTempName(data.full_name || "");
+        setTempUsername(data.username || "");
+        
+        // Sync global Zustand store
+        updateProfile({
+          name: data.full_name,
+          username: data.username,
+          points: data.points ?? 0,
+        });
+      }
+    }
+
+    fetchFreshProfile();
+  }, [user?.id]); // Only re-run if the user ID changes
+
+  // Keep inputs synced if global state changes
   useEffect(() => {
     if (!user) return;
     setTempName(user.name);
@@ -38,21 +67,87 @@ export default function ProfileSection() {
   }, [user]);
 
   const handleLogout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    clearAuth();
-    await logoutAction();
-    router.push("/");
-    router.refresh();
+    try {
+      const supabase = createClient();
+      
+      // 1. Tell Supabase to kill the secure session
+      await supabase.auth.signOut();
+      
+      // 2. Instantly wipe the local Zustand memory
+      clearAuth();
+      
+      // 3. Try to run the server cleanup, but ignore the Next.js panic
+      try {
+        await logoutAction();
+      } catch (ignoredError) {
+        // The server is complaining because the session is already gone. Ignore it.
+      }
+      
+      // 4. Force a hard redirect. This bypasses Next.js cache and fixes the header glitch!
+      window.location.href = "/";
+      
+    } catch (error: any) {
+      console.error(error);
+      addToast("Failed to log out cleanly.", "error");
+    }
   };
 
   const handleSaveProfile = async () => {
    try {
-    updateProfile({ name: tempName, email: tempEmail, username: tempUsername });
+    if(!user?.id) throw new Error("User ID is missing.");
+    const supabase = createClient();
+
+    const {error: dbError} = await supabase
+    .from("profiles")
+    .update({
+      full_name: tempName,
+      username: tempUsername,
+    }).eq("id", user.id);
+
+    if(dbError) throw new Error(dbError.message);
+
+    const {error: authError} = await supabase.auth.updateUser({
+      data: {
+        full_name: tempName,
+      },
+    });
+
+    if(authError) throw new Error(authError.message);
+
+    updateProfile({ name: tempName, username: tempUsername });
     addToast("Profile updated successfully", "success");
-   } catch (error) {
-    addToast("Failed to update profile", "error");
+
+    router.refresh();
+   } catch (error: any) {
+    addToast(error.message || "Failed to update profile", "error");
    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const supabase = createClient();
+      
+      // 1. Trigger the secure database wipe
+      const { error } = await supabase.rpc('delete_user');
+      if (error) throw new Error(error.message);
+
+      // 2. Wipe the local Zustand state instantly
+      clearAuth();
+
+      // 3. Try to wipe server cookies, but ignore the Next.js panic error
+      try {
+        await logoutAction();
+      } catch (ignoredError) {
+        // We expect the server to be confused because the user is gone. Ignore it.
+      }
+      
+      // 4. Force a hard browser redirect to the homepage. 
+      // This bypasses the Next.js cache and guarantees the UI resets.
+      window.location.href = "/";
+
+    } catch (error: any) {
+      addToast(error.message || "Failed to delete account.", "error");
+    }
   };
 
   return (
@@ -197,9 +292,7 @@ export default function ProfileSection() {
               description: "Once you delete your account, there is no going back. Please be certain.",
               submitText: "Delete Account",
               cancelText: "Cancel",
-              action: () => {
-                console.log("Delete account");
-              },
+              action: handleDeleteAccount,
             })}
           >
             <AlertTriangle size={16} aria-hidden="true" />

@@ -3,6 +3,7 @@
 import type { CSSProperties, PointerEventHandler } from "react";
 import { useMemo, useRef, useState } from "react";
 import { Fingerprint, Cpu, CheckCircle2 } from "lucide-react";
+import { calculateHeatLevel } from "@/src/lib/progression";
 import {
   motion,
   useMotionValue,
@@ -32,6 +33,8 @@ export default function CortexPilotLicense({
   const rX = useSpring(useMotionValue(0), { stiffness: 150, damping: 20 });
   const rY = useSpring(useMotionValue(0), { stiffness: 150, damping: 20 });
 
+  const heatLevel = calculateHeatLevel(points);
+
   const pointerMove = useMemo<PointerEventHandler<HTMLDivElement>>(
     () => (event) => {
       if (!cardRef.current || reduceMotion) return;
@@ -49,7 +52,6 @@ export default function CortexPilotLicense({
     rY.set(0);
   };
 
-  const heatLevel = (Math.pow(points / 20, 1/3)).toFixed(1);
   const heatN = Number(heatLevel);
 
   // FIX 1: Map the transition step all the way up to Level 8 so it has room to breathe
