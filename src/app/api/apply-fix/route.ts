@@ -1,4 +1,5 @@
 import { openai } from "@/src/lib/ai-client";
+import { chargeCredits } from "@/src/lib/billing";
 
 /** When present, these rows come from the playground grader (reference solution outputs). */
 type ApplyFixTestFailure = {
@@ -89,6 +90,12 @@ export async function POST(req: Request) {
     const challenge = asString(body?.challenge).trim();
     const requirements = Array.isArray(body?.requirements) ? body!.requirements! : [];
     const testFailures = normalizeTestFailures(body?.testFailures);
+
+    const billing = await chargeCredits(5);
+  
+    if (!billing.success) {
+      return Response.json({ error: billing.error }, { status: 402 });
+    }
 
     if (!code.trim()) {
       return Response.json({ error: "Missing code" }, { status: 400 });

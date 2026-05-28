@@ -1,6 +1,7 @@
 'use server';
 
 import { openai } from '@/src/lib/ai-client';
+import { chargeCredits } from '@/src/lib/billing';
 import {
     deriveExpectedOutputs,
     resolveEntry,
@@ -130,6 +131,7 @@ export async function generateCodingChallenge({
     topic?: string;
 } = {}) {
     try {
+        
         // Treat empty / whitespace / sentinel values as "no topic chosen".
         const normalizedTopic = topic?.trim();
         const hasUserTopic =
@@ -142,9 +144,17 @@ export async function generateCodingChallenge({
         const effectiveTopic = hasUserTopic ? normalizedTopic! : pickRandomTopic(difficulty);
 
         const taskLine = `Create a programming task in ${language} about: "${effectiveTopic}". Difficulty: ${difficulty}. The task should clearly require solving this specific problem — do NOT substitute a different topic just because it is more common.`;
+        const costMap = { easy: 10, medium: 15, hard: 25 };
+        const baseCost = costMap[difficulty];
+    
+        // 2. Charge the user
+        const billing = await chargeCredits(baseCost);
+        if (!billing.success) {
+            return { success: false, error: billing.error };
+        }      
 
         const response = await openai.chat.completions.create({
-            model: 'gpt-4o-mini',
+            model: billing.modelToUse,
             response_format: { type: "json_object" },
             messages: [
                 {
@@ -281,6 +291,7 @@ export async function generateCodingChallenge({
             typeof estimatedTimeRaw === "number" && Number.isFinite(estimatedTimeRaw)
                 ? Math.round(estimatedTimeRaw)
                 : difficultyFallbackTime[difficulty];
+        
 
         return {
             success: true,

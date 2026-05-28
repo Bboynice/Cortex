@@ -7,6 +7,8 @@ import DropdownMenu from '@/src/components/ui/Dropdown';
 import TaskInstructions from '@/src/components/platform/editor/TaskInstructions';
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
+import { useModalStore } from '@/src/hooks/use-modal-store';
+
 import {
   runTestCases,
   resolveEntry,
@@ -75,6 +77,7 @@ function buildApplyFixTestFailurePayload(
 
 export default function PlaygroundPage() {
   const searchParams = useSearchParams();
+  const { onOpen } = useModalStore();
 
   type Language = "javascript" | "python" | "rust";
 
@@ -124,6 +127,22 @@ export default function PlaygroundPage() {
   const generatedLanguageLabel = languageChoices.find((c) => c.value === language)?.label;
   const generatedDifficultyLabel = difficultyChoices.find((c) => c.value === difficulty)?.label;
 
+  const handleBillingError = (errorMessage: string) => {
+    if (errorMessage === "INSUFFICIENT_CREDITS") {
+      onOpen("confirm-delete", { // Reusing your existing modal design format
+        title: "Out of AI Credits",
+        description: "You have exhausted your monthly AI credits. Upgrade to a Pro plan to continue generating challenges and analyzing code.",
+        submitText: "View Plans",
+        cancelText: "Close",
+        action: () => {
+          // You can route them to a pricing page or open a Stripe checkout here
+          window.location.href = "/settings"; 
+        },
+      });
+      return true; // Tells the caller we handled it
+    }
+    return false; // Not a billing error
+  };
   const startCode: Record<Language, string> = {
     javascript: `function sumEvenNumbers(arr) {
   // Your code here
@@ -314,7 +333,10 @@ export default function PlaygroundPage() {
       setReport(null);
       setGenerateReportError(null);
     } else {
-      alert("Error generating challenge");
+      const isBillingIssue = handleBillingError(result.error ?? "");
+      if (!isBillingIssue) {
+        addToast(result.error || "Error generating challenge", "error");
+      }
     }
 
     setLoading(false);
@@ -410,6 +432,10 @@ export default function PlaygroundPage() {
     } catch (e: unknown) {
       if (e instanceof Error && e.name === "AbortError") return;
       setGenerateReportError(e instanceof Error ? e.message : "Failed to generate report");
+      const isBillingIssue = handleBillingError(e instanceof Error ? e.message : "Failed to generate report");
+      if (!isBillingIssue) {
+        addToast(e instanceof Error ? e.message : "Failed to generate report", "error");
+      }
     } finally {
       if (reportInflightRef.current === controller) reportInflightRef.current = null;
       setIsGeneratingReport(false);
@@ -459,7 +485,11 @@ export default function PlaygroundPage() {
       analyzeNow();
     } catch (e: any) {
       if (e?.name === "AbortError") return;
-      setApplyFixError(e?.message || "Failed to apply fix");
+      const isBillingIssue = handleBillingError(e?.message);
+      if (!isBillingIssue) {
+        setApplyFixError(e?.message || "Failed to apply fix");
+        addToast(e?.message || "Failed to apply fix", "error");
+      }
     } finally {
       if (applyFixInflightRef.current === controller) applyFixInflightRef.current = null;
       setIsApplyingFix(false);

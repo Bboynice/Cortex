@@ -1,6 +1,6 @@
 import { openai } from "@/src/lib/ai-client";
+import { chargeCredits } from "@/src/lib/billing"; // <-- Your billing cashier
 
-// Match this shape on the client (or import from a shared types file later).
 export type StructuralIntegrityReport = {
   headline: string;
   verdict: string;
@@ -16,6 +16,8 @@ type GenerateReportRequest = {
   language?: string;
   challenge?: string;
   requirements?: string[];
+  architectMode?: 'mentor' | 'brutal';
+  reportVerbosity?: 'compact' | 'loose';
 };
 
 function asString(x: unknown, fallback = "") {
@@ -55,10 +57,24 @@ export async function POST(req: Request) {
       return Response.json({ error: "Missing code" }, { status: 400 });
     }
 
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+    // ==========================================
+    // 🛡️ THE BOUNCER: CHARGE CREDITS FIRST
+    // ==========================================
+    // We charge a base cost of 15 credits for a report. 
+    // The billing function will automatically multiply this if they use a heavier model!
+    const billing = await chargeCredits(15);
+    
+    if (!billing.success) {
+      // 402 Payment Required. This exactly triggers your frontend 'INSUFFICIENT_CREDITS' modal!
+      return Response.json({ error: billing.error }, { status: 402 });
+    }
+    // ==========================================
+
+    // Use the model the user selected in their settings, handed back by our billing function
+    const model = billing.modelToUse || "gpt-4o-mini";
 
     const response = await openai.chat.completions.create({
-      model,
+      model, // <-- Dynamically set!
       response_format: { type: "json_object" },
       temperature: 0.4,
       max_tokens: 2200,
@@ -131,8 +147,8 @@ export async function POST(req: Request) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     return Response.json(
-      { error: "Failed to generate report", message },
-      { status: 500, headers: { "cache-control": "no-store" } }
+      { error: message === "INSUFFICIENT_CREDITS" ? message : "Failed to generate report", message },
+      { status: message === "INSUFFICIENT_CREDITS" ? 402 : 500, headers: { "cache-control": "no-store" } }
     );
   }
 }

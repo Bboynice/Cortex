@@ -5,17 +5,124 @@ import LabeledInput from "@/src/components/ui/LabeledInput";
 import Pill from "@/src/components/ui/Pill";
 import { Bot, BrainCircuit, Save, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
 import Dropdown from "@/src/components/ui/Dropdown";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/src/hooks/use-toast";
 import { useModalStore } from "@/src/hooks/use-modal-store";
+import { useAuthStore } from "@/src/store/useAuthStore";
+import { createClient } from "@/src/lib/supabase/client";
 
 export default function AISection() {
+  const { addToast } = useToast();
+  const { onOpen } = useModalStore();
+  const { user } = useAuthStore();
+
+  // Text Inputs (Saved manually via button)
+  const [assistantName, setAssistantName] = useState("");
+  const [responseStyle, setResponseStyle] = useState("");
+  const [codeFocus, setCodeFocus] = useState("");
+  const [preferredModel, setPreferredModel] = useState("gpt-4o-mini");
+
+  // Dropdowns (Auto-saved instantly)
   const [autoSuggestions, setAutoSuggestions] = useState("enabled");
   const [reportVerbosity, setReportVerbosity] = useState("compact");
   const [architectMode, setArchitectMode] = useState("mentor");
-  const [preferredModel, setPreferredModel] = useState("gpt-4o-mini");
-  const { addToast } = useToast();
-  const { onOpen } = useModalStore();
+
+  // Read-only Limits (Fetched from profiles)
+  const [monthlyCredits, setMonthlyCredits] = useState(100);
+  const [contextWindow, setContextWindow] = useState(8000);
+
+  // 1. Fetch data on load
+  useEffect(() => {
+    async function fetchAISettings() {
+      if (!user?.id) return;
+      const supabase = createClient();
+
+      // Fetch AI preferences from user_settings
+      const { data: settings } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (settings) {
+        setAssistantName(settings.assistant_name || "");
+        setResponseStyle(settings.response_style || "");
+        setCodeFocus(settings.code_generation_focus || "");
+        setPreferredModel(settings.preferred_model || "gpt-4o-mini");
+        
+        setAutoSuggestions(settings.auto_suggestions ? "enabled" : "disabled");
+        setReportVerbosity(settings.report_verbosity || "compact");
+        setArchitectMode(settings.architect_mode || "mentor");
+      }
+
+      // Fetch limits from profiles
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("monthly_credits, context_window_budget")
+        .eq("id", user.id)
+        .single();
+        
+      if (profile) {
+        setMonthlyCredits(profile.monthly_credits);
+        setContextWindow(profile.context_window_budget);
+      }
+    }
+    fetchAISettings();
+  }, [user?.id]);
+
+  // 2. Manual Save Function (Top Section)
+  const handleSaveAIPreferences = async () => {
+    if (!user?.id) return;
+    const supabase = createClient();
+
+    const { error } = await supabase
+      .from("user_settings")
+      .update({
+        assistant_name: assistantName,
+        response_style: responseStyle,
+        code_generation_focus: codeFocus,
+        preferred_model: preferredModel,
+      })
+      .eq("user_id", user.id);
+
+    if (error) {
+      addToast("Failed to save AI preferences.", "error");
+    } else {
+      addToast("AI preferences have been saved.", "success");
+    }
+  };
+
+  // 3. Auto-Save Functions (Middle Section)
+  const handleAutoSuggestionsChange = async (value: string) => {
+    setAutoSuggestions(value);
+    if (!user?.id) return;
+    
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("user_settings")
+      .update({ auto_suggestions: value === "enabled" }) // Convert string to boolean
+      .eq("user_id", user.id);
+
+    if (!error) addToast(`Auto suggestions have been ${value}.`, "success");
+  };
+
+  const handleVerbosityChange = async (value: string) => {
+    setReportVerbosity(value);
+    if (!user?.id) return;
+    
+    const supabase = createClient();
+    const { error } = await supabase.from("user_settings").update({ report_verbosity: value }).eq("user_id", user.id);
+    if (!error) addToast(`Report verbosity has been set to ${value}.`, "success");
+  };
+
+  const handleArchitectChange = async (value: string) => {
+    setArchitectMode(value);
+    if (!user?.id) return;
+    
+    const supabase = createClient();
+    const { error } = await supabase.from("user_settings").update({ architect_mode: value }).eq("user_id", user.id);
+    if (!error) addToast(`The Architect mode has been set to ${value}.`, "success");
+  };
 
   return (
     <div className="w-full max-w-none space-y-6">
@@ -49,12 +156,14 @@ export default function AISection() {
         <div className="mt-6 grid gap-x-10 gap-y-8 md:grid-cols-2 md:items-start">
           <LabeledInput
             label="Assistant Name"
-            defaultValue="Cortex Copilot"
+            value={assistantName}
+            onChange={(e) => setAssistantName(e.target.value)}
             helperText="Used across your AI workspace and assistant headers."
           />
           <LabeledInput
             label="Response Style"
-            defaultValue="Concise, practical, and implementation-first"
+            value={responseStyle}
+            onChange={(e) => setResponseStyle(e.target.value)}
           />
           <div className="flex w-full flex-col gap-2">
             <span className="text-sm font-semibold text-muted-foreground">Preferred Model</span>
@@ -75,7 +184,8 @@ export default function AISection() {
           </div>
           <LabeledInput
             label="Code Generation Focus"
-            defaultValue="Readable, reusable, and production-safe"
+            value={codeFocus}
+            onChange={(e) => setCodeFocus(e.target.value)}
           />
         </div>
 
@@ -85,14 +195,12 @@ export default function AISection() {
             color="primary"
             className="w-fit justify-start gap-2 rounded-xl px-6 py-3 text-sm font-semibold normal-case"
             onClick={() => {
-              onOpen("user-settings", {
+              onOpen("save-profile", { // Reusing your save modal design
                 title: "Confirm Save Changes",
-                description: "Are you sure you want to save changes?",
+                description: "Are you sure you want to save these AI preferences?",
                 submitText: "Save",
                 cancelText: "Cancel",
-                action: async () => {
-                  addToast(`AI preferences have been saved.`, "success");
-                },
+                action: handleSaveAIPreferences, // Tied to the Supabase function
               });
             }}
           >
@@ -126,17 +234,14 @@ export default function AISection() {
                 { value: "disabled", label: "Disabled" },
               ]}
               value={autoSuggestions}
-              onChange={(value) => {
-                setAutoSuggestions(value);
-                addToast(`Auto suggestions have been ${value}.`, "success");
-              }}
+              onChange={handleAutoSuggestionsChange}
             />
           </div>
           <div className="settings-row flex items-center justify-between gap-4">
             <div>
               <div className="text-sm font-semibold text-content">Report Verbosity</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Determines how big or concise the report generation will be: choose between a compact or a loose style.
+                Determines how big or concise the report generation will be.
               </p>
             </div>
             <Dropdown
@@ -145,17 +250,14 @@ export default function AISection() {
                 { value: "loose", label: "Loose" },
               ]}
               value={reportVerbosity}
-              onChange={(value) => {
-                setReportVerbosity(value);
-                addToast(`Report verbosity has been set to ${value}.`, "success");
-              }}
+              onChange={handleVerbosityChange}
             />
           </div>
           <div className="settings-row flex items-center justify-between gap-4">
             <div>
-              <div className="text-sm font-semibold text-content">The Arhitect Mode</div>
+              <div className="text-sm font-semibold text-content">The Architect Mode</div>
               <p className="mt-1 text-xs text-muted-foreground">
-                Determines the style of report generation: choose between an encouraging, friendly tone or a strict, professional format.
+                Determines the style of report generation: encouraging or strict.
               </p>
             </div>
             <Dropdown
@@ -164,10 +266,7 @@ export default function AISection() {
                 { value: "brutal", label: "Senior Mode" },
               ]}
               value={architectMode}
-              onChange={(value) => {
-                setArchitectMode(value);
-                addToast(`The Architect mode has been set to ${value}.`, "success");
-              }}
+              onChange={handleArchitectChange}
             />
           </div>
         </div>
@@ -182,23 +281,41 @@ export default function AISection() {
         </header>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {/* AI CREDITS WALLET */}
           <div className="settings-row">
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm font-semibold text-content">Monthly AI Credits</span>
-              <span className="text-xs font-medium text-muted-foreground">7,500 / 10,000 used</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {/* Format the numbers nicely with commas */}
+                {monthlyCredits.toLocaleString()} / 10,000 remaining
+              </span>
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/70">
-              <div className="h-full w-[75%] rounded-full bg-primary" />
+              <div 
+                className="h-full rounded-full bg-primary transition-all duration-1000 ease-out" 
+                style={{ 
+                  // Calculate the percentage remaining. Max is 100%, Min is 0%.
+                  width: `${Math.max(0, Math.min(100, (monthlyCredits / 10000) * 100))}%` 
+                }} 
+              />
             </div>
           </div>
 
           <div className="settings-row">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-semibold text-content">Context Window Budget</span>
-              <span className="text-xs font-medium text-muted-foreground">42% active</span>
+              <span className="text-sm font-semibold text-content">Context Window Limit</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {contextWindow.toLocaleString()} tokens
+              </span>
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-background/70">
-              <div className="h-full w-[42%] rounded-full bg-cyan-500" />
+              <div 
+                className="h-full rounded-full bg-cyan-500 transition-all duration-1000 ease-out" 
+                style={{ 
+                  // If they have 8000 (Free), show 25%. If they have 32000+ (Pro), show 100%.
+                  width: contextWindow >= 32000 ? '100%' : '25%' 
+                }} 
+              />
             </div>
           </div>
         </div>

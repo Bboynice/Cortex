@@ -1,4 +1,5 @@
 import { openai } from "@/src/lib/ai-client";
+import { chargeCredits } from "@/src/lib/billing";
 
 type InsightFeedbackKind = "issue" | "improvement" | "praise";
 
@@ -29,6 +30,8 @@ function safeJsonParse(raw: string): any | null {
 
 export async function POST(req: Request) {
   try {
+
+
     const body = (await req.json()) as any;
     const code = asString(body?.code).trim();
     const language = asString(body?.language).trim() || "javascript";
@@ -39,10 +42,13 @@ export async function POST(req: Request) {
       return Response.json({ error: "Missing code" }, { status: 400 });
     }
 
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+    const billing = await chargeCredits(2);
+    if (!billing.success) {
+      return Response.json({ error: billing.error }, { status: 402 });
+    }
 
     const response = await openai.chat.completions.create({
-      model,
+      model: billing.modelToUse,
       response_format: { type: "json_object" },
       temperature: 0.2,
       messages: [
