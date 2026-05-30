@@ -1,70 +1,67 @@
-// src/lib/code-executor.ts
 export async function executeCode(code: string, language: string): Promise<string> {
-  if (language === "javascript") {
-    try {
-      // Create a virtual console to capture logs
-      let output = "";
-      const customConsole = {
-        log: (...args: any[]) => {
-          output += args.join(" ") + "\n";
-        },
-      };
+  // 1. Map your string languages to Judge0's strict integer IDs
+  const languageIds: Record<string, number> = {
+    javascript: 93, // Node.js 18
+    python: 71,     // Python 3
+    rust: 73,       // Rust
+  };
 
-      // Execute the code as a normal script.
-      // Output only comes from console.log(...) (like a real runtime).
-      // eslint-disable-next-line no-new-func
-      const run = new Function("console", `"use strict";\n${code}\n`);
-      run(customConsole);
-      return output || "Executed successfully (no output).";
-    } catch (err: any) {
-      return `Error: ${err?.message ?? String(err)}`;
-    }
+  const langId = languageIds[language];
+  if (!langId) {
+    return `Error: Unsupported language '${language}'`;
   }
 
-  // For Python/Rust/etc, use an external API (Piston)
-  let response: Response;
+  // 2. Prepare the Judge0 API request
+  // ?wait=true forces the API to return the result in one single network request
+  // ?base64_encoded=false keeps the payload readable and easy to parse
+  const url = "https://judge0-ce.p.rapidapi.com/submissions?wait=true&base64_encoded=false";
+  
   try {
-    response = await fetch("https://emkc.org/api/v2/piston/execute", {
+    const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-RapidAPI-Key": process.env.NEXT_PUBLIC_RAPIDAPI_KEY || "", 
+        "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+      },
       body: JSON.stringify({
-        language,
-        version: "*",
-        files: [{ content: code }],
+        language_id: langId,
+        source_code: code,
+        // SECURITY LIMITS: Protects against infinite loops crashing the sandbox
+        cpu_time_limit: 3.0, // 3 seconds max runtime
+        memory_limit: 128000 // 128MB max RAM
       }),
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return `Error: Judge0 API request failed (${response.status}): ${errorText}`;
+    }
+
+    const data = await response.json();
+
+    // 3. Parse the Judge0 Output structure
+
+    // Status 6 = Compilation Error (Highly relevant for Rust)
+    if (data.status?.id === 6) {
+      return `Compilation Error:\n${data.compile_output || data.message}`;
+    }
+
+    // Status 5 = Time Limit Exceeded (Infinite loop caught!)
+    if (data.status?.id === 5) {
+      return "Error: Time Limit Exceeded. Check for infinite loops in your code.";
+    }
+
+    // Standard Error = Code compiled, but crashed while running (e.g., Python syntax error)
+    if (data.stderr) {
+      return `Error:\n${data.stderr}`;
+    }
+
+    // Standard Output = Success!
+    const output = data.stdout?.trim();
+    return output && output.length > 0 ? output : "Executed successfully (no output).";
+
   } catch (err: any) {
-    return `Error: Failed to reach executor API (${err?.message ?? String(err)})`;
+    return `Error: Failed to reach Executor API (${err?.message ?? String(err)})`;
   }
-
-  // Piston sometimes returns non-standard shapes for errors; never assume data.run exists.
-  let data: any = null;
-  try {
-    data = await response.json();
-  } catch {
-    const text = await response.text().catch(() => "");
-    return response.ok
-      ? `Error: Invalid JSON from executor API${text ? `: ${text}` : ""}`
-      : `Error: Executor API request failed (${response.status})${text ? `: ${text}` : ""}`;
-  }
-
-  if (!response.ok) {
-    const msg =
-      data?.message ??
-      data?.error ??
-      (typeof data === "string" ? data : null) ??
-      `Executor API request failed (${response.status})`;
-    return `Error: ${msg}`;
-  }
-
-  const output =
-    data?.run?.output ??
-    data?.run?.stdout ??
-    data?.run?.stderr ??
-    data?.compile?.output ??
-    data?.compile?.stdout ??
-    data?.compile?.stderr ??
-    null;
-
-  return (typeof output === "string" && output.length > 0) ? output : "No output.";
 }

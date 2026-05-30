@@ -136,7 +136,7 @@ export default function PlaygroundPage() {
         cancelText: "Close",
         action: () => {
           // You can route them to a pricing page or open a Stripe checkout here
-          window.location.href = "/settings"; 
+          window.location.href = "/settings/billing"; 
         },
       });
       return true; // Tells the caller we handled it

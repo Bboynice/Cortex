@@ -2,6 +2,7 @@
 
 import { openai } from '@/src/lib/ai-client';
 import { chargeCredits } from '@/src/lib/billing';
+import { executeCode } from "@/src/lib/code-executor";
 import {
     deriveExpectedOutputs,
     resolveEntry,
@@ -159,37 +160,37 @@ export async function generateCodingChallenge({
             messages: [
                 {
                     role: 'system',
-                    content:
-                        "You are a coding mentor. Return ONLY valid JSON (no markdown, no backticks).",
+                    content: "You are a senior coding mentor creating programming tasks. Return ONLY valid JSON."
                 },
                 {
                     role: "user",
                     content: [
                         taskLine,
                         "",
-                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "testInputs": string[], "entryFunction": string, "starterCode": string, "referenceSolution": string }',
+                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "entryFunction": string, "starterCode": string, "testRunnerCode": string }',
                         "",
                         "Constraints:",
-                        "- Use ONLY standard language features. No third-party libraries, no frameworks, no package imports of any kind.",
-                        "- No UI, web, networking, file-I/O, or framework tasks.",
-                        "- The task must be solvable with a single pure function the user writes in the editor.",
-                        '- requirements: 2-4 items, each "Label: value", no bullets/numbering',
-                        "- hints: EXACTLY 3 items; each has title + description; keep both short; no bullets/numbering",
-                        "- difficulty guide: easy(simple loops/if), medium(edge cases/parsing), hard(efficient algorithm)",
-                        "- estimatedTime: integer minutes; easy 10-20, medium 20-40, hard 40-60",
-                        "- Stick exactly to the topic above. Do NOT replace it with FizzBuzz, vowel counting, palindrome checking, or plain-string-reversal unless the topic literally asks for one of those.",
+                        "- Use ONLY standard language features. No third-party libraries.",
+                        "- The task must be solvable with a single pure function.",
+                        '- requirements: 2-4 items, each "Label: value", no bullets.',
+                        "- hints: EXACTLY 3 items; short title + description.",
+                        "- estimatedTime: integer minutes (10 to 60).",
                         "",
-                        "Grading fields (CRITICAL — read carefully):",
-                        `- entryFunction: the exact identifier name of the function the user must implement (e.g. "sumEvenNumbers"). camelCase for JavaScript/Rust, snake_case for Python. The same name MUST be used in starterCode and referenceSolution.`,
-                        `- starterCode: a ${language} snippet that defines ONLY the function signature using entryFunction as the name, with a placeholder body. Examples:`,
-                        `    javascript: "function sumEvenNumbers(arr) {\\n  // Your code here\\n  return 0;\\n}"`,
-                        `    python:     "def sum_even_numbers(arr):\\n    # Your code here\\n    return 0"`,
-                        `    rust:       "fn sum_even_numbers(arr: &[i32]) -> i32 {\\n    // Your code here\\n    return 0;\\n}"`,
-                        "- referenceSolution: a COMPLETE, CORRECT implementation of entryFunction in the same language. It MUST run as-is and produce correct outputs for every input in testInputs. Use only standard-library features. Do not include test calls, prints, or main(). Define the function at module/top level.",
-                        "- testInputs: 3-5 items. Each item is a JSON-encoded string representing the positional arguments to entryFunction:",
-                        '    * A JSON array of positional arguments. e.g. "[[1,2,3,4]]" means call entryFunction([1,2,3,4]). For multi-arg: "[\\"hello\\", 3]" means entryFunction("hello", 3).',
-                        "    * Do NOT include the function call syntax. Do NOT compute or include expected outputs anywhere — the grader will derive them by executing referenceSolution.",
-                        "    * Cover diverse, meaningful cases (typical, edge, boundary).",
+                        "Grading fields (CRITICAL):",
+                        `- entryFunction: The exact function name (e.g., "sumEvenNumbers").`,
+                        `- starterCode: The function signature with a placeholder body.`,
+                        `- testRunnerCode: This is crucial. Provide a COMPLETE, runnable script in ${language}. It MUST include the correct reference implementation of entryFunction. Below the function, write exactly 3 to 5 test calls. For EACH test call, you must print/log exactly this format to standard output:`,
+                        `___TEST_CASE___<stringified_input>___<stringified_output>`,
+                        `CRITICAL RULE: Both <stringified_input> and <stringified_output> MUST be strictly valid JSON (use json.dumps in Python, JSON.stringify in JS). Do NOT use language-specific string representations like Python's default single-quoted lists.`,
+                        "Example for Python:",
+                        'import json',
+                        'print(f"___TEST_CASE___[1, 2, 3]___{json.dumps(sum_even([1, 2, 3]))}")',
+                        "Example for JavaScript:",
+                        'console.log(`___TEST_CASE___[1, 2, 3]___${JSON.stringify(sumEven([1, 2, 3]))}`);',
+                        "Example for Rust:",
+                        '// Output strict JSON. Use double quotes for strings.',
+                        'println!("___TEST_CASE___[1, 2, 3]___[\\"ACTIVE\\", \\"OFF\\"]");',
+                        "Do NOT print anything else. Just the test cases."
                     ].join("\n"),
                 },
             ],
@@ -220,31 +221,15 @@ export async function generateCodingChallenge({
                 ? starterCodeRaw
                 : undefined;
 
-        const referenceSolutionRaw = (parsed as any)?.referenceSolution;
-        const referenceSolution =
-            typeof referenceSolutionRaw === "string" && referenceSolutionRaw.trim().length > 0
-                ? referenceSolutionRaw
+        const testRunnerCodeRaw = (parsed as any)?.testRunnerCode;
+        const testRunnerCode =
+            typeof testRunnerCodeRaw === "string" && testRunnerCodeRaw.trim().length > 0
+                ? testRunnerCodeRaw
                 : undefined;
 
-        // testInputs comes back as an array of JSON-encoded strings. Anything
-        // that isn't already a string we coerce via JSON.stringify so it still
-        // round-trips through the reference harness.
-        const testInputsRaw = Array.isArray((parsed as any)?.testInputs)
-            ? (parsed as any).testInputs
-            : [];
-        const testInputs: string[] = testInputsRaw
-            .map((v: unknown) => (typeof v === "string" ? v : JSON.stringify(v)))
-            .filter((s: string) => typeof s === "string" && s.length > 0)
-            .slice(0, 5);
-
-        // Derive expected outputs by *executing* the reference solution. This
-        // is the whole point of the rewrite — the AI is bad at computing
-        // outputs, but it's fine at writing the function that produces them.
         const testCases = await buildTestCases({
-            referenceSolution,
+            testRunnerCode,
             language,
-            entryFunction,
-            testInputs,
         });
 
         const requirements = requirementsRaw
@@ -312,53 +297,41 @@ export async function generateCodingChallenge({
     }
 }
 
-// Given the AI's reference solution and a list of input strings, executes the
-// reference solution against each input and returns {input, output} pairs
-// where output is the *real* return value. Inputs that error out are dropped.
-// If nothing usable comes back we return an empty list — the caller / UI will
-// surface that as "no test cases", which is better than showing lies.
 async function buildTestCases({
-    referenceSolution,
+    testRunnerCode,
     language,
-    entryFunction,
-    testInputs,
 }: {
-    referenceSolution: string | undefined;
+    testRunnerCode: string | undefined;
     language: SupportedLanguage;
-    entryFunction: string | undefined;
-    testInputs: string[];
 }): Promise<{ input: string; output: string }[]> {
-    if (!referenceSolution || testInputs.length === 0) return [];
+    if (!testRunnerCode) return [];
 
-    // Rust reference execution isn't wired up yet (same reason grading isn't).
-    // Skip silently so the user still gets a challenge + starter; they can run
-    // their own code but won't see meaningful test cases for Rust until then.
-    if (language === "rust") return [];
+    // 1. Run the AI's custom test runner script on Judge0
+    const rawOutput = await executeCode(testRunnerCode, language);
 
-    // Find the actual callable in the reference solution. Prefer the AI's
-    // claimed entryFunction, fall back to whatever function the regex finds.
-    const entry = resolveEntry(referenceSolution, language, entryFunction);
-    if (!entry) return [];
-
-    const derived = await deriveExpectedOutputs(
-        referenceSolution,
-        language,
-        entry,
-        testInputs,
-    );
-
+    // 2. Parse the Sentinel format
     const cases: { input: string; output: string }[] = [];
-    for (let i = 0; i < testInputs.length; i++) {
-        const d = derived[i];
-        if (d?.ok) {
-            cases.push({ input: testInputs[i], output: d.output });
-        } else if (d) {
-            // Log so we can spot bad reference solutions in server logs; the
-            // case itself is silently dropped from the user-facing list.
-            console.warn(
-                `[generateCodingChallenge] reference solution failed for input ${i}: ${d.error}`,
-            );
+    const lines = rawOutput.split("\n");
+
+    for (const line of lines) {
+        if (!line.includes("___TEST_CASE___")) continue;
+
+        // Split by the sentinel
+        const parts = line.split("___");
+        
+        // parts[0] is empty or garbage before the first sentinel
+        // parts[1] should be "TEST_CASE"
+        // parts[2] is the input
+        // parts[3] is the output
+        if (parts.length >= 4) {
+            const input = parts[2].trim();
+            const output = parts[3].trim();
+            
+            if (input && output) {
+                cases.push({ input, output });
+            }
         }
     }
+
     return cases;
 }

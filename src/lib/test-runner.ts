@@ -370,60 +370,111 @@ export async function runTestCases(
   cases: TestCase[],
 ): Promise<TestResult[]> {
   if (cases.length === 0) return [];
-
   if (!entry) {
-    return cases.map((_, i) => ({
-      i,
-      status: "error" as const,
-      message: "Could not detect a function to test. Make sure you have a named function in your code.",
-    }));
+    return cases.map((_, i) => ({ i, status: "error", message: "No function detected." }));
   }
 
-  // Rust grading requires a much more involved harness (serde, parsing arguments,
-  // typed return values). For now we surface a clear "skipped" status per case.
-  if (language === "rust") {
-    return cases.map((_, i) => ({
-      i,
-      status: "skipped" as const,
-      message: "Rust grading is not supported yet.",
-    }));
+  // 1. Build a strict, safe wrapper for the user's code
+  let harness = "";
+
+  if (language === "javascript") {
+    const caseLogs = cases.map((c, i) => {
+        return `
+        try {
+            let args = JSON.parse('${c.input.replace(/'/g, "\\'")}');
+            let res;
+            // SMART CHECK: If it's an array AND the function expects multiple arguments, spread it.
+            // Otherwise, pass it directly as a single array.
+            if (Array.isArray(args) && ${entry}.length > 1) {
+                res = ${entry}(...args);
+            } else {
+                res = ${entry}(args);
+            }
+            console.log('${SENTINEL}${i}___' + JSON.stringify(res));
+        } catch(e) {
+            console.log('${SENTINEL}${i}___ERROR___' + e.message);
+        }`;
+    }).join("\n");
+    harness = `${userCode}\n\n${caseLogs}`;
+  } 
+  else if (language === "python") {
+     const caseLogs = cases.map((c, i) => {
+        return `
+try:
+    import json
+    args = json.loads('${c.input.replace(/'/g, "\\'")}')
+    
+    if isinstance(args, list):
+        try:
+            # Attempt 1: Try unpacking as multiple arguments
+            res = ${entry}(*args)
+        except TypeError as e:
+            # Attempt 2: If Python complains about positional arguments, pass as a single list
+            if "positional argument" in str(e):
+                res = ${entry}(args)
+            else:
+                raise e
+    else:
+        res = ${entry}(args)
+        
+    print(f'${SENTINEL}${i}___{json.dumps(res)}')
+except Exception as e:
+    print(f'${SENTINEL}${i}___ERROR___{str(e)}')`;
+    }).join("\n");
+    harness = `${userCode}\n\n${caseLogs}`;
+  }
+  else if (language === "rust") {
+     return cases.map((_, i) => ({ i, status: "skipped", message: "Rust auto-grading is complex. Manual testing required." }));
   }
 
-  const wrapped =
-    language === "javascript"
-      ? buildJsHarness(userCode, entry, cases)
-      : buildPythonHarness(userCode, entry, cases);
+  // 2. Execute the user's code + harness
+  const rawOutput = await executeCode(harness, language);
 
-  const raw = await executeCode(wrapped, language);
-
+  // 3. Parse the results
   const results: TestResult[] = [];
-  const seen = new Set<number>();
+  const lines = rawOutput.split("\n");
 
-  for (const line of raw.split("\n")) {
-    const idx = line.indexOf(SENTINEL);
-    if (idx === -1) continue;
-    const payload = line.slice(idx + SENTINEL.length).trim();
+  const normalizeOutput = (str: string) => {
     try {
-      const parsed = JSON.parse(payload) as TestResult;
-      if (parsed && typeof parsed.i === "number" && !seen.has(parsed.i)) {
-        seen.add(parsed.i);
-        results.push(parsed);
-      }
+        // If it's valid JSON, parsing and stringifying perfectly synchronizes spacing
+        return JSON.stringify(JSON.parse(str));
     } catch {
-      // Ignore non-JSON sentinel lines.
+        // Fallback: Strip ALL whitespace and swap single quotes for double quotes
+        return str.replace(/\s+/g, '').replace(/'/g, '"');
     }
-  }
+  };
 
-  // Any case that never reported a result (e.g. runtime crash before reaching it)
-  // is reported as an error so the UI never shows blanks.
-  for (let i = 0; i < cases.length; i++) {
-    if (!seen.has(i)) {
-      results.push({
-        i,
-        status: "error",
-        message: "No result reported (possible runtime error before this case ran).",
-      });
+  for (const line of lines) {
+    if (!line.includes(SENTINEL)) continue;
+    
+    const cleanLine = line.substring(line.indexOf(SENTINEL) + SENTINEL.length);
+    const [indexStr, ...rest] = cleanLine.split("___");
+    const i = parseInt(indexStr);
+    const actualRaw = rest.join("___").trim();
+
+    if (isNaN(i) || i < 0 || i >= cases.length) continue;
+
+    if (actualRaw.startsWith("ERROR___")) {
+        results.push({ i, status: "error", message: actualRaw.replace("ERROR___", "") });
+        continue;
     }
+
+    const expectedRaw = cases[i].output;
+    
+    // ✨ NEW: Compare the normalized versions, not the raw strings!
+    if (normalizeOutput(actualRaw) === normalizeOutput(expectedRaw)) {
+        results.push({ i, status: "pass", actual: actualRaw, expected: expectedRaw });
+    } else {
+        results.push({ i, status: "fail", actual: actualRaw, expected: expectedRaw });
+    }
+}
+
+  // Fill in any missing cases (crashes)
+  const processedIndices = new Set(results.map(r => r.i));
+  for (let i = 0; i < cases.length; i++) {
+      if (!processedIndices.has(i)) {
+           results.push({ i, status: "error", message: "Execution stopped before this test." });
+      }
   }
 
   return results.sort((a, b) => a.i - b.i);

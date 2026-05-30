@@ -173,7 +173,15 @@ export default function PrivacySection() {
               roundness={12}
               color="primary"
               className="w-fit shrink-0 justify-start rounded-xl px-5 py-3 text-sm font-semibold normal-case"
-              onClick={handleClearHistory}
+              onClick={
+                () => onOpen("user-settings", {
+                  title: "Confirm Clear History",
+                  description: "Are you sure you want to clear your session history?",
+                  submitText: "Clear History",
+                  cancelText: "Cancel",
+                  action: handleClearHistory,
+                })
+              }
             >
               Clear History
             </GlowButton>
