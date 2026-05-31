@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { InsightAnalysis, InsightReport } from "@/src/components/platform/editor/InsightPanel";
+import type { PlaygroundTopic } from "@/src/lib/playground-topics";
 
 export type PlaygroundLanguage = "javascript" | "python" | "rust";
 export type PlaygroundDifficulty = "easy" | "medium" | "hard";
@@ -21,6 +22,7 @@ interface PlaygroundState {
   language: PlaygroundLanguage;
   editorLanguage: PlaygroundLanguage;
   difficulty: PlaygroundDifficulty;
+  topic: PlaygroundTopic;
 
   analysis: InsightAnalysis | null;
   report: InsightReport | null;
@@ -29,6 +31,7 @@ interface PlaygroundState {
   setLanguage: (lang: PlaygroundLanguage) => void;
   setEditorLanguage: (lang: PlaygroundLanguage) => void;
   setDifficulty: (d: PlaygroundDifficulty) => void;
+  setTopic: (t: PlaygroundTopic) => void;
 
   /** One action that runs after a successful `generateCodingChallenge` */
   applySuccessfulGeneration: (args: {
@@ -67,6 +70,7 @@ export const usePlaygroundStore = create<PlaygroundState>()(
       language: "javascript",
       editorLanguage: "javascript",
       difficulty: "easy",
+      topic: "random",
       analysis: null,
       report: null,
 
@@ -74,6 +78,7 @@ export const usePlaygroundStore = create<PlaygroundState>()(
       setLanguage: (language) => set({ language }),
       setEditorLanguage: (editorLanguage) => set({ editorLanguage }),
       setDifficulty: (difficulty) => set({ difficulty }),
+      setTopic: (topic) => set({ topic }),
 
       applySuccessfulGeneration: ({
         code,
@@ -119,6 +124,7 @@ export const usePlaygroundStore = create<PlaygroundState>()(
         language: s.language,
         editorLanguage: s.editorLanguage,
         difficulty: s.difficulty,
+        topic: s.topic,
         analysis: s.analysis,
         report: s.report,
       }),

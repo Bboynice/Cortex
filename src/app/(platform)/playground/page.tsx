@@ -8,6 +8,7 @@ import TaskInstructions from '@/src/components/platform/editor/TaskInstructions'
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
 import { useModalStore } from '@/src/hooks/use-modal-store';
+import { awardTaskPoints } from '@/src/app/(platform)/playground/actions';
 
 import {
   runTestCases,
@@ -20,6 +21,7 @@ import InsightPanel, { type InsightReport, type InsightAnalysis } from '@/src/co
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/src/hooks/use-toast';
 import { usePlaygroundStore } from '@/src/store/usePlaygroundStore';
+import { PLAYGROUND_TOPICS, topicToPrompt, type PlaygroundTopic } from '@/src/lib/playground-topics';
 
 /** Rows sent to /api/apply-fix so the model sees reference expected vs actual from Submit. */
 function buildApplyFixTestFailurePayload(
@@ -92,9 +94,11 @@ export default function PlaygroundPage() {
   const language = usePlaygroundStore((s) => s.language);
   const editorLanguage = usePlaygroundStore((s) => s.editorLanguage);
   const difficulty = usePlaygroundStore((s) => s.difficulty);
+  const topic = usePlaygroundStore((s) => s.topic);
   const applySuccessfulGeneration = usePlaygroundStore((s) => s.applySuccessfulGeneration);
   const setLanguage = usePlaygroundStore((s) => s.setLanguage);
   const setDifficulty = usePlaygroundStore((s) => s.setDifficulty);
+  const setTopic = usePlaygroundStore((s) => s.setTopic);
   const setEditorLanguage = usePlaygroundStore((s) => s.setEditorLanguage);
   const analysis = usePlaygroundStore((s) => s.analysis);
   const setAnalysis = usePlaygroundStore((s) => s.setAnalysis);
@@ -123,6 +127,7 @@ export default function PlaygroundPage() {
     { value: "medium" as const, label: "Medium" },
     { value: "hard" as const, label: "Hard" },
   ];
+  const topicChoices = PLAYGROUND_TOPICS.map((t) => ({ value: t.value, label: t.label }));
 
   const generatedLanguageLabel = languageChoices.find((c) => c.value === language)?.label;
   const generatedDifficultyLabel = difficultyChoices.find((c) => c.value === difficulty)?.label;
@@ -274,11 +279,13 @@ export default function PlaygroundPage() {
     language?: Language;
     difficulty?: "easy" | "medium" | "hard";
     topic?: string;
+    topicSlug?: PlaygroundTopic;
   };
 
   async function handleGenerate(overrides: GenerateOverrides = {}) {
     const nextLanguage = overrides.language ?? language;
     const nextDifficulty = overrides.difficulty ?? difficulty;
+    const nextTopic = overrides.topicSlug ?? topic;
 
     // Sync UI state so dropdowns + editor reflect what we're generating for.
     if (overrides.language && overrides.language !== language) {
@@ -286,6 +293,9 @@ export default function PlaygroundPage() {
     }
     if (overrides.difficulty && overrides.difficulty !== difficulty) {
       setDifficulty(overrides.difficulty);
+    }
+    if (overrides.topicSlug && overrides.topicSlug !== topic) {
+      setTopic(overrides.topicSlug);
     }
     setEditorLanguage(nextLanguage);
     setCode(startCode[nextLanguage]);
@@ -297,10 +307,12 @@ export default function PlaygroundPage() {
     reportInflightRef.current?.abort();
     setAnalysisStatus("idle");
 
+    const topicForApi = overrides.topic ?? topicToPrompt(nextTopic);
+
     const result = await generateCodingChallenge({
       language: nextLanguage,
       difficulty: nextDifficulty,
-      topic: overrides.topic,
+      topic: topicForApi,
     });
 
     if (result.success) {
@@ -524,9 +536,6 @@ export default function PlaygroundPage() {
     setTestResults(undefined);
 
     try {
-      // Prefer the AI's name if the user's code actually defines it; otherwise
-      // fall back to whatever function is present. This survives "Apply Fix"
-      // rewrites and user renames.
       const entry = resolveEntry(codeToSubmit, editorLanguage, entryFunction);
       const results = await runTestCases(codeToSubmit, editorLanguage, entry, testCases);
       setTestResults(results);
@@ -536,7 +545,13 @@ export default function PlaygroundPage() {
       if (skipped === total && total > 0) {
         addToast("Grading for this language is not supported yet.", "warning");
       } else if (passed === total) {
-        addToast(`All ${total} test cases passed!`, "success");
+        const reward = await awardTaskPoints(difficulty as "easy" | "medium" | "hard");
+        if (reward.success) {
+          addToast(`Success! You earned +${reward.awarded} points!`, "success");
+          
+        } else {
+          addToast(`All ${total} test cases passed!`, "success");
+        }
       } else if (errored > 0) {
         addToast(`${passed} / ${total} passed (${errored} errored)`, "warning");
       } else {
@@ -604,21 +619,30 @@ export default function PlaygroundPage() {
       <section className="flex w-full shrink-0 flex-col">
         <div className="flex h-auto w-full shrink-0 items-center justify-start text-content">
           <div className="flex h-auto w-1/3 flex-row items-center justify-center gap-2">
-            <div className="flex h-auto w-[90%] flex-row items-center justify-between gap-2">
+            <div className="flex h-auto w-[90%] flex-row items-stretch justify-between gap-2">
               <MyButton effect="glow" onClick={() => handleGenerate()}>
                 {loading ? "Generating..." : "Generate"}
               </MyButton>
               <DropdownMenu
+                header="Language"
                 choices={languageChoices}
                 value={language}
                 onChange={handleLanguageChange}
                 placeholder="Language"
               />
               <DropdownMenu
+                header="Difficulty"
                 choices={difficultyChoices}
                 value={difficulty}
                 onChange={setDifficulty}
                 placeholder="Difficulty"
+              />
+              <DropdownMenu
+                header="Topic"
+                choices={topicChoices}
+                value={topic}
+                onChange={setTopic}
+                placeholder="Topic"
               />
             </div>
           </div>

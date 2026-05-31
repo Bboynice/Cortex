@@ -124,6 +124,7 @@ const CodeWindow = ({ language, code, onChange, onRun, onSubmit, logs }: CodeWin
               </svg>
               <span>Run</span>
             </button>
+
             <button
               type="button"
               onClick={handleSubmit}

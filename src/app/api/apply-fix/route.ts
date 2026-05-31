@@ -116,6 +116,19 @@ export async function POST(req: Request) {
           ].join("\n")
         : "";
 
+    const lang = language.toLowerCase();
+    let runnableLastLineRule = "";
+    if (lang === "python") {
+      runnableLastLineRule =
+        "The last line of the returned code must be a print(...) call that invokes the solution function with empty or minimal placeholder arguments (e.g. print(solve([])) or print(solve(\"\"))) so the user can replace those arguments with their own inputs and run the file manually.";
+    } else if (lang === "rust") {
+      runnableLastLineRule =
+        "The last lines must include a fn main() block whose final statement is println!(\"{:?}\", ...) (or dbg!(...)) calling the solution function with empty or minimal placeholder arguments (e.g. println!(\"{:?}\", solve(&[]))) so the user can paste their own inputs and run with cargo run.";
+    } else {
+      runnableLastLineRule =
+        "The last line of the returned code must be a console.log(...) call that invokes the solution function with empty or minimal placeholder arguments (e.g. console.log(solve([])) or console.log(solve(\"\"))) so the user can replace those arguments with their own inputs and run the file manually.";
+    }
+
     const response = await openai.chat.completions.create({
       model,
       response_format: { type: "json_object" },
@@ -125,12 +138,13 @@ export async function POST(req: Request) {
         {
           role: "system",
           content:
-            'You are a senior software engineer. Rewrite the user\'s code and return ONLY valid JSON: {"code": string}. No markdown fences or prose outside JSON. Prefer simple, idiomatic code.\n\nPriorities:\n1) If the user message includes an \"Automated test failures\" section, those expected values are authoritative for the grader. Fix logic so outputs match reference expectations for those rows (including types such as null vs number).\n2) Apply the improvement suggestion when it does not conflict with (1).\n3) Keep the same entry function name and overall structure unless (1) or the suggestion requires changes.\n4) Avoid unrelated refactors or extra features.\n\nHandling inputs or return shapes implied by failing tests is required behavior — not \"unnecessary defensive code\". Only skip extras that neither the task nor the failures imply.',
+            'You are a senior software engineer. Rewrite the user\'s code and return ONLY valid JSON: {"code": string}. No markdown fences or prose outside JSON. Prefer simple, idiomatic code.\n\nPriorities:\n1) If the user message includes an \"Automated test failures\" section, those expected values are authoritative for the grader. Fix logic so outputs match reference expectations for those rows (including types such as null vs number).\n2) Apply the improvement suggestion when it does not conflict with (1).\n3) Keep the same entry function name and overall structure unless (1) or the suggestion requires changes.\n4) Avoid unrelated refactors or extra features.\n5) Always leave a runnable last line as described in the user message (language-specific print/log call with empty or placeholder arguments).\n\nHandling inputs or return shapes implied by failing tests is required behavior — not \"unnecessary defensive code\". Only skip extras that neither the task nor the failures imply.',
         },
         {
           role: "user",
           content: [
             `Language: ${language}`,
+            runnableLastLineRule,
             challenge ? `Task: ${challenge}` : "",
             requirements.length ? `Requirements: ${requirements.join(" | ")}` : "",
             failuresBlock,

@@ -3,11 +3,15 @@
 import { openai } from '@/src/lib/ai-client';
 import { chargeCredits } from '@/src/lib/billing';
 import { executeCode } from "@/src/lib/code-executor";
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
+
 import {
     deriveExpectedOutputs,
     resolveEntry,
     type SupportedLanguage,
 } from '@/src/lib/test-runner';
+
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -117,6 +121,36 @@ const TOPIC_BANK: Record<Difficulty, string[]> = {
     ],
 };
 
+// Add this to your existing actions.ts file
+export async function awardTaskPoints(difficulty: "easy" | "medium" | "hard") {
+    // 1. Set the reward logic
+    const pointsMap = {
+        easy: 10,
+        medium: 25,
+        hard: 50
+    };
+    const pointsToAward = pointsMap[difficulty];
+
+    // 2. Initialize Supabase (Server-side)
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+    );
+
+    // 3. Award the points securely
+    const { error } = await supabase.rpc('add_user_points', {
+        gained_points: pointsToAward
+    });
+
+    if (error) {
+        return { success: false, error: "Failed to award points." };
+    }
+
+    return { success: true, awarded: pointsToAward };
+}
+
 function pickRandomTopic(difficulty: Difficulty): string {
     const bank = TOPIC_BANK[difficulty];
     return bank[Math.floor(Math.random() * bank.length)];
@@ -167,7 +201,7 @@ export async function generateCodingChallenge({
                     content: [
                         taskLine,
                         "",
-                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "entryFunction": string, "starterCode": string, "testRunnerCode": string }',
+                        'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "entryFunction": string, "starterCode": string, "referenceSolution": string, "testInputs": string[], "testRunnerCode": string }',
                         "",
                         "Constraints:",
                         "- Use ONLY standard language features. No third-party libraries.",
@@ -179,6 +213,8 @@ export async function generateCodingChallenge({
                         "Grading fields (CRITICAL):",
                         `- entryFunction: The exact function name (e.g., "sumEvenNumbers").`,
                         `- starterCode: The function signature with a placeholder body.`,
+                        `- referenceSolution: A complete, correct implementation of entryFunction only (no extra helpers that change the public API). Must compile and run.`,
+                        `- testInputs: EXACTLY 3 to 5 items. Each item is a JSON-encoded arguments payload as a string (e.g. "[1, 2, 3]" for one array arg, or "[1, 2]" for two numeric args). Must match how entryFunction is called in testRunnerCode.`,
                         `- testRunnerCode: This is crucial. Provide a COMPLETE, runnable script in ${language}. It MUST include the correct reference implementation of entryFunction. Below the function, write exactly 3 to 5 test calls. For EACH test call, you must print/log exactly this format to standard output:`,
                         `___TEST_CASE___<stringified_input>___<stringified_output>`,
                         `CRITICAL RULE: Both <stringified_input> and <stringified_output> MUST be strictly valid JSON (use json.dumps in Python, JSON.stringify in JS). Do NOT use language-specific string representations like Python's default single-quoted lists.`,
@@ -190,7 +226,9 @@ export async function generateCodingChallenge({
                         "Example for Rust:",
                         '// Output strict JSON. Use double quotes for strings.',
                         'println!("___TEST_CASE___[1, 2, 3]___[\\"ACTIVE\\", \\"OFF\\"]");',
-                        "Do NOT print anything else. Just the test cases."
+                        "Do NOT print anything else. Just the test cases.",
+                        "",
+                        "All grading fields are mandatory. testInputs must align with the ___TEST_CASE___ lines in testRunnerCode.",
                     ].join("\n"),
                 },
             ],
@@ -227,10 +265,40 @@ export async function generateCodingChallenge({
                 ? testRunnerCodeRaw
                 : undefined;
 
-        const testCases = await buildTestCases({
+        const referenceSolutionRaw = (parsed as any)?.referenceSolution;
+        const referenceSolution =
+            typeof referenceSolutionRaw === "string" && referenceSolutionRaw.trim().length > 0
+                ? referenceSolutionRaw
+                : undefined;
+
+        const testInputs = normalizeTestInputs((parsed as any)?.testInputs);
+
+        let testCases = await buildTestCases({
             testRunnerCode,
+            referenceSolution,
+            testInputs,
+            entryFunction,
             language,
         });
+
+        if (testCases.length === 0 && entryFunction && challenge) {
+            const repaired = await repairTestGradingFields({
+                model: billing.modelToUse,
+                language,
+                challenge,
+                entryFunction,
+                starterCode,
+            });
+            if (repaired) {
+                testCases = await buildTestCases({
+                    testRunnerCode: repaired.testRunnerCode,
+                    referenceSolution: repaired.referenceSolution,
+                    testInputs: repaired.testInputs,
+                    entryFunction,
+                    language,
+                });
+            }
+        }
 
         const requirements = requirementsRaw
             .map((r: unknown) => (typeof r === "string" ? r.trim() : ""))
@@ -299,39 +367,209 @@ export async function generateCodingChallenge({
 
 async function buildTestCases({
     testRunnerCode,
+    referenceSolution,
+    testInputs,
+    entryFunction,
     language,
 }: {
     testRunnerCode: string | undefined;
+    referenceSolution: string | undefined;
+    testInputs: string[];
+    entryFunction: string | undefined;
     language: SupportedLanguage;
 }): Promise<{ input: string; output: string }[]> {
-    if (!testRunnerCode) return [];
+    const fromRunner = await parseTestRunnerOutput(testRunnerCode, language);
+    if (fromRunner.length >= 3) return fromRunner.slice(0, 5);
 
-    // 1. Run the AI's custom test runner script on Judge0
-    const rawOutput = await executeCode(testRunnerCode, language);
+    const fromReference = await buildCasesFromReference({
+        referenceSolution,
+        testInputs,
+        entryFunction,
+        language,
+    });
+    if (fromReference.length >= 3) return fromReference.slice(0, 5);
 
-    // 2. Parse the Sentinel format
-    const cases: { input: string; output: string }[] = [];
-    const lines = rawOutput.split("\n");
+    // Prefer any partial results rather than returning nothing.
+    if (fromRunner.length > 0) return fromRunner;
+    if (fromReference.length > 0) return fromReference;
 
-    for (const line of lines) {
-        if (!line.includes("___TEST_CASE___")) continue;
+    return [];
+}
 
-        // Split by the sentinel
-        const parts = line.split("___");
-        
-        // parts[0] is empty or garbage before the first sentinel
-        // parts[1] should be "TEST_CASE"
-        // parts[2] is the input
-        // parts[3] is the output
-        if (parts.length >= 4) {
-            const input = parts[2].trim();
-            const output = parts[3].trim();
-            
-            if (input && output) {
-                cases.push({ input, output });
-            }
+function normalizeTestInputs(raw: unknown): string[] {
+    if (!Array.isArray(raw)) return [];
+    const out: string[] = [];
+    for (const item of raw) {
+        if (typeof item === "string") {
+            const trimmed = item.trim();
+            if (trimmed) out.push(trimmed);
+            continue;
+        }
+        try {
+            out.push(JSON.stringify(item));
+        } catch {
+            // skip non-serializable values
         }
     }
+    return out.slice(0, 5);
+}
 
+function parseTestCaseLine(line: string): { input: string; output: string } | null {
+    const marker = "___TEST_CASE___";
+    const idx = line.indexOf(marker);
+    if (idx === -1) return null;
+
+    const rest = line.slice(idx + marker.length);
+    const sep = rest.indexOf("___");
+    if (sep === -1) return null;
+
+    const input = rest.slice(0, sep).trim();
+    const output = rest.slice(sep + 3).trim();
+    if (!input || !output) return null;
+
+    return { input, output };
+}
+
+function extractCasesFromRunnerSource(code: string): { input: string; output: string }[] {
+    const cases: { input: string; output: string }[] = [];
+    const re = /___TEST_CASE___([\s\S]*?)___([\s\S]*?)(?=\)|;|$|\n)/g;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(code)) !== null) {
+        const input = match[1].trim();
+        const output = match[2].trim();
+        if (input && output) cases.push({ input, output });
+    }
+    return cases.slice(0, 5);
+}
+
+async function parseTestRunnerOutput(
+    testRunnerCode: string | undefined,
+    language: SupportedLanguage,
+): Promise<{ input: string; output: string }[]> {
+    if (!testRunnerCode) return [];
+
+    const rawOutput = await executeCode(testRunnerCode, language);
+    const looksLikeFailure =
+        rawOutput.startsWith("Error:") ||
+        rawOutput.startsWith("Compilation Error:") ||
+        rawOutput.startsWith("Error\n");
+
+    if (looksLikeFailure) {
+        return extractCasesFromRunnerSource(testRunnerCode);
+    }
+
+    const cases: { input: string; output: string }[] = [];
+    for (const line of rawOutput.split("\n")) {
+        const parsed = parseTestCaseLine(line);
+        if (parsed) cases.push(parsed);
+    }
+
+    if (cases.length > 0) return cases;
+
+    // Execution succeeded but sentinel lines missing — scrape literals from source.
+    return extractCasesFromRunnerSource(testRunnerCode);
+}
+
+async function buildCasesFromReference({
+    referenceSolution,
+    testInputs,
+    entryFunction,
+    language,
+}: {
+    referenceSolution: string | undefined;
+    testInputs: string[];
+    entryFunction: string | undefined;
+    language: SupportedLanguage;
+}): Promise<{ input: string; output: string }[]> {
+    if (!referenceSolution?.trim() || testInputs.length === 0 || !entryFunction) return [];
+    if (language === "rust") return [];
+
+    const derived = await deriveExpectedOutputs(
+        referenceSolution,
+        language,
+        entryFunction,
+        testInputs,
+    );
+
+    const cases: { input: string; output: string }[] = [];
+    for (let i = 0; i < testInputs.length; i++) {
+        const row = derived[i];
+        if (row?.ok) cases.push({ input: testInputs[i], output: row.output });
+    }
     return cases;
+}
+
+type RepairedGradingFields = {
+    referenceSolution?: string;
+    testInputs: string[];
+    testRunnerCode?: string;
+};
+
+async function repairTestGradingFields({
+    model,
+    language,
+    challenge,
+    entryFunction,
+    starterCode,
+}: {
+    model: string;
+    language: SupportedLanguage;
+    challenge: string;
+    entryFunction: string;
+    starterCode: string | undefined;
+}): Promise<RepairedGradingFields | null> {
+    try {
+        const response = await openai.chat.completions.create({
+            model,
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+            max_tokens: 2500,
+            messages: [
+                {
+                    role: "system",
+                    content:
+                        "You generate grading artifacts for an existing coding challenge. Return ONLY valid JSON.",
+                },
+                {
+                    role: "user",
+                    content: [
+                        `Language: ${language}`,
+                        `Task: ${challenge}`,
+                        `entryFunction: ${entryFunction}`,
+                        starterCode ? `starterCode:\n${starterCode}` : "",
+                        "",
+                        'Return JSON: {"referenceSolution": string, "testInputs": string[], "testRunnerCode": string}',
+                        "",
+                        "Rules:",
+                        "- referenceSolution: complete correct implementation of entryFunction.",
+                        "- testInputs: 3-5 JSON-encoded argument payloads as strings.",
+                        `- testRunnerCode: runnable ${language} script with referenceSolution plus exactly 3-5 lines printing ___TEST_CASE___<input>___<output> using strict JSON for both parts.`,
+                        "- Use only standard library features.",
+                    ]
+                        .filter(Boolean)
+                        .join("\n"),
+                },
+            ],
+        });
+
+        const raw = response.choices?.[0]?.message?.content ?? "";
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        const testInputs = normalizeTestInputs(parsed.testInputs);
+        const referenceSolution =
+            typeof parsed.referenceSolution === "string" && parsed.referenceSolution.trim()
+                ? parsed.referenceSolution
+                : undefined;
+        const testRunnerCode =
+            typeof parsed.testRunnerCode === "string" && parsed.testRunnerCode.trim()
+                ? parsed.testRunnerCode
+                : undefined;
+
+        if (!referenceSolution && !testRunnerCode) return null;
+        if (testInputs.length === 0 && !testRunnerCode) return null;
+
+        return { referenceSolution, testInputs, testRunnerCode };
+    } catch (err) {
+        console.error("repairTestGradingFields failed:", err);
+        return null;
+    }
 }

@@ -9,6 +9,7 @@ export type DropdownChoice<T extends string = string> = {
 };
 
 interface DropdownMenuProps<T extends string = string> {
+  header?: string;
   choices: DropdownChoice<T>[];
   value?: T; // controlled
   defaultValue?: T; // uncontrolled
@@ -17,6 +18,7 @@ interface DropdownMenuProps<T extends string = string> {
 }
 
 export default function DropdownMenu<T extends string = string>({
+  header = "",
   choices,
   value,
   defaultValue,
@@ -49,21 +51,27 @@ export default function DropdownMenu<T extends string = string>({
     <div
       ref={dropdownRef}
       className="theme-sync relative w-auto select-none"
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
       <button
         aria-haspopup="listbox"
         aria-expanded={isOpen}
         className={[
-          "flex w-full min-h-10 min-w-[10rem] items-center justify-center p-2",
+          "flex w-full min-h-10 min-w-[10rem] flex-col items-center justify-center p-2",
+          header ? "gap-0.5 py-1.5" : "",
           "border border-[0.5px] border-border bg-card/80 text-content backdrop-blur-lg",
           /* Only animate open shape — colors follow :root/.dark instantly like the rest of the playground */
           "transition-[border-radius,transform] duration-200 ease-out",
           isOpen ? "rounded-t-lg rounded-b-none" : "rounded-lg",
         ].join(" ")}
       >
-        {selectedChoice?.label ?? placeholder}
+        {header && (
+          <span className="text-[10px] font-medium leading-none text-content/50">
+            {header}
+          </span>
+        )}
+        <span>{selectedChoice?.label ?? placeholder}</span>
       </button>
 
       <AnimatePresence>
@@ -74,7 +82,7 @@ export default function DropdownMenu<T extends string = string>({
             animate={{ opacity: 1, scaleY: 1, y: 0 }}
             exit={{ opacity: 0, scaleY: 0.98, y: -2 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-0 top-full z-10 w-full origin-top overflow-hidden rounded-b-lg border border-t-0 border-[0.5px] border-border bg-card/80 text-content backdrop-blur-lg shadow-lg"
+            className="absolute left-0 top-full z-10 w-full origin-top overflow-y-auto overflow-x-hidden max-h-52 rounded-b-lg border border-t-0 border-[0.5px] border-border bg-card/80 text-content backdrop-blur-lg shadow-lg [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-thumb]:rounded-full"
           >
             {choices.map((choice) => (
               <motion.li
