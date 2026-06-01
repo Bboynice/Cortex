@@ -34,6 +34,16 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
     const isProfileDialog = type === "save-profile";
     const isUserSettingsDialog = type === "user-settings";
 
+    const allPassed =
+      result !== null && result.passed === result.total && result.total > 0;
+
+    // After a full pass, close the results modal in sync with playground reset (~2s).
+    useEffect(() => {
+      if (!isOpen || !isSaveCodeDialog || !allPassed) return;
+      const timer = window.setTimeout(() => onClose(), 2000);
+      return () => window.clearTimeout(timer);
+    }, [isOpen, isSaveCodeDialog, allPassed, onClose]);
+
     if (
       !isOpen ||
       (!isSaveCodeDialog && !isConfirmDialog && !isProfileDialog && !isUserSettingsDialog)
@@ -74,7 +84,7 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
           return;
         }
 
-        addToast("Submitted.", "success");
+        // Aborted early (e.g. no task generated) — handler already toasts; just dismiss.
         onClose();
       } catch {
         addToast(
@@ -88,8 +98,6 @@ export default function SavePopUp({ title, description, submitText, cancelText, 
         setIsSubmitting(false);
       }
     };
-
-    const allPassed = result !== null && result.passed === result.total && result.total > 0;
 
     const secondaryBtn =
       "theme-sync inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-semibold text-content hover:bg-muted/50 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-60";

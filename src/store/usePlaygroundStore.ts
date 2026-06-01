@@ -11,6 +11,7 @@ type Hint = { title: string; description: string };
 
 /** Everything you want to survive refresh + drive TaskInstructions / CodeWindow / tests */
 interface PlaygroundState {
+  challengeId: string | null;
   code: string;
   challenge: string | undefined;
   requirements: string[];
@@ -35,6 +36,7 @@ interface PlaygroundState {
 
   /** One action that runs after a successful `generateCodingChallenge` */
   applySuccessfulGeneration: (args: {
+    challengeId: string;
     code: string;
     challenge: string;
     requirements: string[];
@@ -50,6 +52,8 @@ interface PlaygroundState {
   clearInsights: () => void;
   setAnalysis: (a: InsightAnalysis | null) => void;
   setReport: (r: InsightReport | null) => void;
+
+  resetPlayground: () => void;
 }
 
 const initialCode = `function sumEvenNumbers(arr) {
@@ -60,6 +64,7 @@ const initialCode = `function sumEvenNumbers(arr) {
 export const usePlaygroundStore = create<PlaygroundState>()(
   persist(
     (set) => ({
+      challengeId: null,
       code: initialCode,
       challenge: undefined,
       requirements: [],
@@ -80,7 +85,21 @@ export const usePlaygroundStore = create<PlaygroundState>()(
       setDifficulty: (difficulty) => set({ difficulty }),
       setTopic: (topic) => set({ topic }),
 
+      resetPlayground: () => set({
+        challengeId: null,
+        code: `function sumEvenNumbers(arr) {\n  // Your code here\n  return 0;\n}`,
+        challenge: undefined,
+        requirements: [],
+        hints: [],
+        estimatedTime: undefined,
+        testCases: undefined,
+        entryFunction: undefined,
+        analysis: null,
+        report: null,
+    }),
+
       applySuccessfulGeneration: ({
+        challengeId,
         code,
         challenge,
         requirements,
@@ -93,6 +112,7 @@ export const usePlaygroundStore = create<PlaygroundState>()(
         difficulty,
       }) =>
         set({
+          challengeId,
           code,
           challenge,
           requirements,
@@ -114,6 +134,7 @@ export const usePlaygroundStore = create<PlaygroundState>()(
     {
       name: "cortex-playground-storage",
       partialize: (s) => ({
+        challengeId: s.challengeId,
         code: s.code,
         challenge: s.challenge,
         requirements: s.requirements,

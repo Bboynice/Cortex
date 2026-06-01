@@ -5,6 +5,7 @@ import { chargeCredits } from '@/src/lib/billing';
 import { executeCode } from "@/src/lib/code-executor";
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 
 import {
     deriveExpectedOutputs,
@@ -12,126 +13,10 @@ import {
     type SupportedLanguage,
 } from '@/src/lib/test-runner';
 
-
-type Difficulty = "easy" | "medium" | "hard";
-
-// Curated, language-agnostic topic banks. We pick one server-side instead of
-// asking the model to "vary the topic" — LLMs are bad at that and default to
-// the most common task in their training data (hence the endless vowel
-// counters). Big enough that repeats within a session are rare.
-const TOPIC_BANK: Record<Difficulty, string[]> = {
-    easy: [
-        // --- INDUSTRIAL UTILITIES ---
-        "calculate the 'Thermal Efficiency' (percentage) from an array of heat readings",
-        "mask sensitive characters in a system log leaving only the first and last",
-        "generate a unique 'Session ID' by combining a timestamp and a random hex",
-        "extract all 'ERROR' tags from a raw system output string",
-        "format a raw byte count into a human-readable string (KB, MB, GB)",
-        "validate if a 'Hardware Version' string (e.g., v1.2) follows the correct format",
-        "sanitize a user-provided 'Alias' by removing all non-alphanumeric characters",
-        "calculate the 'Uptime Ratio' from an array of boolean power states",
-        "detect a 'Data Spike': find if any value in a sequence is > 50% of the previous",
-        "truncate a log entry to 100 characters and append an industrial '...' marker",
-        "find the 'Coldest Node' (minimum value) in a telemetry data set",
-        "check if a string of characters contains any forbidden 'Restricted Symbols'",
-        "count how many 'Critical Failures' exist in a nested object of status reports",
-        "map an array of raw status codes (0, 1, 2) to ('OFF', 'STANDBY', 'ACTIVE')",
-        "calculate the 'Mean Latency' from an array of millisecond response times",
-        "check if a provided 'Access Key' meets the 8-character minimum length",
-        "generate a 'System Slug' (lowercase-hyphenated) from a mission title",
-        "find the most frequent 'Event Category' in a flat list of logs",
-        "compute the 'Checksum' of a string by summing the ASCII values of its characters",
-        "verify if a list of 'Packet IDs' is strictly increasing (no gaps)",
-        "remove duplicate 'IP Addresses' from a list while maintaining the original order",
-        "calculate the 'Load Balance' (difference between highest and lowest value)",
-        "detect 'Silent Drops': find index where a value is null in a data stream",
-        "count the number of 'Active Modules' in a status bitmask string (1s and 0s)",
-        "format a number as a 'Core Percentage' with exactly two decimal places",
-        "extract the 'Domain' from a raw server connection string",
-        "find the 'Peak Load' (maximum value) in a 24-hour telemetry array",
-        "swap the 'High' and 'Low' values in an array of two-element clusters",
-        "calculate the total 'Processing Time' by summing an array of durations",
-        "check if a 'Command String' starts and ends with the required brackets '[ ]'",
-    ],
-    medium: [
-        // --- SYSTEMS ARCHITECTURE & CLASSES ---
-        "implement a 'CortexCache' class with basic Get/Set and a 10-item limit",
-        "build a 'TaskQueue' class that processes items in First-In-First-Out (FIFO) order",
-        "create a 'StateTracker' that records a history of 5 changes and allows 'Undo'",
-        "transform a flat list of 'Folder Paths' into a nested 'Directory Tree' object",
-        "implement a 'LogFilter' that handles multiple criteria (Level, Date, Module)",
-        "build a 'RateLimiter' function that returns false if called > 5 times per second",
-        "develop a 'ValidationEngine' that checks an object against a simple schema",
-        "create a 'DataDiff' utility that returns only the changed values between two objects",
-        "implement a 'WeightedRandom' selector for AI personality traits",
-        "build a 'SearchIndex' that maps words in a document to their line numbers",
-        "implement a 'VersionComparator' for complex semantic versions (e.g., 1.2.10 vs 1.10.2)",
-        "create a 'CircuitBreaker' class that disables a function after 3 consecutive errors",
-        "transform a 'CSV' data string into a clean Array of typed Objects",
-        "calculate the 'Moving Average' of a telemetry stream with a window of N",
-        "implement a 'TokenMasker' that redacts specific keywords from a large text block",
-        "find the 'Deepest Level' of a nested JSON configuration object",
-        "group a list of 'System Alerts' by their severity and count the occurrences",
-        "build a 'TemplateEngine' that replaces {{variables}} in a string with object data",
-        "implement a 'Dependency Check': ensure all 'Required IDs' exist in a 'Provided' list",
-        "create a 'ColorConverter' between HEX, RGB, and HSL formats",
-        "detect 'Pattern Drifts': find if a sequence of values significantly deviates from a mean",
-        "implement a 'PaginationLogic' generator (total, current, next, previous pages)",
-        "build an 'EventBus' class that allows basic Emit and Listen functionality",
-        "calculate the 'Intersection' of two massive sets of server logs",
-        "implement a 'BinarySearch' to find a target 'Timestamp' in a sorted array",
-        "flatten a 'Deeply Nested' array into a single level without using .flat()",
-        "find the 'First Non-Repeating' character in a long stream of hex data",
-        "build a 'Breadcrumb' string from a nested object path (e.g., 'sys/core/power')",
-        "implement a 'DeepClone' function that creates a fresh copy of a nested object",
-        "calculate 'Overlap' between two scheduled maintenance intervals",
-    ],
-    hard: [
-        // --- COMPLEX ENGINEERING & ALGORITHMS ---
-        "detect a 'Circular Dependency' in a module graph (Cycle Detection)",
-        "implement a 'Virtual DOM' diff algorithm to identify changes between two trees",
-        "build a 'PriorityScheduler' that executes tasks based on weight and arrival time",
-        "solve the 'Optimal Resource Allocation' problem (0/1 Knapsack logic)",
-        "implement a 'Pathfinder' (BFS) to find the shortest route through a grid of nodes",
-        "create a 'JSON-to-Typescript' interface generator from a raw sample object",
-        "build a 'Self-Healing' data sequence that corrects single-bit errors",
-        "implement a 'Tokenizer' and 'Parser' for a simple math-based query language",
-        "solve the 'LRU Cache' problem using a Map and a Doubly Linked List logic",
-        "implement 'ReactiveSignals': a simple system where variables auto-update on change",
-        "detect 'Stress Fractures': find the largest contiguous subarray sum (Kadane’s)",
-        "reconstruct a 'Fragmented Stream' by reordering packets by ID and offset",
-        "implement a 'Markdown' parser for headers, bold text, and code blocks",
-        "build a 'Trie' (Prefix Tree) to provide ultra-fast autocomplete for 1000+ commands",
-        "find the 'Median' of two large sorted telemetry arrays in logarithmic time",
-        "solve the 'WordBreak' challenge: can a string be split into a valid command sequence?",
-        "implement a 'Token Bucket' algorithm for high-concurrency traffic shaping",
-        "build a 'Dependency Resolver' that outputs a valid 'Boot Order' for system modules",
-        "calculate the 'Edit Distance' (Levenshtein) between two legacy configurations",
-        "implement a 'Min-Heap' to track the 5 lowest-latency servers in real-time",
-        "solve the 'Matrix Rotation' problem for a 2D grid of pixel data (90 degrees)",
-        "implement an 'Abstract Syntax Tree' (AST) walker for a custom JSON-based logic",
-        "build a 'BigInt' addition and subtraction utility for strings of 50+ digits",
-        "solve the 'N-Queens' logic for positioning AI sensors on a grid with no overlap",
-        "implement a 'Huffman Coding' compression algorithm for a technical text block",
-        "find the 'Longest Common Subsequence' between two different system logs",
-        "build a 'State Machine' that transition between (Idle, Loading, Error, Success)",
-        "implement a 'Debounce' and 'Throttle' utility from scratch",
-        "solve the 'Sudoku Solver' logic for a 9x9 diagnostic grid",
-        "implement a 'Custom Sort' that orders logs by Severity, then Timestamp, then ID",
-    ],
-};
-
-// Add this to your existing actions.ts file
-export async function awardTaskPoints(difficulty: "easy" | "medium" | "hard") {
-    // 1. Set the reward logic
-    const pointsMap = {
-        easy: 10,
-        medium: 25,
-        hard: 50
-    };
-    const pointsToAward = pointsMap[difficulty];
-
-    // 2. Initialize Supabase (Server-side)
+// ==========================================
+// 1. SECURE POINT AWARDER (Anti-Cheat RPC)
+// ==========================================
+export async function submitChallengeAction(challengeId: string, difficulty: string) {
     const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -139,54 +24,120 @@ export async function awardTaskPoints(difficulty: "easy" | "medium" | "hard") {
         { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
     );
 
-    // 3. Award the points securely
-    const { error } = await supabase.rpc('add_user_points', {
-        gained_points: pointsToAward
+    // Call our secure RPC to check if solved, record it, and add points
+    const { data, error } = await supabase.rpc('submit_and_award', {
+        p_challenge_id: challengeId,
+        p_difficulty: difficulty
     });
 
+    // ✨ ADDED CONSOLE.ERROR SO YOU CAN SEE THE EXACT DATABASE BUG IN YOUR TERMINAL
     if (error) {
-        return { success: false, error: "Failed to award points." };
+        console.error("🚨 DB SUBMISSION ERROR:", error);
+        return { success: false, error: error.message };
     }
-
-    return { success: true, awarded: pointsToAward };
+    
+    return { success: true, ...data };
 }
 
-function pickRandomTopic(difficulty: Difficulty): string {
-    const bank = TOPIC_BANK[difficulty];
-    return bank[Math.floor(Math.random() * bank.length)];
-}
-
+// ==========================================
+// 2. THE AI FACTORY (Generate & Cache)
+// ==========================================
 export async function generateCodingChallenge({
     language = "javascript",
     difficulty = "easy",
     topic,
 }: {
     language?: SupportedLanguage;
-    difficulty?: Difficulty;
+    difficulty?: "easy" | "medium" | "hard";
     topic?: string;
 } = {}) {
     try {
+        const cookieStore = await cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+            { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+        );
+
+        const { data: { user } } = await supabase.auth.getUser();
         
-        // Treat empty / whitespace / sentinel values as "no topic chosen".
-        const normalizedTopic = topic?.trim();
-        const hasUserTopic =
-            !!normalizedTopic &&
-            normalizedTopic.toLowerCase() !== "any" &&
-            normalizedTopic.toLowerCase() !== "random";
+        // Normalize the topic. Fallback to Arrays if empty or "random"
+        const targetTopic = topic && topic.toLowerCase() !== "random" && topic.toLowerCase() !== "any" 
+            ? topic.trim() 
+            : "Arrays / Lists (1D)";
 
-        // If the caller didn't specify a topic, pick one from the bank so the
-        // model isn't free to fall back to its favourite (vowel counter etc).
-        const effectiveTopic = hasUserTopic ? normalizedTopic! : pickRandomTopic(difficulty);
+        // --- STEP A: CHECK THE CACHE ---
+        if (user) {
+            // 1. Get IDs of challenges this user has already passed
+            const { data: solved } = await supabase
+                .from('user_submissions')
+                .select('challenge_id')
+                .eq('user_id', user.id)
+                .eq('status', 'passed');
+            
+            const solvedIds = solved?.map(s => s.challenge_id) || [];
 
-        const taskLine = `Create a programming task in ${language} about: "${effectiveTopic}". Difficulty: ${difficulty}. The task should clearly require solving this specific problem — do NOT substitute a different topic just because it is more common.`;
+            // 2. Look for a matching challenge NOT in their solved list
+            let query = supabase
+                .from('challenges')
+                .select('*')
+                .eq('language', language)
+                .eq('difficulty', difficulty)
+                .eq('topic', targetTopic);
+            
+            if (solvedIds.length > 0) {
+                query = query.not('id', 'in', `(${solvedIds.join(',')})`);
+            }
+
+            const { data: existingChallenge } = await query.limit(1).maybeSingle();
+
+            // 3. CACHE HIT! Return it instantly for 0 credits.
+            if (existingChallenge) {
+                return {
+                    success: true,
+                    challengeId: existingChallenge.id,
+                    ...existingChallenge.content
+                };
+            }
+        }
+
+        // --- STEP B: CACHE MISS (Generate New) ---
         const costMap = { easy: 10, medium: 15, hard: 25 };
         const baseCost = costMap[difficulty];
     
-        // 2. Charge the user
         const billing = await chargeCredits(baseCost);
         if (!billing.success) {
             return { success: false, error: billing.error };
         }      
+
+        // ✨ THE FIX: Get the last 15 tasks in this bucket to use as an exclusion list
+        let exclusionPrompt = "";
+        const { data: existingChallenges } = await supabase
+            .from('challenges')
+            .select('content')
+            .eq('language', language)
+            .eq('difficulty', difficulty)
+            .eq('topic', targetTopic)
+            .order('created_at', { ascending: false })
+            .limit(15);
+
+        if (existingChallenges && existingChallenges.length > 0) {
+            // Extract just the challenge text to save AI tokens
+            const existingDescriptions = existingChallenges
+                .map(c => `- ${c.content?.challenge || 'Unknown'}`)
+                .join("\n");
+            
+            exclusionPrompt = `
+CRITICAL ANTI-DUPLICATION RULE:
+Our platform already has the following tasks for this topic:
+${existingDescriptions}
+
+You MUST NOT re-skin or re-theme the logic from the tasks above. 
+If the tasks above involve summing, counting, or finding a maximum, your task MUST require a completely different algorithmic mechanism (e.g., sorting, shifting, pattern matching, grouping, validating a sequence). 
+Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The underlying code structure required to solve this must be fundamentally unique.`;
+        }
+
+        const taskLine = `Create a programming task in ${language} about: "${targetTopic}". Difficulty: ${difficulty}. The task should clearly require solving this specific problem.`;
 
         const response = await openai.chat.completions.create({
             model: billing.modelToUse,
@@ -200,6 +151,7 @@ export async function generateCodingChallenge({
                     role: "user",
                     content: [
                         taskLine,
+                        exclusionPrompt,
                         "",
                         'Return JSON: {"challenge": string, "requirements": string[], "hints": { "title": string, "description": string }[], "estimatedTime": number, "entryFunction": string, "starterCode": string, "referenceSolution": string, "testInputs": string[], "testRunnerCode": string }',
                         "",
@@ -237,42 +189,21 @@ export async function generateCodingChallenge({
 
         const raw = response.choices?.[0]?.message?.content ?? "";
         const parsed = JSON.parse(raw) as unknown;
-        const challenge =
-            typeof (parsed as any)?.challenge === "string"
-                ? (parsed as any).challenge.trim()
-                : "";
-        const requirementsRaw = Array.isArray((parsed as any)?.requirements)
-            ? (parsed as any).requirements
-            : [];
+        const challenge = typeof (parsed as any)?.challenge === "string" ? (parsed as any).challenge.trim() : "";
+        const requirementsRaw = Array.isArray((parsed as any)?.requirements) ? (parsed as any).requirements : [];
         const hintsRaw = Array.isArray((parsed as any)?.hints) ? (parsed as any).hints : [];
         const estimatedTimeRaw = (parsed as any)?.estimatedTime;
-
         const entryFunctionRaw = (parsed as any)?.entryFunction;
-        const entryFunction =
-            typeof entryFunctionRaw === "string" && /^[A-Za-z_][\w]*$/.test(entryFunctionRaw.trim())
-                ? entryFunctionRaw.trim()
-                : undefined;
-
+        const entryFunction = typeof entryFunctionRaw === "string" && /^[A-Za-z_][\w]*$/.test(entryFunctionRaw.trim()) ? entryFunctionRaw.trim() : undefined;
         const starterCodeRaw = (parsed as any)?.starterCode;
-        const starterCode =
-            typeof starterCodeRaw === "string" && starterCodeRaw.trim().length > 0
-                ? starterCodeRaw
-                : undefined;
-
+        const starterCode = typeof starterCodeRaw === "string" && starterCodeRaw.trim().length > 0 ? starterCodeRaw : undefined;
         const testRunnerCodeRaw = (parsed as any)?.testRunnerCode;
-        const testRunnerCode =
-            typeof testRunnerCodeRaw === "string" && testRunnerCodeRaw.trim().length > 0
-                ? testRunnerCodeRaw
-                : undefined;
-
+        const testRunnerCode = typeof testRunnerCodeRaw === "string" && testRunnerCodeRaw.trim().length > 0 ? testRunnerCodeRaw : undefined;
         const referenceSolutionRaw = (parsed as any)?.referenceSolution;
-        const referenceSolution =
-            typeof referenceSolutionRaw === "string" && referenceSolutionRaw.trim().length > 0
-                ? referenceSolutionRaw
-                : undefined;
-
+        const referenceSolution = typeof referenceSolutionRaw === "string" && referenceSolutionRaw.trim().length > 0 ? referenceSolutionRaw : undefined;
         const testInputs = normalizeTestInputs((parsed as any)?.testInputs);
 
+        // Build robust test cases using your fallback utility methods
         let testCases = await buildTestCases({
             testRunnerCode,
             referenceSolution,
@@ -306,13 +237,10 @@ export async function generateCodingChallenge({
             .filter(Boolean)
             .slice(0, 4);
 
-        const normalizedRequirements =
-            requirements.length >= 2
-                ? requirements
-                : [
-                      "Goal: implement the challenge in the chosen language",
-                      "Handle: edge cases and invalid inputs",
-                  ];
+        const normalizedRequirements = requirements.length >= 2 ? requirements : [
+            "Goal: implement the challenge in the chosen language",
+            "Handle: edge cases and invalid inputs",
+        ];
 
         const hints = hintsRaw
             .map((h: any) => ({
@@ -326,28 +254,18 @@ export async function generateCodingChallenge({
             .filter((h: { title: string; description: string }) => h.title && h.description)
             .slice(0, 3);
 
-        const normalizedHints =
-            hints.length === 3
-                ? hints
-                : [
-                      { title: "Break it down", description: "Solve step-by-step with small helpers" },
-                      { title: "Validate input", description: "Handle empty or invalid inputs safely" },
-                      { title: "Test edges", description: "Try boundary cases before finishing" },
-                  ];
+        const normalizedHints = hints.length === 3 ? hints : [
+            { title: "Break it down", description: "Solve step-by-step with small helpers" },
+            { title: "Validate input", description: "Handle empty or invalid inputs safely" },
+            { title: "Test edges", description: "Try boundary cases before finishing" },
+        ];
 
-        const difficultyFallbackTime: Record<Difficulty, number> = {
-            easy: 15,
-            medium: 30,
-            hard: 50,
-        };
-        const estimatedTime =
-            typeof estimatedTimeRaw === "number" && Number.isFinite(estimatedTimeRaw)
-                ? Math.round(estimatedTimeRaw)
-                : difficultyFallbackTime[difficulty];
+        const difficultyFallbackTime: Record<string, number> = { easy: 15, medium: 30, hard: 50 };
+        const estimatedTime = typeof estimatedTimeRaw === "number" && Number.isFinite(estimatedTimeRaw)
+            ? Math.round(estimatedTimeRaw)
+            : difficultyFallbackTime[difficulty] || 15;
         
-
-        return {
-            success: true,
+        const newChallengeContent = {
             challenge: challenge || "No challenge found",
             requirements: normalizedRequirements,
             hints: normalizedHints,
@@ -356,14 +274,52 @@ export async function generateCodingChallenge({
             entryFunction,
             starterCode,
         };
+
+        // --- STEP C: SAVE TO LIBRARY ---
+        if (user && testCases.length > 0) {
+            
+            // 🔒 SECURITY FIRST: Create an Admin client that bypasses RLS.
+            // This ensures ONLY your secure Next.js server can write to the challenges table.
+            const supabaseAdmin = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.SUPABASE_SERVICE_ROLE_KEY! 
+            );
+
+            const { data: inserted, error: insertError } = await supabaseAdmin
+                .from('challenges')
+                .insert({
+                    language,
+                    difficulty,
+                    topic: targetTopic,
+                    content: newChallengeContent
+                })
+                .select('id')
+                .single();
+
+            // Log any errors so you can see exactly why it fails in your terminal
+            if (insertError) {
+                console.error("🔒 ADMIN DB INSERT ERROR:", insertError.message);
+            }
+
+            if (inserted && !insertError) {
+                return { success: true, challengeId: inserted.id, ...newChallengeContent };
+            }
+        } else if (testCases.length === 0) {
+            console.warn("⚠️ Did not save to DB: AI failed to generate valid test cases.");
+        }
+
+        // Fallback if DB save fails
+        return { success: true, challengeId: 'temp_id', ...newChallengeContent };
+
     } catch (error) {
         console.error('Error generating coding challenge:', error);
-        return {
-            success: false,
-            error: 'Failed to fetch coding challenge',
-        };
+        return { success: false, error: 'Failed to fetch coding challenge' };
     }
 }
+
+// ==========================================
+// 3. ROBUST TEST CASE UTILITIES
+// ==========================================
 
 async function buildTestCases({
     testRunnerCode,
@@ -389,7 +345,6 @@ async function buildTestCases({
     });
     if (fromReference.length >= 3) return fromReference.slice(0, 5);
 
-    // Prefer any partial results rather than returning nothing.
     if (fromRunner.length > 0) return fromRunner;
     if (fromReference.length > 0) return fromReference;
 
@@ -466,7 +421,6 @@ async function parseTestRunnerOutput(
 
     if (cases.length > 0) return cases;
 
-    // Execution succeeded but sentinel lines missing — scrape literals from source.
     return extractCasesFromRunnerSource(testRunnerCode);
 }
 

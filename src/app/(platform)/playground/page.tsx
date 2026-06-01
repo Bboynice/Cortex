@@ -8,7 +8,7 @@ import TaskInstructions from '@/src/components/platform/editor/TaskInstructions'
 import CodeWindow from '@/src/components/platform/editor/CodeWindow';
 import { executeCode } from '@/src/lib/code-executor';
 import { useModalStore } from '@/src/hooks/use-modal-store';
-import { awardTaskPoints } from '@/src/app/(platform)/playground/actions';
+import { submitChallengeAction } from '@/src/app/(platform)/playground/actions';
 
 import {
   runTestCases,
@@ -287,70 +287,45 @@ export default function PlaygroundPage() {
     const nextDifficulty = overrides.difficulty ?? difficulty;
     const nextTopic = overrides.topicSlug ?? topic;
 
-    // Sync UI state so dropdowns + editor reflect what we're generating for.
-    if (overrides.language && overrides.language !== language) {
-      setLanguage(overrides.language);
-    }
-    if (overrides.difficulty && overrides.difficulty !== difficulty) {
-      setDifficulty(overrides.difficulty);
-    }
-    if (overrides.topicSlug && overrides.topicSlug !== topic) {
-      setTopic(overrides.topicSlug);
-    }
+    if (overrides.language && overrides.language !== language) setLanguage(overrides.language);
+    if (overrides.difficulty && overrides.difficulty !== difficulty) setDifficulty(overrides.difficulty);
+    if (overrides.topicSlug && overrides.topicSlug !== topic) setTopic(overrides.topicSlug);
+    
     setEditorLanguage(nextLanguage);
     setCode(startCode[nextLanguage]);
-    usePlaygroundStore.setState({ entryFunction: undefined });
+    usePlaygroundStore.setState({ entryFunction: undefined, challengeId: null });
     setTestResults(undefined);
-
     setLoading(true);
-    inflightRef.current?.abort();
-    reportInflightRef.current?.abort();
     setAnalysisStatus("idle");
 
-    const topicForApi = overrides.topic ?? topicToPrompt(nextTopic);
-
+    // Pass the exact label (e.g. "Arrays / Lists (1D)") so the DB can cache it properly
     const result = await generateCodingChallenge({
       language: nextLanguage,
       difficulty: nextDifficulty,
-      topic: topicForApi,
+      topic: nextTopic, 
     });
 
     if (result.success) {
       const nextStarter = result.starterCode?.trim() ? result.starterCode : startCode[nextLanguage];
 
       applySuccessfulGeneration({
+        challengeId: result.challengeId, // <-- Store the DB ID!
         code: nextStarter,
         challenge: result.challenge ?? "No challenge found",
         requirements: result.requirements ?? [],
         hints: result.hints ?? [],
         estimatedTime: result.estimatedTime ?? 0,
-        testCases:
-          result.testCases ?? [{ input: "Error generating test cases", output: "Error generating test cases" }],
+        testCases: result.testCases ?? [],
         entryFunction: result.entryFunction,
         language: nextLanguage,
         editorLanguage: nextLanguage,
         difficulty: nextDifficulty,
       });
-
-      lastSuccessfulHashRef.current = null;
-      latestContextRef.current = {
-        code: nextStarter,
-        language: nextLanguage,
-        challenge: result.challenge ?? undefined,
-        requirements: result.requirements ?? [],
-      };
-      setAnalysis(null);
-      setAnalysisStatus("idle");
-      setAnalysisError(null);
-      setReport(null);
-      setGenerateReportError(null);
+      // ... rest of generation logic
     } else {
       const isBillingIssue = handleBillingError(result.error ?? "");
-      if (!isBillingIssue) {
-        addToast(result.error || "Error generating challenge", "error");
-      }
+      if (!isBillingIssue) addToast(result.error || "Error generating challenge", "error");
     }
-
     setLoading(false);
   }
 
@@ -545,13 +520,43 @@ export default function PlaygroundPage() {
       if (skipped === total && total > 0) {
         addToast("Grading for this language is not supported yet.", "warning");
       } else if (passed === total) {
-        const reward = await awardTaskPoints(difficulty as "easy" | "medium" | "hard");
-        if (reward.success) {
-          addToast(`Success! You earned +${reward.awarded} points!`, "success");
-          
+        
+        // 🏆 SUCCESS! They passed all tests.
+        const challengeId = usePlaygroundStore.getState().challengeId;
+        
+        if (challengeId && challengeId !== 'temp_id') {
+           const reward = await submitChallengeAction(challengeId, difficulty);
+           
+           if (reward.success) {
+              if (reward.points_awarded > 0) {
+                 addToast(`Success! You earned +${reward.points_awarded} points!`, "success");
+              } else {
+                 addToast(reward.message || "All tests passed! (Already solved previously)", "success");
+              }
+
+              // Wipe the board after success — modal auto-closes on the same timer.
+              setTimeout(() => {
+                 useModalStore.getState().onClose();
+                 usePlaygroundStore.getState().resetPlayground();
+                 setTestResults(undefined);
+                 setLogs(["Ready for your next challenge!"]);
+              }, 2000);
+
+           } else {
+              addToast(reward.error || "Failed to record submission in database.", "error");
+           }
         } else {
-          addToast(`All ${total} test cases passed!`, "success");
+           addToast(`All ${total} test cases passed! (Unsaved task)`, "success");
+           
+           // Wipe the board for unsaved tasks too
+           setTimeout(() => {
+              useModalStore.getState().onClose();
+              usePlaygroundStore.getState().resetPlayground();
+              setTestResults(undefined);
+              setLogs(["Ready for your next challenge!"]);
+           }, 2000);
         }
+
       } else if (errored > 0) {
         addToast(`${passed} / ${total} passed (${errored} errored)`, "warning");
       } else {
