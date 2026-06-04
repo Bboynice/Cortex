@@ -291,6 +291,17 @@ export default function PlaygroundPage() {
     if (overrides.difficulty && overrides.difficulty !== difficulty) setDifficulty(overrides.difficulty);
     if (overrides.topicSlug && overrides.topicSlug !== topic) setTopic(overrides.topicSlug);
     
+    // ✨ THE FIX: We use .getState() to read the store without calling a Hook!
+    const store = usePlaygroundStore.getState();
+    const currentId = store.challengeId;
+    
+    if (currentId && currentId !== 'temp_id') {
+       store.setSkippedChallengeIds(currentId);
+    }
+    
+    // Grab the updated list safely using .getState()
+    const allSkippedChallengeIds = usePlaygroundStore.getState().skippedChallengeIds;
+
     setEditorLanguage(nextLanguage);
     setCode(startCode[nextLanguage]);
     usePlaygroundStore.setState({ entryFunction: undefined, challengeId: null });
@@ -298,18 +309,18 @@ export default function PlaygroundPage() {
     setLoading(true);
     setAnalysisStatus("idle");
 
-    // Pass the exact label (e.g. "Arrays / Lists (1D)") so the DB can cache it properly
     const result = await generateCodingChallenge({
       language: nextLanguage,
       difficulty: nextDifficulty,
       topic: nextTopic, 
+      allSkippedChallengeIds: allSkippedChallengeIds, 
     });
 
     if (result.success) {
       const nextStarter = result.starterCode?.trim() ? result.starterCode : startCode[nextLanguage];
 
       applySuccessfulGeneration({
-        challengeId: result.challengeId, // <-- Store the DB ID!
+        challengeId: result.challengeId,
         code: nextStarter,
         challenge: result.challenge ?? "No challenge found",
         requirements: result.requirements ?? [],
@@ -321,11 +332,26 @@ export default function PlaygroundPage() {
         editorLanguage: nextLanguage,
         difficulty: nextDifficulty,
       });
-      // ... rest of generation logic
+
+      lastSuccessfulHashRef.current = null;
+      latestContextRef.current = {
+        code: nextStarter,
+        language: nextLanguage,
+        challenge: result.challenge ?? undefined,
+        requirements: result.requirements ?? [],
+      };
+      setAnalysis(null);
+      setAnalysisStatus("idle");
+      setAnalysisError(null);
+      setReport(null);
+      setGenerateReportError(null);
     } else {
       const isBillingIssue = handleBillingError(result.error ?? "");
-      if (!isBillingIssue) addToast(result.error || "Error generating challenge", "error");
+      if (!isBillingIssue) {
+        addToast(result.error || "Error generating challenge", "error");
+      }
     }
+
     setLoading(false);
   }
 

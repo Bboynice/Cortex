@@ -5,7 +5,8 @@ import { chargeCredits } from '@/src/lib/billing';
 import { executeCode } from "@/src/lib/code-executor";
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'; // For Admin operations
+import { revalidatePath } from 'next/cache'; // For cache busting
 
 import {
     deriveExpectedOutputs,
@@ -20,22 +21,26 @@ export async function submitChallengeAction(challengeId: string, difficulty: str
     const cookieStore = await cookies();
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // ✨ FIXED: Uses Anon Key
         { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
     );
 
-    // Call our secure RPC to check if solved, record it, and add points
     const { data, error } = await supabase.rpc('submit_and_award', {
         p_challenge_id: challengeId,
         p_difficulty: difficulty
     });
 
-    // ✨ ADDED CONSOLE.ERROR SO YOU CAN SEE THE EXACT DATABASE BUG IN YOUR TERMINAL
     if (error) {
         console.error("🚨 DB SUBMISSION ERROR:", error);
         return { success: false, error: error.message };
     }
     
+    // ✨ CACHE BUSTER: Update dashboard instantly when points are won
+    if (data?.points_awarded > 0) {
+        revalidatePath('/dashboard', 'page');
+        revalidatePath('/settings/profile', 'page');
+    }
+
     return { success: true, ...data };
 }
 
@@ -46,29 +51,31 @@ export async function generateCodingChallenge({
     language = "javascript",
     difficulty = "easy",
     topic,
+    allSkippedChallengeIds,
 }: {
     language?: SupportedLanguage;
     difficulty?: "easy" | "medium" | "hard";
     topic?: string;
+    allSkippedChallengeIds?: string[];
+
+
 } = {}) {
     try {
         const cookieStore = await cookies();
         const supabase = createServerClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // ✨ FIXED: Uses Anon Key
             { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
         );
 
         const { data: { user } } = await supabase.auth.getUser();
         
-        // Normalize the topic. Fallback to Arrays if empty or "random"
         const targetTopic = topic && topic.toLowerCase() !== "random" && topic.toLowerCase() !== "any" 
             ? topic.trim() 
             : "Arrays / Lists (1D)";
 
         // --- STEP A: CHECK THE CACHE ---
         if (user) {
-            // 1. Get IDs of challenges this user has already passed
             const { data: solved } = await supabase
                 .from('user_submissions')
                 .select('challenge_id')
@@ -77,7 +84,6 @@ export async function generateCodingChallenge({
             
             const solvedIds = solved?.map(s => s.challenge_id) || [];
 
-            // 2. Look for a matching challenge NOT in their solved list
             let query = supabase
                 .from('challenges')
                 .select('*')
@@ -85,13 +91,22 @@ export async function generateCodingChallenge({
                 .eq('difficulty', difficulty)
                 .eq('topic', targetTopic);
             
+            // ✨ THE BULLETPROOF EXCLUSION LOOP ✨
+            // Instead of string formatting, we explicitly tell the DB to ignore every solved ID.
             if (solvedIds.length > 0) {
-                query = query.not('id', 'in', `(${solvedIds.join(',')})`);
+                solvedIds.forEach(id => {
+                    query = query.neq('id', id);
+                });
+            }
+
+            if (allSkippedChallengeIds && allSkippedChallengeIds.length > 0) {
+                allSkippedChallengeIds.forEach(id => {
+                    query = query.neq('id', id);
+                });
             }
 
             const { data: existingChallenge } = await query.limit(1).maybeSingle();
 
-            // 3. CACHE HIT! Return it instantly for 0 credits.
             if (existingChallenge) {
                 return {
                     success: true,
@@ -106,11 +121,9 @@ export async function generateCodingChallenge({
         const baseCost = costMap[difficulty];
     
         const billing = await chargeCredits(baseCost);
-        if (!billing.success) {
-            return { success: false, error: billing.error };
-        }      
+        if (!billing.success) return { success: false, error: billing.error };      
 
-        // ✨ THE FIX: Get the last 15 tasks in this bucket to use as an exclusion list
+        // Get past tasks to feed into the AI Exclusion List
         let exclusionPrompt = "";
         const { data: existingChallenges } = await supabase
             .from('challenges')
@@ -122,7 +135,6 @@ export async function generateCodingChallenge({
             .limit(15);
 
         if (existingChallenges && existingChallenges.length > 0) {
-            // Extract just the challenge text to save AI tokens
             const existingDescriptions = existingChallenges
                 .map(c => `- ${c.content?.challenge || 'Unknown'}`)
                 .join("\n");
@@ -134,10 +146,10 @@ ${existingDescriptions}
 
 You MUST NOT re-skin or re-theme the logic from the tasks above. 
 If the tasks above involve summing, counting, or finding a maximum, your task MUST require a completely different algorithmic mechanism (e.g., sorting, shifting, pattern matching, grouping, validating a sequence). 
-Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The underlying code structure required to solve this must be fundamentally unique.`;
+Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable.`;
         }
 
-        const taskLine = `Create a programming task in ${language} about: "${targetTopic}". Difficulty: ${difficulty}. The task should clearly require solving this specific problem.`;
+        const taskLine = `Create a programming task in ${language} about: "${targetTopic}". Difficulty: ${difficulty}.`;
 
         const response = await openai.chat.completions.create({
             model: billing.modelToUse,
@@ -167,20 +179,10 @@ Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The 
                         `- starterCode: The function signature with a placeholder body.`,
                         `- referenceSolution: A complete, correct implementation of entryFunction only (no extra helpers that change the public API). Must compile and run.`,
                         `- testInputs: EXACTLY 3 to 5 items. Each item is a JSON-encoded arguments payload as a string (e.g. "[1, 2, 3]" for one array arg, or "[1, 2]" for two numeric args). Must match how entryFunction is called in testRunnerCode.`,
-                        `- testRunnerCode: This is crucial. Provide a COMPLETE, runnable script in ${language}. It MUST include the correct reference implementation of entryFunction. Below the function, write exactly 3 to 5 test calls. For EACH test call, you must print/log exactly this format to standard output:`,
+                        `- testRunnerCode: Provide a COMPLETE, runnable script in ${language}. It MUST include the correct reference implementation of entryFunction. Below the function, write exactly 3 to 5 test calls. For EACH test call, you must print/log exactly this format to standard output:`,
                         `___TEST_CASE___<stringified_input>___<stringified_output>`,
-                        `CRITICAL RULE: Both <stringified_input> and <stringified_output> MUST be strictly valid JSON (use json.dumps in Python, JSON.stringify in JS). Do NOT use language-specific string representations like Python's default single-quoted lists.`,
-                        "Example for Python:",
-                        'import json',
-                        'print(f"___TEST_CASE___[1, 2, 3]___{json.dumps(sum_even([1, 2, 3]))}")',
-                        "Example for JavaScript:",
-                        'console.log(`___TEST_CASE___[1, 2, 3]___${JSON.stringify(sumEven([1, 2, 3]))}`);',
-                        "Example for Rust:",
-                        '// Output strict JSON. Use double quotes for strings.',
-                        'println!("___TEST_CASE___[1, 2, 3]___[\\"ACTIVE\\", \\"OFF\\"]");',
-                        "Do NOT print anything else. Just the test cases.",
-                        "",
-                        "All grading fields are mandatory. testInputs must align with the ___TEST_CASE___ lines in testRunnerCode.",
+                        `CRITICAL RULE: Both <stringified_input> and <stringified_output> MUST be strictly valid JSON (use json.dumps in Python, JSON.stringify in JS).`,
+                        "Do NOT print anything else. Just the test cases."
                     ].join("\n"),
                 },
             ],
@@ -203,7 +205,6 @@ Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The 
         const referenceSolution = typeof referenceSolutionRaw === "string" && referenceSolutionRaw.trim().length > 0 ? referenceSolutionRaw : undefined;
         const testInputs = normalizeTestInputs((parsed as any)?.testInputs);
 
-        // Build robust test cases using your fallback utility methods
         let testCases = await buildTestCases({
             testRunnerCode,
             referenceSolution,
@@ -277,9 +278,7 @@ Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The 
 
         // --- STEP C: SAVE TO LIBRARY ---
         if (user && testCases.length > 0) {
-            
-            // 🔒 SECURITY FIRST: Create an Admin client that bypasses RLS.
-            // This ensures ONLY your secure Next.js server can write to the challenges table.
+            // 🔒 SECURITY FIRST: Use the Admin key to bypass RLS and insert the task
             const supabaseAdmin = createClient(
                 process.env.NEXT_PUBLIC_SUPABASE_URL!,
                 process.env.SUPABASE_SERVICE_ROLE_KEY! 
@@ -296,19 +295,13 @@ Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The 
                 .select('id')
                 .single();
 
-            // Log any errors so you can see exactly why it fails in your terminal
-            if (insertError) {
-                console.error("🔒 ADMIN DB INSERT ERROR:", insertError.message);
-            }
+            if (insertError) console.error("🔒 ADMIN DB INSERT ERROR:", insertError.message);
 
             if (inserted && !insertError) {
                 return { success: true, challengeId: inserted.id, ...newChallengeContent };
             }
-        } else if (testCases.length === 0) {
-            console.warn("⚠️ Did not save to DB: AI failed to generate valid test cases.");
         }
 
-        // Fallback if DB save fails
         return { success: true, challengeId: 'temp_id', ...newChallengeContent };
 
     } catch (error) {
@@ -320,7 +313,6 @@ Changing the nouns (e.g., from "Apples" to "Spaceships") is NOT acceptable. The 
 // ==========================================
 // 3. ROBUST TEST CASE UTILITIES
 // ==========================================
-
 async function buildTestCases({
     testRunnerCode,
     referenceSolution,
@@ -362,9 +354,7 @@ function normalizeTestInputs(raw: unknown): string[] {
         }
         try {
             out.push(JSON.stringify(item));
-        } catch {
-            // skip non-serializable values
-        }
+        } catch {}
     }
     return out.slice(0, 5);
 }
@@ -404,14 +394,9 @@ async function parseTestRunnerOutput(
     if (!testRunnerCode) return [];
 
     const rawOutput = await executeCode(testRunnerCode, language);
-    const looksLikeFailure =
-        rawOutput.startsWith("Error:") ||
-        rawOutput.startsWith("Compilation Error:") ||
-        rawOutput.startsWith("Error\n");
+    const looksLikeFailure = rawOutput.startsWith("Error:") || rawOutput.startsWith("Compilation Error:") || rawOutput.startsWith("Error\n");
 
-    if (looksLikeFailure) {
-        return extractCasesFromRunnerSource(testRunnerCode);
-    }
+    if (looksLikeFailure) return extractCasesFromRunnerSource(testRunnerCode);
 
     const cases: { input: string; output: string }[] = [];
     for (const line of rawOutput.split("\n")) {
@@ -420,7 +405,6 @@ async function parseTestRunnerOutput(
     }
 
     if (cases.length > 0) return cases;
-
     return extractCasesFromRunnerSource(testRunnerCode);
 }
 
@@ -438,12 +422,7 @@ async function buildCasesFromReference({
     if (!referenceSolution?.trim() || testInputs.length === 0 || !entryFunction) return [];
     if (language === "rust") return [];
 
-    const derived = await deriveExpectedOutputs(
-        referenceSolution,
-        language,
-        entryFunction,
-        testInputs,
-    );
+    const derived = await deriveExpectedOutputs(referenceSolution, language, entryFunction, testInputs);
 
     const cases: { input: string; output: string }[] = [];
     for (let i = 0; i < testInputs.length; i++) {
@@ -479,11 +458,7 @@ async function repairTestGradingFields({
             temperature: 0.1,
             max_tokens: 2500,
             messages: [
-                {
-                    role: "system",
-                    content:
-                        "You generate grading artifacts for an existing coding challenge. Return ONLY valid JSON.",
-                },
+                { role: "system", content: "You generate grading artifacts for an existing coding challenge. Return ONLY valid JSON." },
                 {
                     role: "user",
                     content: [
@@ -499,9 +474,7 @@ async function repairTestGradingFields({
                         "- testInputs: 3-5 JSON-encoded argument payloads as strings.",
                         `- testRunnerCode: runnable ${language} script with referenceSolution plus exactly 3-5 lines printing ___TEST_CASE___<input>___<output> using strict JSON for both parts.`,
                         "- Use only standard library features.",
-                    ]
-                        .filter(Boolean)
-                        .join("\n"),
+                    ].filter(Boolean).join("\n"),
                 },
             ],
         });
@@ -509,14 +482,8 @@ async function repairTestGradingFields({
         const raw = response.choices?.[0]?.message?.content ?? "";
         const parsed = JSON.parse(raw) as Record<string, unknown>;
         const testInputs = normalizeTestInputs(parsed.testInputs);
-        const referenceSolution =
-            typeof parsed.referenceSolution === "string" && parsed.referenceSolution.trim()
-                ? parsed.referenceSolution
-                : undefined;
-        const testRunnerCode =
-            typeof parsed.testRunnerCode === "string" && parsed.testRunnerCode.trim()
-                ? parsed.testRunnerCode
-                : undefined;
+        const referenceSolution = typeof parsed.referenceSolution === "string" && parsed.referenceSolution.trim() ? parsed.referenceSolution : undefined;
+        const testRunnerCode = typeof parsed.testRunnerCode === "string" && parsed.testRunnerCode.trim() ? parsed.testRunnerCode : undefined;
 
         if (!referenceSolution && !testRunnerCode) return null;
         if (testInputs.length === 0 && !testRunnerCode) return null;

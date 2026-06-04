@@ -331,6 +331,10 @@
     --ai-core: 4 99% 38%;               /* "Deep Heat" Red */
     /* Same danger / pulse hue as .dark — cream (32 39% 76%) failed contrast on light surfaces */
     --ai-glow: 4 99% 38%;               /* #C10801 — warnings, errors, heat accents */
+
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.55 0.095 248.556);
   }
 
   .dark {
@@ -365,6 +369,9 @@
     
     /* AI GLOW: Use for Danger Zone borders and "Connection Error" text */
     --ai-glow: 4 99% 38%;                /* #C10801 (Deep Warning Red) */
+
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
   }
 }
 

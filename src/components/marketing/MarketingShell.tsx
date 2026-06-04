@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ThemeToggle from "@/src/components/ui/ThemeToogle";
+import MarketingThemeToggle from "@/src/components/marketing/MarketingThemeToggle";
 import { useAuthStore } from "@/src/store/useAuthStore";
 
 type MarketingShellProps = {
@@ -63,7 +63,7 @@ export default function MarketingShell({ children }: MarketingShellProps) {
             </nav>
 
             <div className="flex items-center gap-2">
-              <ThemeToggle />
+              <MarketingThemeToggle />
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"

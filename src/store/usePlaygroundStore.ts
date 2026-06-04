@@ -34,6 +34,9 @@ interface PlaygroundState {
   setDifficulty: (d: PlaygroundDifficulty) => void;
   setTopic: (t: PlaygroundTopic) => void;
 
+  skippedChallengeIds: string[];
+  setSkippedChallengeIds: (id: string) => void;
+
   /** One action that runs after a successful `generateCodingChallenge` */
   applySuccessfulGeneration: (args: {
     challengeId: string;
@@ -85,6 +88,11 @@ export const usePlaygroundStore = create<PlaygroundState>()(
       setDifficulty: (difficulty) => set({ difficulty }),
       setTopic: (topic) => set({ topic }),
 
+      skippedChallengeIds: [],
+      setSkippedChallengeIds: (id) => set((state) => ({ 
+        skippedChallengeIds: state.skippedChallengeIds.includes(id) ? state.skippedChallengeIds : [...state.skippedChallengeIds, id] 
+    })),
+
       resetPlayground: () => set({
         challengeId: null,
         code: `function sumEvenNumbers(arr) {\n  // Your code here\n  return 0;\n}`,
@@ -96,6 +104,7 @@ export const usePlaygroundStore = create<PlaygroundState>()(
         entryFunction: undefined,
         analysis: null,
         report: null,
+        skippedChallengeIds: [],
     }),
 
       applySuccessfulGeneration: ({
