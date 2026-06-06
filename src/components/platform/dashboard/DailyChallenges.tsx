@@ -40,14 +40,14 @@ export default function DailyChallenges() {
     }
 
     return (
-        <div className="theme-sync flex h-full min-h-0 w-full flex-col rounded-xl bg-muted/20 p-4 shadow-sm backdrop-blur-lg">
-            <div className="mb-3 flex h-7 shrink-0 items-center gap-2 px-1">
+        <div className="theme-sync flex w-full flex-col rounded-xl bg-muted/20 p-4 shadow-sm backdrop-blur-lg">
+            <div className="mb-3 flex shrink-0 items-center gap-2 px-1">
                 <Sparkles className="text-primary" size={18} aria-hidden="true" />
                 <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                     Daily Challenges
                 </h3>
             </div>
-            <div className="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto pr-1">
+            <div className="flex max-h-[28rem] flex-col gap-2 overflow-y-auto pr-1">
                 {missions.map((mission, index) => (
                     <MissionCard
                         key={`${mission.title}-${index}`}
@@ -61,7 +61,7 @@ export default function DailyChallenges() {
                     />
                 ))}
             </div>
-            <div className="shrink-0 pt-6 w-full">
+            <div className="mt-4 shrink-0 w-full">
                 <GlowButton
                     color="primary"
                     roundness={12}

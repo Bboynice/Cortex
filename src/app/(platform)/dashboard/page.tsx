@@ -32,8 +32,8 @@ export default async function DashboardPage() {
   const points = profile?.points ?? 0;
 
   return (
-    <div className="theme-sync min-h-0 flex-1 overflow-y-auto px-4 pb-10 pt-20">
-      <div className="mx-auto flex min-h-[calc(100vh-6rem)] w-full flex-row gap-4">
+    <div className="theme-sync min-h-0 flex-1 overflow-y-auto px-4 pt-16 dark:bg-background">
+      <div className="mx-auto flex h-auto w-full flex-row gap-4">
         <div className="flex w-[70%] flex-col gap-4 py-4">
           <div className="flex flex-row gap-4">
             <Card title="23" description="Current Streak">
@@ -68,7 +68,9 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex w-[30%] flex-col gap-4 py-4">
-          <div className="h-[220px] w-full shrink-0">
+          <div className="h-[220px] flex-1 w-full shrink-0 bg-muted/20 rounded-lg shadow-sm backdrop-blur-lg flex flex-col gap-2 p-4">
+          <h1 className="text-2xl font-bold">Language Breakdown</h1>
+          <h3 className="text-sm text-muted-foreground">Your language breakdown of the submitted challenges.</h3>
             <PieChart
               chartData={[
                 { language: "Python", points: 45 },
@@ -77,7 +79,9 @@ export default async function DashboardPage() {
               ]}
             />
           </div>
-          <div className="min-h-[280px] flex-1 w-full">
+          <div className="min-h-[280px] flex-1 w-full bg-muted/20 rounded-lg shadow-sm backdrop-blur-lg flex flex-col gap-2 p-4">
+          <h1 className="text-2xl font-bold">Topics Metrics</h1>
+          <h3 className="text-sm text-muted-foreground">Topics metrics of the submitted challenges.</h3>
             <RadarChart
               chartData={[
                 { topic: "If/Else", value: 186 },

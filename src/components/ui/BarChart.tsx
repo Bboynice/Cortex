@@ -20,6 +20,15 @@ interface BarChartProps {
   }[];
 }
 
+function formatBarDate(value: string): string {
+  const parts = value.split("-");
+  if (parts.length === 3) {
+    const [dd, mm] = parts;
+    return `${dd}/${mm}`;
+  }
+  return value;
+}
+
 export default function BarChart({ chartData = defaultChartData }: BarChartProps) {
   return (
     <div className="w-full h-[300px] bg-muted/20 rounded-lg shadow-sm backdrop-blur-lg flex justify-center items-center">
@@ -29,12 +38,24 @@ export default function BarChart({ chartData = defaultChartData }: BarChartProps
           <XAxis
             dataKey="date"
             tickLine={false}
-            tickMargin={10}
+            tickMargin={8}
             axisLine={false}
-            tickFormatter={(value) => value.slice(0, 3)}
+            interval={0}
+            height={52}
+            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            tickFormatter={formatBarDate}
           />
-          <Tooltip cursor={true} />
-          <Bar dataKey={`points`} fill="hsl(24 99% 47%)" radius={8} />
+          <Tooltip
+            cursor
+            filterNull={false}
+            contentStyle={{
+              backgroundColor: "hsl(var(--card)/0.9)",
+              color: "hsl(var(--text))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "8px",
+            }}
+          />
+          <Bar dataKey="points" fill="hsl(var(--primary))" radius={8} />
         </RechartsBarChart>
       </ResponsiveContainer>
     </div>

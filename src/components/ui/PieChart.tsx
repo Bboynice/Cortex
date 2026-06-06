@@ -16,8 +16,8 @@ const COLORS = ["#ef4444", "#f97316", "#a855f7"];
 
 export default function MyPieChart({ chartData = defaultChartData }: PieChartProps) {
   return (
-    <div className="h-full w-full bg-muted/20 rounded-lg shadow-sm backdrop-blur-lg">
-      <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 280, height: 200 }}>
+    <div className="h-full w-full">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={chartData}
@@ -26,7 +26,7 @@ export default function MyPieChart({ chartData = defaultChartData }: PieChartPro
             cx="50%"
             cy="50%"
             innerRadius={0}
-            outerRadius="78%"
+            outerRadius="90%"
             paddingAngle={0}
             stroke="#fff"
             strokeWidth={1}
@@ -37,10 +37,19 @@ export default function MyPieChart({ chartData = defaultChartData }: PieChartPro
           </Pie>
           <Legend
             verticalAlign="bottom"
-            iconSize={8}
+            iconSize={12}
             wrapperStyle={{ fontSize: "11px", color: "#fff" }}
           />
-          <Tooltip />
+          <Tooltip 
+            cursor
+            filterNull={false}
+            contentStyle={{
+              backgroundColor: "hsl(var(--card)/0.9)",
+              color: "hsl(var(--text))",
+              border: "1px solid hsl(var(--border))",
+              borderRadius: "8px",
+            }}
+          />
         </PieChart>
       </ResponsiveContainer>
     </div>
